@@ -222,7 +222,7 @@ def version(project_root='.', tag=True):
     current = versioner.current_version()
     release = versioner.release_version()
 
-    release = input_str('Current version in app.yaml is {current}. Enter'
+    release = input_str('Current version in setup.py is {current}. Enter'
                         ' release version'.format(current=current),
                         default=release)
 
