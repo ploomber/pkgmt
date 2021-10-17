@@ -78,6 +78,9 @@ def test_release_version(move_to_package_name):
     ['0.1', '0.1.1dev'],
     ['0.1.1', '0.1.2dev'],
     ['0.9', '0.9.1dev'],
+    ['0.10a1', '0.10dev'],
+    ['0.10b1', '0.10dev'],
+    ['0.10rc1', '0.10dev'],
 ])
 def test_bump_up_version(monkeypatch, version, version_new,
                          move_to_package_name):
@@ -161,10 +164,14 @@ def test_add_changelog_new_dev_section_rst(backup_package_name):
     ) == 'CHANGELOG\n=========\n\n0.2dev\n------\n\n0.1dev\n------'
 
 
-def test_release(backup_package_name, monkeypatch):
+@pytest.mark.parametrize('selected, stored, dev', [
+    ['', '0.1', '0.1.1dev'],
+    ['0.1', '0.1', '0.1.1dev'],
+])
+def test_release(backup_package_name, monkeypatch, selected, stored, dev):
     mock = Mock()
     mock_input = Mock()
-    mock_input.side_effect = ['', 'y']
+    mock_input.side_effect = [selected, 'y']
 
     monkeypatch.setattr(versioneer, 'call', mock)
     monkeypatch.setattr(versioneer, '_input', mock_input)
@@ -174,20 +181,55 @@ def test_release(backup_package_name, monkeypatch):
     assert mock.call_args_list == [
         _call(['git', 'add', '--all']),
         _call(['git', 'status']),
-        _call(['git', 'commit', '-m', 'package_name release 0.1']),
-        _call(['git', 'tag', '-a', '0.1', '-m', 'package_name release 0.1']),
-        _call(['git', 'push', 'origin', '0.1']),
+        _call(['git', 'commit', '-m', f'package_name release {stored}']),
+        _call([
+            'git', 'tag', '-a', stored, '-m', f'package_name release {stored}'
+        ]),
+        _call(['git', 'push', 'origin', stored]),
         _call(['git', 'add', '--all']),
         _call(['git', 'status']),
-        _call([
-            'git', 'commit', '-m', 'Bumps up package_name to version 0.1.1dev'
-        ]),
+        _call(
+            ['git', 'commit', '-m',
+             f'Bumps up package_name to version {dev}']),
         _call(['git', 'push'])
     ]
 
     today = datetime.now().strftime('%Y-%m-%d')
     assert Path('CHANGELOG.md').read_text(
-    ) == f'# CHANGELOG\n\n## 0.1.1dev\n\n## 0.1 ({today})'
+    ) == f'# CHANGELOG\n\n## {dev}\n\n## {stored} ({today})'
+
+
+@pytest.mark.parametrize('selected, stored, dev', [
+    ['1.2b1', '1.2b1', '1.2dev'],
+])
+def test_pre_release(backup_package_name, monkeypatch, selected, stored, dev):
+    mock = Mock()
+    mock_input = Mock()
+    mock_input.side_effect = [selected, 'y']
+
+    monkeypatch.setattr(versioneer, 'call', mock)
+    monkeypatch.setattr(versioneer, '_input', mock_input)
+
+    versioneer.version(tag=True)
+
+    assert mock.call_args_list == [
+        _call(['git', 'add', '--all']),
+        _call(['git', 'status']),
+        _call(['git', 'commit', '-m', f'package_name release {stored}']),
+        _call([
+            'git', 'tag', '-a', stored, '-m', f'package_name release {stored}'
+        ]),
+        _call(['git', 'push', 'origin', stored]),
+        _call(['git', 'add', '--all']),
+        _call(['git', 'status']),
+        _call(
+            ['git', 'commit', '-m',
+             f'Bumps up package_name to version {dev}']),
+        _call(['git', 'push'])
+    ]
+
+    # changelog must not change
+    assert Path('CHANGELOG.md').read_text() == '# CHANGELOG\n\n## 0.1dev'
 
 
 def test_release_with_no_changelog(backup_package_name, monkeypatch, capsys):

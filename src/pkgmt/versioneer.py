@@ -58,6 +58,10 @@ def input_confirm(prompt, abort):
     return response
 
 
+def is_pre_release(version):
+    return 'a' in version or 'b' in version or 'rc' in version
+
+
 class Versioner:
     """Utility functions to manage versions
     """
@@ -110,9 +114,20 @@ class Versioner:
         """
         Gets gets a release version and returns a the next value value.
         e.g. 1.2.5 -> 1.2.6dev
+
+        Notes
+        -----
+        If a doing a pre-release (e.g., 1.0b1), the new version returns to dev
+        (e.g., 1.0b1 -> 1.0dev)
         """
         # Get current version
         current = self.current_version()
+
+        # pre-releases
+        for pre in ['a', 'b', 'rc']:
+            if pre in current:
+                prefix = current.split(pre)[0]
+                return f'{prefix}dev'
 
         if 'dev' in current:
             raise ValueError('Current version is dev version, new dev '
@@ -226,7 +241,7 @@ def version(project_root='.', tag=True):
                         ' release version'.format(current=current),
                         default=release)
 
-    if versioner.path_to_changelog:
+    if versioner.path_to_changelog and not is_pre_release(release):
         versioner.update_changelog_release(release)
 
         changelog = versioner.path_to_changelog.read_text()
@@ -244,8 +259,10 @@ def version(project_root='.', tag=True):
     # Create a new dev version and save it
     bumped_version = versioner.bump_up_version()
 
-    print('Creating new section in CHANGELOG...')
-    versioner.add_changelog_new_dev_section(bumped_version)
+    if not is_pre_release(release):
+        print('Creating new section in CHANGELOG...')
+        versioner.add_changelog_new_dev_section(bumped_version)
+
     print('Commiting dev version: {}'.format(bumped_version))
     versioner.commit_version(
         bumped_version,
