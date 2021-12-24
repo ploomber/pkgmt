@@ -21,8 +21,8 @@ def _expand_github_from_text(text):
     return _replace_issue_number_with_links(url, text)
 
 
-def expand_github_from_changelog():
-    path = Path('CHANGELOG.md')
+def expand_github_from_changelog(path='CHANGELOG.md'):
+    path = Path(path)
     changelog = path.read_text()
     changelog_ = _expand_github_from_text(changelog)
     path.write_text(changelog_)

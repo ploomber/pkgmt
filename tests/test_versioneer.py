@@ -133,7 +133,7 @@ def test_update_changelog_release_md(backup_package_name):
     v.update_changelog_release('0.1')
     today = datetime.now().strftime('%Y-%m-%d')
     assert v.path_to_changelog.read_text(
-    ) == f'# CHANGELOG\n\n## 0.1 ({today})'
+    ) == f'# CHANGELOG\n\n## 0.1 ({today})\n\n* Fixes #1'
 
 
 def test_update_changelog_release_rst(backup_package_name):
@@ -151,7 +151,7 @@ def test_add_changelog_new_dev_section_md(backup_package_name):
     v = Versioner()
     v.add_changelog_new_dev_section('0.2dev')
     assert v.path_to_changelog.read_text(
-    ) == '# CHANGELOG\n\n## 0.2dev\n\n## 0.1dev'
+    ) == '# CHANGELOG\n\n## 0.2dev\n\n## 0.1dev\n\n* Fixes #1'
 
 
 def test_add_changelog_new_dev_section_rst(backup_package_name):
@@ -196,7 +196,7 @@ def test_release(backup_package_name, monkeypatch, selected, stored, dev):
 
     today = datetime.now().strftime('%Y-%m-%d')
     assert Path('CHANGELOG.md').read_text(
-    ) == f'# CHANGELOG\n\n## {dev}\n\n## {stored} ({today})'
+    ) == f'# CHANGELOG\n\n## {dev}\n\n## {stored} ({today})\n\n* Fixes #1'
 
 
 @pytest.mark.parametrize('selected, stored, dev', [
@@ -229,7 +229,8 @@ def test_pre_release(backup_package_name, monkeypatch, selected, stored, dev):
     ]
 
     # changelog must not change
-    assert Path('CHANGELOG.md').read_text() == '# CHANGELOG\n\n## 0.1dev'
+    assert Path(
+        'CHANGELOG.md').read_text() == '# CHANGELOG\n\n## 0.1dev\n\n* Fixes #1'
 
 
 def test_release_with_no_changelog(backup_package_name, monkeypatch, capsys):
