@@ -23,7 +23,7 @@ def read(*names, **kwargs):
                    encoding=kwargs.get('encoding', 'utf8')).read()
 
 
-REQUIRES = []
+REQUIRES = ['toml']
 
 DEV = [
     'pytest',

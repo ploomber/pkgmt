@@ -16,3 +16,19 @@ def setup(c, version=None):
           '&& pip install --editable .[dev]')
 
     print(f'Done! Activate your environment with:\nconda activate {env_name}')
+
+
+@task
+def new(c):
+    """Release a new version
+    """
+    from pkgmt import versioneer
+    versioneer.version(project_root='.', tag=True)
+
+
+@task
+def upload(c, tag, production=True):
+    """Upload to PyPI
+    """
+    from pkgmt import versioneer
+    versioneer.upload(tag, production=production)
