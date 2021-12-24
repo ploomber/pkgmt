@@ -10,6 +10,8 @@ import os
 from pathlib import Path
 import shutil
 
+from pkgmt.changelog import expand_github_from_changelog
+
 
 def replace_in_file(path_to_file, original, replacement):
     """Replace string in file
@@ -250,6 +252,13 @@ def version(project_root='.', tag=True):
             f'\n{versioner.path_to_changelog} content:'
             f'\n\n{changelog}\n',
             abort=True)
+
+    # Expand github links
+    if (versioner.path_to_changelog
+            and versioner.path_to_changelog.suffix == '.md'):
+        expand_github_from_changelog(path=versioner.path_to_changelog)
+    else:
+        print('Skipping github expansion (only supported in .md files)')
 
     # Replace version number and create tag
     print('Commiting release version: {}'.format(release))
