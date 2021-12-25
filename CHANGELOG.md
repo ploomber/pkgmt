@@ -1,5 +1,7 @@
 # CHANGELOG
 
+## 0.0.4dev
+
 ## 0.0.3 (2021-12-24)
 * Integrates github expansion when creating a new version
 
