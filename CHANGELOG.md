@@ -1,5 +1,7 @@
 # CHANGELOG
 
+## 0.0.5dev
+
 ## 0.0.4 (2021-12-31)
 * Adds `pkgmt` CLI
 * Adds `pkgmt check-links` command to search for broken links
