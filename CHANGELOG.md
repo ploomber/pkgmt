@@ -1,6 +1,8 @@
 # CHANGELOG
 
 ## 0.0.4dev
+* Adds `pkgmt` CLI
+* Adds `pkgmt check-links` command to search for broken links
 
 ## 0.0.3 (2021-12-24)
 * Integrates github expansion when creating a new version
