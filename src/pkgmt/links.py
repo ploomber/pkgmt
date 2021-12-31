@@ -12,7 +12,7 @@ def _make_glob_exp(extension):
     return f'**/*.{extension}'
 
 
-def find_broken_in_files(extensions, ignore_substrings=None):
+def find_broken_in_files(extensions, ignore_substrings=None, verbose=False):
     """
     Parameters
     ----------
@@ -27,12 +27,19 @@ def find_broken_in_files(extensions, ignore_substrings=None):
     globs = (iglob(_make_glob_exp(ext), recursive=True) for ext in extensions)
 
     for file in chain(*globs):
-        print(f'Checking: {file}')
         text = Path(file).read_text()
         broken[file].extend(
             find_broken_in_text(text, ignore_substrings=ignore_substrings))
 
-    return dict(broken)
+    out = {file: urls for file, urls in broken.items() if urls}
+
+    if verbose:
+        for file, broken in out.items():
+            if broken:
+                print(f'*** {file} ***')
+                print('\n'.join(broken))
+
+    return out
 
 
 def find_broken_in_text(text, ignore_substrings=None):
@@ -72,8 +79,5 @@ def _check_if_broken(url):
         broken = True
 
     response = Response(url, code, broken)
-
-    if response.broken:
-        print(f'  Broken: {response.url}')
 
     return response

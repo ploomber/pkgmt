@@ -1,3 +1,5 @@
+import sys
+
 import click
 
 from pkgmt import links
@@ -14,4 +16,9 @@ def check_links():
     """Check for broken links
     """
     cfg = config.load()['check_links']
-    links.find_broken_in_files(cfg['extensions'], cfg.get('ignore_substrings'))
+    out = links.find_broken_in_files(cfg['extensions'],
+                                     cfg.get('ignore_substrings'),
+                                     verbose=True)
+
+    if out:
+        sys.exit(1)
