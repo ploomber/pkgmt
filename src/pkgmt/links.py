@@ -4,7 +4,6 @@ import re
 from collections import namedtuple, defaultdict
 from itertools import chain
 import requests
-from urllib.parse import urlparse
 
 Response = namedtuple('Response', ['url', 'code', 'broken'])
 
@@ -13,7 +12,7 @@ def _make_glob_exp(extension):
     return f'**/*.{extension}'
 
 
-def find_broken_in_files(extensions):
+def find_broken_in_files(extensions, ignore_substrings=None):
     """
     Parameters
     ----------
@@ -30,15 +29,16 @@ def find_broken_in_files(extensions):
     for file in chain(*globs):
         print(f'Checking: {file}')
         text = Path(file).read_text()
-        broken[file].extend(find_broken_in_text(text))
+        broken[file].extend(
+            find_broken_in_text(text, ignore_substrings=ignore_substrings))
 
     return dict(broken)
 
 
-def find_broken_in_text(text):
+def find_broken_in_text(text, ignore_substrings=None):
     """Find broken links
     """
-    links = _find(text)
+    links = _find(text, ignore_substrings=ignore_substrings)
     responses = [_check_if_broken(link) for link in links]
     return [res.url for res in responses if res.broken]
 
@@ -48,7 +48,7 @@ def _find(text, ignore_substrings=None):
     """
     ignore_substrings = ignore_substrings or []
     # source: https://www.geeksforgeeks.org/python-check-url-string/
-    regex = r"(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'\".,<>?«»“”‘’]))"
+    regex = r"(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'\".,<>?«»“”‘’]))"  # noqa
     url = re.findall(regex, text)
 
     return [

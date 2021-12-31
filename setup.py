@@ -23,7 +23,11 @@ def read(*names, **kwargs):
                    encoding=kwargs.get('encoding', 'utf8')).read()
 
 
-REQUIRES = ['toml', 'requests']
+REQUIRES = [
+    'toml',
+    'requests',
+    'click',
+]
 
 DEV = [
     'pytest',
@@ -33,20 +37,25 @@ DEV = [
     'twine',
 ]
 
-setup(name='pkgmt',
-      version=VERSION,
-      description=None,
-      license=None,
-      author=None,
-      author_email=None,
-      url=None,
-      packages=find_packages('src'),
-      package_dir={'': 'src'},
-      py_modules=[splitext(basename(path))[0] for path in glob('src/*.py')],
-      package_data={"": ["*.txt", "*.rst"]},
-      classifiers=[],
-      keywords=[],
-      install_requires=REQUIRES,
-      extras_require={
-          'dev': DEV,
-      })
+setup(
+    name='pkgmt',
+    version=VERSION,
+    description=None,
+    license=None,
+    author=None,
+    author_email=None,
+    url=None,
+    packages=find_packages('src'),
+    package_dir={'': 'src'},
+    py_modules=[splitext(basename(path))[0] for path in glob('src/*.py')],
+    package_data={"": ["*.txt", "*.rst"]},
+    classifiers=[],
+    keywords=[],
+    install_requires=REQUIRES,
+    extras_require={
+        'dev': DEV,
+    },
+    entry_points={
+        'console_scripts': ['pkgmt=pkgmt.cli:cli'],
+    },
+)
