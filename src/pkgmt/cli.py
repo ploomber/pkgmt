@@ -31,7 +31,7 @@ def check_links():
 def execute(path, output):
     """Execute rst files
     """
-    from pkgmt import rst
+    from pkgmt.testing import rst
     code = rst.parse_from_path(path)
 
     if output:

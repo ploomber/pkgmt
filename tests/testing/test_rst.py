@@ -1,4 +1,4 @@
-from pkgmt import rst
+from pkgmt.testing import rst
 
 import pytest
 
@@ -49,8 +49,6 @@ set -x
 
 echo hi\
 """
-
-# tmp_empty
 
 
 @pytest.mark.parametrize('in_, out', [

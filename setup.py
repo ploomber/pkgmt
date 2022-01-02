@@ -35,6 +35,8 @@ DEV = [
     'flake8',
     'invoke',
     'twine',
+    # for pkgmt.testing module
+    'sphinx',
 ]
 
 setup(
