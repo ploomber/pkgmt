@@ -1,3 +1,4 @@
+from pathlib import Path
 import sys
 
 import click
@@ -22,3 +23,19 @@ def check_links():
 
     if out:
         sys.exit(1)
+
+
+@cli.command()
+@click.argument('path', type=click.Path(exists=True, dir_okay=False))
+@click.option('-o', '--output', default=None, type=click.Path(exists=False))
+def execute(path, output):
+    """Execute rst files
+    """
+    from pkgmt import rst
+    code = rst.parse_from_path(path)
+
+    if output:
+        click.echo(f'Writing script to {output}')
+        Path(output).write_text(code)
+    else:
+        click.echo(code)
