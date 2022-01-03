@@ -34,11 +34,11 @@ set -x
 """
 
 
-def parse_from_path(path):
-    return parse(Path(path).read_text())
+def to_script_from_path(path):
+    return to_script(Path(path).read_text())
 
 
-def parse(content):
+def to_snippets(text):
     # maybe use sphinx's parser - it should be configured with the custom
     # directives
     doc = new_document('doc.rst')
@@ -46,7 +46,7 @@ def parse(content):
     doc.settings.rfc_references = None
     # doc.settings.tab_width = None
 
-    _parser.parse(content, doc)
+    _parser.parse(text, doc)
 
     elements = doc.traverse()
 
@@ -70,12 +70,18 @@ def parse(content):
             return prev.astext() == 'skip-next'
 
     snippets = [
-        s for i, s in enumerate(selected)
+        s.astext() for i, s in enumerate(selected)
         if not previous_not_comment(i, selected)
         and not isinstance(s, nodes.comment)
     ]
 
-    code_user = '\n\n'.join(s.astext() for s in snippets)
+    return snippets
+
+
+def to_script(text):
+    snippets = to_snippets(text)
+
+    code_user = '\n\n'.join(snippets)
     code_script = _template.format(code=code_user)
 
     return code_script

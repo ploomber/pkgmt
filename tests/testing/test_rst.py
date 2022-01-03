@@ -56,5 +56,5 @@ echo hi\
     [simple_in, simple_out],
     [skip_in, skip_out],
 ])
-def test_parse(in_, out):
-    assert rst.parse(in_) == out
+def test_to_script(in_, out):
+    assert rst.to_script(in_) == out

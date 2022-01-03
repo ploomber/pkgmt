@@ -32,7 +32,7 @@ def execute(path, output):
     """Execute rst files
     """
     from pkgmt.testing import rst
-    code = rst.parse_from_path(path)
+    code = rst.to_script_from_path(path)
 
     if output:
         click.echo(f'Writing script to {output}')
