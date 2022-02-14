@@ -293,3 +293,18 @@ def test_upload(backup_package_name, monkeypatch, production):
 
     mock_delete.assert_called_once_with(
         'dist', 'build', str(Path('src', 'package_name.egg-info')))
+
+
+@pytest.mark.parametrize('selected', ['y', 'n', 'y1.2'])
+def test_invalid_version_string(backup_package_name, monkeypatch, selected):
+    mock = Mock()
+    mock_input = Mock()
+    mock_input.side_effect = [selected, 'y']
+
+    monkeypatch.setattr(versioneer, 'call', mock)
+    monkeypatch.setattr(versioneer, '_input', mock_input)
+
+    with pytest.raises(ValueError) as excinfo:
+        versioneer.version(tag=True)
+
+    assert '(first character must be numeric)' in str(excinfo.value)

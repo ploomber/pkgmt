@@ -225,6 +225,15 @@ def make_header(content, path, add_date=False):
         raise ValueError('Unsupported format, must be .rst or .md')
 
 
+def validate_version_string(version):
+    if not len(version):
+        raise ValueError(f'Got invalid empty version string: {version!r}')
+
+    if version[0] not in '0123456789':
+        raise ValueError(f'Got invalid version string: {version!r} '
+                         '(first character must be numeric)')
+
+
 def version(project_root='.', tag=True):
     """
     Create a new version:
@@ -242,6 +251,8 @@ def version(project_root='.', tag=True):
     release = input_str('Current version in setup.py is {current}. Enter'
                         ' release version'.format(current=current),
                         default=release)
+
+    validate_version_string(release)
 
     if versioner.path_to_changelog and not is_pre_release(release):
         versioner.update_changelog_release(release)
