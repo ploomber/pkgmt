@@ -1,5 +1,7 @@
 # CHANGELOG
 
+## 0.0.6dev
+
 ## 0.0.5 (2022-02-14)
 * Validate version string (first character must be numeric)
 
