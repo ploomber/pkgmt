@@ -1,6 +1,7 @@
 # CHANGELOG
 
-## 0.0.5dev
+## 0.0.5 (2022-02-14)
+* Validate version string (first character must be numeric)
 
 ## 0.0.4 (2021-12-31)
 * Adds `pkgmt` CLI
