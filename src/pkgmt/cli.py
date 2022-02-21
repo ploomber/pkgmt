@@ -2,8 +2,8 @@ import sys
 
 import click
 
-from pkgmt import links
-from pkgmt import config
+from pkgmt import links, config
+from pkgmt import new as new_
 
 
 @click.group()
@@ -22,3 +22,11 @@ def check_links():
 
     if out:
         sys.exit(1)
+
+
+@cli.command()
+@click.argument('name')
+def new(name):
+    """Create new package
+    """
+    new_.package(name)
