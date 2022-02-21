@@ -36,6 +36,6 @@ setup(
         'dev': DEV,
     },
     entry_points={
-        # 'console_scripts': ['name=modile.cli:cli'],
+        # 'console_scripts': ['$name=$name.cli:cli'],
     },
 )
