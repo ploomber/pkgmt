@@ -1,3 +1,5 @@
 include CHANGELOG.md
 include README.md
-graft src/pkgmt/assets/*
+graft src/pkgmt/assets
+global-exclude __pycache__
+global-exclude *.py[co]
