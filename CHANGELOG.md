@@ -2,6 +2,7 @@
 
 ## 0.0.6dev
 * Adds `pkgmt new` command to create a new pre-configured package
+* Allows packages with more than one folder under `src/`
 
 ## 0.0.5 (2022-02-14)
 * Validate version string (first character must be numeric)

@@ -9,6 +9,7 @@ import datetime
 import os
 from pathlib import Path
 import shutil
+import warnings
 
 from pkgmt.changelog import expand_github_from_changelog
 
@@ -70,13 +71,14 @@ class Versioner:
     def __init__(self, project_root='.'):
         path_to_src = Path(project_root, 'src')
 
-        dirs = [
+        dirs = sorted([
             f for f in os.listdir(path_to_src)
             if Path('src', f).is_dir() and not f.endswith('.egg-info')
-        ]
+        ])
 
         if len(dirs) != 1:
-            raise ValueError(f'src/ must have a single folder, got: {dirs}')
+            warnings.warn('Found more than one dir, '
+                          f'choosing the first one: {dirs[0]}')
 
         self.package_name = dirs[0]
         self.PACKAGE = path_to_src / self.package_name

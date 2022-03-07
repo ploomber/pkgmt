@@ -308,3 +308,11 @@ def test_invalid_version_string(backup_package_name, monkeypatch, selected):
         versioneer.version(tag=True)
 
     assert '(first character must be numeric)' in str(excinfo.value)
+
+
+def test_picks_up_first_module_under_src(backup_package_name):
+    Path('src', 'z').mkdir()
+
+    v = Versioner()
+
+    assert v.package_name == 'package_name'
