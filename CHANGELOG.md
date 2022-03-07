@@ -1,5 +1,7 @@
 # CHANGELOG
 
+## 0.0.7dev
+
 ## 0.0.6 (2022-03-06)
 * Adds `pkgmt new` command to create a new pre-configured package
 * Allows packages with more than one folder under `src/`
