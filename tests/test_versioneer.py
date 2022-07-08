@@ -325,6 +325,42 @@ def test_release(backup_package_name, monkeypatch, selected, stored, dev):
 
 
 @pytest.mark.parametrize('selected, stored, dev', [
+    ['', '0.1', '0.1.1dev'],
+    ['0.1', '0.1', '0.1.1dev'],
+])
+def test_release_non_setup(backup_another_package, monkeypatch, selected, stored, dev):
+    mock = Mock()
+    mock_input = Mock()
+    mock_input.side_effect = [selected, 'y']
+
+    monkeypatch.setattr(versioneer, 'call', mock)
+    monkeypatch.setattr(versioneer, '_input', mock_input)
+
+    versioneer.version(tag=True, version_package='app')
+
+    assert mock.call_args_list == [
+        _call(['git', 'add', '--all']),
+        _call(['git', 'status']),
+        _call(['git', 'commit', '-m', f'app release {stored}']),
+        _call([
+            'git', 'tag', '-a', stored, '-m', f'app release {stored}'
+        ]),
+        _call(['git', 'push', 'origin', stored]),
+        _call(['git', 'add', '--all']),
+        _call(['git', 'status']),
+        _call(
+            ['git', 'commit', '-m',
+             f'Bumps up app to version {dev}']),
+        _call(['git', 'push'])
+    ]
+
+    today = datetime.now().strftime('%Y-%m-%d')
+    assert Path('CHANGELOG.md').read_text() == (
+        f'# CHANGELOG\n\n## {dev}\n\n## {stored} ({today})\n\n'
+        '* Fixes [#1](https://github.com/edublancas/pkgmt/issues/1)')
+
+
+@pytest.mark.parametrize('selected, stored, dev', [
     ['1.2b1', '1.2b1', '1.2dev'],
 ])
 def test_pre_release(backup_package_name, monkeypatch, selected, stored, dev):
@@ -350,6 +386,41 @@ def test_pre_release(backup_package_name, monkeypatch, selected, stored, dev):
         _call(
             ['git', 'commit', '-m',
              f'Bumps up package_name to version {dev}']),
+        _call(['git', 'push'])
+    ]
+
+    # changelog must not change
+    assert Path('CHANGELOG.md').read_text() == (
+        '# CHANGELOG\n\n## 0.1dev\n\n'
+        '* Fixes [#1](https://github.com/edublancas/pkgmt/issues/1)')
+
+
+@pytest.mark.parametrize('selected, stored, dev', [
+    ['1.2b1', '1.2b1', '1.2dev'],
+])
+def test_pre_release_non_setup(backup_another_package, monkeypatch, selected, stored, dev):
+    mock = Mock()
+    mock_input = Mock()
+    mock_input.side_effect = [selected, 'y']
+
+    monkeypatch.setattr(versioneer, 'call', mock)
+    monkeypatch.setattr(versioneer, '_input', mock_input)
+
+    versioneer.version(tag=True, version_package='app')
+
+    assert mock.call_args_list == [
+        _call(['git', 'add', '--all']),
+        _call(['git', 'status']),
+        _call(['git', 'commit', '-m', f'app release {stored}']),
+        _call([
+            'git', 'tag', '-a', stored, '-m', f'app release {stored}'
+        ]),
+        _call(['git', 'push', 'origin', stored]),
+        _call(['git', 'add', '--all']),
+        _call(['git', 'status']),
+        _call(
+            ['git', 'commit', '-m',
+             f'Bumps up app to version {dev}']),
         _call(['git', 'push'])
     ]
 
@@ -385,6 +456,37 @@ def test_release_with_no_changelog(backup_package_name, monkeypatch, capsys):
         _call(['git', 'status']),
         _call([
             'git', 'commit', '-m', 'Bumps up package_name to version 0.1.1dev'
+        ]),
+        _call(['git', 'push'])
+    ]
+
+
+def test_release_with_no_changelog_non_setup(backup_another_package, monkeypatch, capsys):
+    Path('CHANGELOG.md').unlink()
+
+    mock = Mock()
+    mock_input = Mock()
+    mock_input.side_effect = ['', 'y']
+
+    monkeypatch.setattr(versioneer, 'call', mock)
+    monkeypatch.setattr(versioneer, '_input', mock_input)
+
+    versioneer.version(tag=True, version_package='app')
+
+    captured = capsys.readouterr()
+    assert ('No CHANGELOG.{rst,md} found, skipping changelog editing...'
+            in captured.out)
+
+    assert mock.call_args_list == [
+        _call(['git', 'add', '--all']),
+        _call(['git', 'status']),
+        _call(['git', 'commit', '-m', 'app release 0.1']),
+        _call(['git', 'tag', '-a', '0.1', '-m', 'app release 0.1']),
+        _call(['git', 'push', 'origin', '0.1']),
+        _call(['git', 'add', '--all']),
+        _call(['git', 'status']),
+        _call([
+            'git', 'commit', '-m', 'Bumps up app to version 0.1.1dev'
         ]),
         _call(['git', 'push'])
     ]
@@ -430,6 +532,21 @@ def test_invalid_version_string(backup_package_name, monkeypatch, selected):
 
     with pytest.raises(ValueError) as excinfo:
         versioneer.version(tag=True)
+
+    assert '(first character must be numeric)' in str(excinfo.value)
+
+
+@pytest.mark.parametrize('selected', ['y', 'n', 'y1.2'])
+def test_invalid_version_string_non_setup(backup_another_package, monkeypatch, selected):
+    mock = Mock()
+    mock_input = Mock()
+    mock_input.side_effect = [selected, 'y']
+
+    monkeypatch.setattr(versioneer, 'call', mock)
+    monkeypatch.setattr(versioneer, '_input', mock_input)
+
+    with pytest.raises(ValueError) as excinfo:
+        versioneer.version(tag=True, version_package='app')
 
     assert '(first character must be numeric)' in str(excinfo.value)
 
