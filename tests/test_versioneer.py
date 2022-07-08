@@ -21,7 +21,7 @@ from datetime import datetime
 
 import pytest
 
-from pkgmt.versioneer import Versioner
+from pkgmt.versioneer import Versioner, VersionerNonSetup
 from pkgmt import versioneer
 
 
@@ -52,9 +52,37 @@ def backup_package_name(root):
 
 
 @pytest.fixture
+def backup_another_package(root):
+    old = os.getcwd()
+    backup = tempfile.mkdtemp()
+    backup_another_package = str(Path(backup, 'backup-template'))
+    path_to_templates = root / 'tests' / 'assets' / 'another_package'
+    shutil.copytree(str(path_to_templates), backup_another_package)
+
+    os.chdir(path_to_templates)
+
+    yield path_to_templates
+
+    os.chdir(old)
+
+    shutil.rmtree(str(path_to_templates))
+    shutil.copytree(backup_another_package, str(path_to_templates))
+    shutil.rmtree(backup)
+
+
+@pytest.fixture
 def move_to_package_name(root):
     old = os.getcwd()
     p = root / 'tests' / 'assets' / 'package_name'
+    os.chdir(p)
+    yield
+    os.chdir(old)
+
+
+@pytest.fixture
+def move_to_another_package(root):
+    old = os.getcwd()
+    p = root / 'tests' / 'assets' / 'another_package'
     os.chdir(p)
     yield
     os.chdir(old)
@@ -66,12 +94,26 @@ def test_locate_package_and_readme(move_to_package_name):
     assert v.path_to_changelog == Path('CHANGELOG.md')
 
 
+def test_locate_package_and_readme_non_setup(move_to_another_package):
+    v = VersionerNonSetup('app')
+    assert v.PACKAGE == Path('app')
+    assert v.path_to_changelog == Path('CHANGELOG.md')
+
+
 def test_current_version(move_to_package_name):
     assert Versioner().current_version() == '0.1dev'
 
 
+def test_current_version_non_setup(move_to_another_package):
+    assert VersionerNonSetup('app').current_version() == '0.1dev'
+
+
 def test_release_version(move_to_package_name):
     assert Versioner().release_version() == '0.1'
+
+
+def test_release_version_non_setup(move_to_another_package):
+    assert VersionerNonSetup('app').release_version() == '0.1'
 
 
 @pytest.mark.parametrize('version, version_new', [
@@ -82,10 +124,16 @@ def test_release_version(move_to_package_name):
     ['0.10b1', '0.10dev'],
     ['0.10rc1', '0.10dev'],
 ])
-def test_bump_up_version(monkeypatch, version, version_new,
-                         move_to_package_name):
-    monkeypatch.setattr(Versioner, 'current_version', lambda self: version)
-    assert Versioner().bump_up_version() == version_new
+@pytest.mark.parametrize(
+    'move_to, attr, versioner',
+    [[move_to_package_name, Versioner,
+      Versioner()],
+     [move_to_another_package, VersionerNonSetup,
+      VersionerNonSetup('app')]])
+def test_bump_up_version(monkeypatch, version, version_new, move_to, attr,
+                         versioner):
+    monkeypatch.setattr(attr, 'current_version', lambda self: version)
+    assert versioner.bump_up_version() == version_new
 
 
 def test_commit_version_no_tag(backup_package_name, monkeypatch):
