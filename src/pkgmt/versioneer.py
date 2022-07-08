@@ -68,6 +68,7 @@ def is_pre_release(version):
 class Versioner:
     """Utility functions to manage versions
     """
+
     def __init__(self, project_root='.'):
         path_to_src = Path(project_root, 'src')
 
@@ -217,6 +218,7 @@ class Versioner:
 class VersionerNonSetup:
     """Utility functions to manage versions
     """
+
     def __init__(self, version_package, project_root='.'):
 
         for path, dirs, files in os.walk(project_root):
@@ -380,12 +382,25 @@ def validate_version_string(version):
 
 def version(project_root='.', tag=True, version_package=None):
     """
-    Create a new version:
-    1. Set new stable version in package_name/__init__.py
-    2. Update header in CHANGELOG file, and ask to review CHANGELOG
-    3. Create commit for new version, create git tag, and push
-    4. Set new development version in package_name/__init__.py, and CHANGELOG
-    5. Commit new development version and push
+    Create a new version (projects with setup.py) :
+    1. version_package will be None
+    2. Set new stable version in package_name/__init__.py
+    3. Update header in CHANGELOG file, and ask to review CHANGELOG
+    4. Create commit for new version, create git tag, and push
+    5. Set new development version in package_name/__init__.py, and CHANGELOG
+    6. Commit new development version and push
+
+    Create a new version (projects without setup.py) :
+    1. These projects should contain two essential files:
+       config.yaml in root directory which should contain the repo
+       name
+       _version.py file containing __version__ in the required directory
+    2. version_package will be the directory containing _version.py file
+    3. Set new stable version in package_name/_version.py
+    4. Update header in CHANGELOG file, and ask to review CHANGELOG
+    5. Create commit for new version, create git tag, and push
+    6. Set new development version in package_name/_version.py, and CHANGELOG
+    7. Commit new development version and push
     """
 
     if version_package:
