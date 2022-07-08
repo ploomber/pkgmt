@@ -155,6 +155,25 @@ def test_commit_version_no_tag(backup_package_name, monkeypatch):
     assert "__version__ = '0.2'" in (v.PACKAGE / '__init__.py').read_text()
 
 
+def test_commit_version_no_tag_non_setup(backup_another_package, monkeypatch):
+    v = VersionerNonSetup('app')
+
+    mock = Mock()
+    monkeypatch.setattr(versioneer, 'call', mock)
+
+    v.commit_version('0.2',
+                     msg_template='{package_name} release {new_version}',
+                     tag=False)
+
+    assert mock.call_args_list == [
+        _call(['git', 'add', '--all']),
+        _call(['git', 'status']),
+        _call(['git', 'commit', '-m', 'app release 0.2']),
+    ]
+
+    assert "__version__ = '0.2'" in (v.PACKAGE / '_version.py').read_text()
+
+
 def test_commit_version_tag(backup_package_name, monkeypatch):
     v = Versioner()
 
@@ -176,8 +195,37 @@ def test_commit_version_tag(backup_package_name, monkeypatch):
     assert "__version__ = '0.2'" in (v.PACKAGE / '__init__.py').read_text()
 
 
+def test_commit_version_tag_non_setup(backup_another_package, monkeypatch):
+    v = VersionerNonSetup('app')
+
+    mock = Mock()
+    monkeypatch.setattr(versioneer, 'call', mock)
+
+    v.commit_version('0.2',
+                     msg_template='{package_name} release {new_version}',
+                     tag=True)
+
+    assert mock.call_args_list == [
+        _call(['git', 'add', '--all']),
+        _call(['git', 'status']),
+        _call(['git', 'commit', '-m', 'app release 0.2']),
+        _call(['git', 'tag', '-a', '0.2', '-m', 'app release 0.2']),
+        _call(['git', 'push', 'origin', '0.2'])
+    ]
+
+    assert "__version__ = '0.2'" in (v.PACKAGE / '_version.py').read_text()
+
+
 def test_update_changelog_release_md(backup_package_name):
     v = Versioner()
+    v.update_changelog_release('0.1')
+    today = datetime.now().strftime('%Y-%m-%d')
+    assert v.path_to_changelog.read_text(
+    ) == f'# CHANGELOG\n\n## 0.1 ({today})\n\n* Fixes #1'
+
+
+def test_update_changelog_release_md_non_setup(backup_another_package):
+    v = VersionerNonSetup('app')
     v.update_changelog_release('0.1')
     today = datetime.now().strftime('%Y-%m-%d')
     assert v.path_to_changelog.read_text(
@@ -195,8 +243,26 @@ def test_update_changelog_release_rst(backup_package_name):
     ) == f'CHANGELOG\n=========\n\n0.1 ({today})\n----------------'
 
 
+def test_update_changelog_release_rst_non_setup(backup_another_package):
+    Path('CHANGELOG.md').unlink()
+    Path('CHANGELOG.rst').write_text('CHANGELOG\n=========\n\n0.1dev\n------')
+
+    v = VersionerNonSetup('app')
+    v.update_changelog_release('0.1')
+    today = datetime.now().strftime('%Y-%m-%d')
+    assert v.path_to_changelog.read_text(
+    ) == f'CHANGELOG\n=========\n\n0.1 ({today})\n----------------'
+
+
 def test_add_changelog_new_dev_section_md(backup_package_name):
     v = Versioner()
+    v.add_changelog_new_dev_section('0.2dev')
+    assert v.path_to_changelog.read_text(
+    ) == '# CHANGELOG\n\n## 0.2dev\n\n## 0.1dev\n\n* Fixes #1'
+
+
+def test_add_changelog_new_dev_section_md_non_setup(backup_another_package):
+    v = VersionerNonSetup('app')
     v.add_changelog_new_dev_section('0.2dev')
     assert v.path_to_changelog.read_text(
     ) == '# CHANGELOG\n\n## 0.2dev\n\n## 0.1dev\n\n* Fixes #1'
@@ -207,6 +273,16 @@ def test_add_changelog_new_dev_section_rst(backup_package_name):
     Path('CHANGELOG.rst').write_text('CHANGELOG\n=========\n\n0.1dev\n------')
 
     v = Versioner()
+    v.add_changelog_new_dev_section('0.2dev')
+    assert v.path_to_changelog.read_text(
+    ) == 'CHANGELOG\n=========\n\n0.2dev\n------\n\n0.1dev\n------'
+
+
+def test_add_changelog_new_dev_section_rst_non_setup(backup_another_package):
+    Path('CHANGELOG.md').unlink()
+    Path('CHANGELOG.rst').write_text('CHANGELOG\n=========\n\n0.1dev\n------')
+
+    v = VersionerNonSetup('app')
     v.add_changelog_new_dev_section('0.2dev')
     assert v.path_to_changelog.read_text(
     ) == 'CHANGELOG\n=========\n\n0.2dev\n------\n\n0.1dev\n------'
