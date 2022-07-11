@@ -316,7 +316,7 @@ def upload(tag, production):
     print('Checking out tag {}'.format(tag))
     call(['git', 'checkout', tag])
 
-    versioner = Versioner()
+    versioner = VersionerSetup()
     current = versioner.current_version()
 
     input_confirm('Version in {} tag is {}. Do you want to continue?'.format(
