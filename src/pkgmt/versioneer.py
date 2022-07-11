@@ -12,6 +12,7 @@ import shutil
 import warnings
 
 from pkgmt.changelog import expand_github_from_changelog
+from pkgmt.versioner.versionersetup import VersionerSetup
 
 
 def replace_in_file(path_to_file, original, replacement):
@@ -257,7 +258,7 @@ def version(project_root='.', tag=True, version_package=None):
         versioner = VersionerNonSetup(version_package,
                                       project_root=project_root)
     else:
-        versioner = Versioner(project_root=project_root)
+        versioner = VersionerSetup(project_root=project_root)
 
     current = versioner.current_version()
     release = versioner.release_version()

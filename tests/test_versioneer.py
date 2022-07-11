@@ -21,7 +21,7 @@ from datetime import datetime
 
 import pytest
 
-from pkgmt.versioner.versionersetup import Versioner
+from pkgmt.versioner.versionersetup import VersionerSetup
 from pkgmt.versioneer import VersionerNonSetup
 from pkgmt import versioneer
 
@@ -102,7 +102,7 @@ def test_locate_package_and_readme_non_setup(move_to_another_package):
 
 
 def test_current_version(move_to_package_name):
-    assert Versioner().current_version() == '0.1dev'
+    assert VersionerSetup().current_version() == '0.1dev'
 
 
 def test_current_version_non_setup(move_to_another_package):
@@ -110,7 +110,7 @@ def test_current_version_non_setup(move_to_another_package):
 
 
 def test_release_version(move_to_package_name):
-    assert Versioner().release_version() == '0.1'
+    assert VersionerSetup().release_version() == '0.1'
 
 
 def test_release_version_non_setup(move_to_another_package):
@@ -127,8 +127,8 @@ def test_release_version_non_setup(move_to_another_package):
 ])
 @pytest.mark.parametrize(
     'move_to, attr, versioner',
-    [[move_to_package_name, Versioner,
-      Versioner()],
+    [[move_to_package_name, VersionerSetup,
+      VersionerSetup()],
      [move_to_another_package, VersionerNonSetup,
       VersionerNonSetup('app')]])
 def test_bump_up_version(monkeypatch, version, version_new, move_to, attr,
@@ -138,7 +138,7 @@ def test_bump_up_version(monkeypatch, version, version_new, move_to, attr,
 
 
 def test_commit_version_no_tag(backup_package_name, monkeypatch):
-    v = Versioner()
+    v = VersionerSetup()
 
     mock = Mock()
     monkeypatch.setattr(versioneer, 'call', mock)
@@ -176,7 +176,7 @@ def test_commit_version_no_tag_non_setup(backup_another_package, monkeypatch):
 
 
 def test_commit_version_tag(backup_package_name, monkeypatch):
-    v = Versioner()
+    v = VersionerSetup()
 
     mock = Mock()
     monkeypatch.setattr(versioneer, 'call', mock)
@@ -218,7 +218,7 @@ def test_commit_version_tag_non_setup(backup_another_package, monkeypatch):
 
 
 def test_update_changelog_release_md(backup_package_name):
-    v = Versioner()
+    v = VersionerSetup()
     v.update_changelog_release('0.1')
     today = datetime.now().strftime('%Y-%m-%d')
     assert v.path_to_changelog.read_text(
@@ -237,7 +237,7 @@ def test_update_changelog_release_rst(backup_package_name):
     Path('CHANGELOG.md').unlink()
     Path('CHANGELOG.rst').write_text('CHANGELOG\n=========\n\n0.1dev\n------')
 
-    v = Versioner()
+    v = VersionerSetup()
     v.update_changelog_release('0.1')
     today = datetime.now().strftime('%Y-%m-%d')
     assert v.path_to_changelog.read_text(
@@ -256,7 +256,7 @@ def test_update_changelog_release_rst_non_setup(backup_another_package):
 
 
 def test_add_changelog_new_dev_section_md(backup_package_name):
-    v = Versioner()
+    v = VersionerSetup()
     v.add_changelog_new_dev_section('0.2dev')
     assert v.path_to_changelog.read_text(
     ) == '# CHANGELOG\n\n## 0.2dev\n\n## 0.1dev\n\n* Fixes #1'
@@ -273,7 +273,7 @@ def test_add_changelog_new_dev_section_rst(backup_package_name):
     Path('CHANGELOG.md').unlink()
     Path('CHANGELOG.rst').write_text('CHANGELOG\n=========\n\n0.1dev\n------')
 
-    v = Versioner()
+    v = VersionerSetup()
     v.add_changelog_new_dev_section('0.2dev')
     assert v.path_to_changelog.read_text(
     ) == 'CHANGELOG\n=========\n\n0.2dev\n------\n\n0.1dev\n------'
@@ -549,6 +549,6 @@ def test_invalid_version_string_non_setup(backup_another_package, monkeypatch,
 def test_picks_up_first_module_under_src(backup_package_name):
     Path('src', 'z').mkdir()
 
-    v = Versioner()
+    v = VersionerSetup()
 
     assert v.package_name == 'package_name'

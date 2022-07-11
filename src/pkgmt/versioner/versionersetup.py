@@ -4,7 +4,7 @@ from pathlib import Path
 from pkgmt.versioner.abstractversioner import AbstractVersioner
 
 
-class Versioner(AbstractVersioner):
+class VersionerSetup(AbstractVersioner):
 
     def find_package(self, project_root):
         path_to_src = Path(project_root, 'src')
