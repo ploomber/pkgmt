@@ -90,7 +90,7 @@ def move_to_another_package(root):
 
 
 def test_locate_package_and_readme(move_to_package_name):
-    v = Versioner()
+    v = VersionerSetup()
     assert v.PACKAGE == Path('src', 'package_name')
     assert v.path_to_changelog == Path('CHANGELOG.md')
 
