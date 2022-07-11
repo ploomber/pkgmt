@@ -16,7 +16,7 @@ import tempfile
 import shutil
 import os
 from pathlib import Path
-from unittest.mock import Mock, call
+from unittest.mock import Mock, _Call
 from datetime import datetime
 
 import pytest
@@ -30,7 +30,7 @@ from pkgmt import versioneer
 def _call(arg):
     """Shortcut for comparing call objects
     """
-    return call(((arg, ), ))
+    return _Call(((arg, ), ))
 
 
 @pytest.fixture
