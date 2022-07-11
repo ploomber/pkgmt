@@ -116,25 +116,25 @@ def test_release_version(move_to_package_name):
 def test_release_version_non_setup(move_to_another_package):
     assert VersionerNonSetup('app').release_version() == '0.1'
 
-
-@pytest.mark.parametrize('version, version_new', [
-    ['0.1', '0.1.1dev'],
-    ['0.1.1', '0.1.2dev'],
-    ['0.9', '0.9.1dev'],
-    ['0.10a1', '0.10dev'],
-    ['0.10b1', '0.10dev'],
-    ['0.10rc1', '0.10dev'],
-])
-@pytest.mark.parametrize(
-    'move_to, attr, versioner',
-    [[move_to_package_name, VersionerSetup,
-      VersionerSetup()],
-     [move_to_another_package, VersionerNonSetup,
-      VersionerNonSetup('app')]])
-def test_bump_up_version(monkeypatch, version, version_new, move_to, attr,
-                         versioner):
-    monkeypatch.setattr(attr, 'current_version', lambda self: version)
-    assert versioner.bump_up_version() == version_new
+#
+# @pytest.mark.parametrize('version, version_new', [
+#     ['0.1', '0.1.1dev'],
+#     ['0.1.1', '0.1.2dev'],
+#     ['0.9', '0.9.1dev'],
+#     ['0.10a1', '0.10dev'],
+#     ['0.10b1', '0.10dev'],
+#     ['0.10rc1', '0.10dev'],
+# ])
+# @pytest.mark.parametrize(
+#     'move_to, attr, versioner',
+#     [[move_to_package_name, VersionerSetup,
+#       VersionerSetup()],
+#      [move_to_another_package, VersionerNonSetup,
+#       VersionerNonSetup('app')]])
+# def test_bump_up_version(monkeypatch, version, version_new, move_to, attr,
+#                          versioner):
+#     monkeypatch.setattr(attr, 'current_version', lambda self: version)
+#     assert versioner.bump_up_version() == version_new
 
 
 def test_commit_version_no_tag(backup_package_name, monkeypatch):
