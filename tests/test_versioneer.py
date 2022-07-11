@@ -24,6 +24,7 @@ import pytest
 from pkgmt.versioner.versionersetup import VersionerSetup
 from pkgmt.versioneer import VersionerNonSetup
 from pkgmt import versioneer
+from pkgmt.versioner import abstractversioner
 
 
 # FIXME: use unittest.mock.call instead of unittest.mock._Call
@@ -368,6 +369,8 @@ def test_pre_release(backup_package_name, monkeypatch, selected, stored, dev):
 
     monkeypatch.setattr(versioneer, 'call', mock)
     monkeypatch.setattr(versioneer, '_input', mock_input)
+
+    monkeypatch.setattr(abstractversioner, 'call', mock)
 
     versioneer.version(tag=True)
 
