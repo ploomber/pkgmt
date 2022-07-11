@@ -21,7 +21,8 @@ from datetime import datetime
 
 import pytest
 
-from pkgmt.versioneer import Versioner, VersionerNonSetup
+from pkgmt.versioner.versionersetup import Versioner
+from pkgmt.versioneer import VersionerNonSetup
 from pkgmt import versioneer
 
 
