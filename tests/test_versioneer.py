@@ -301,6 +301,7 @@ def test_release(backup_package_name, monkeypatch, selected, stored, dev):
     mock_input.side_effect = [selected, 'y']
 
     monkeypatch.setattr(versioneer, 'call', mock)
+    monkeypatch.setattr(abstractversioner, 'call', mock)
     monkeypatch.setattr(versioneer, '_input', mock_input)
 
     versioneer.version(tag=True)
