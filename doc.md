@@ -64,7 +64,7 @@ invoke setup
 
 ### New version
 
-Releasing a new version involves setting new stable version in `package_name/__init__.py`, updating header in `CHANGELOG` file and committing new version.
+Releasing a new version involves setting new stable version in `package_name/__init__.py` / `package_name/_version.py`, updating header in `CHANGELOG` file and committing new version.
 
 ```
 invoke new 
