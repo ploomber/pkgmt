@@ -1,5 +1,4 @@
 import os
-import warnings
 from pathlib import Path
 from pkgmt.versioner.abstractversioner import AbstractVersioner
 
@@ -8,7 +7,7 @@ class VersionerNonSetup(AbstractVersioner):
 
     def __init__(self, version_package, project_root='.'):
         self.version_package = version_package
-        super().__init__()
+        super().__init__(project_root)
 
     def find_package(self):
 

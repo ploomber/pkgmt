@@ -163,6 +163,7 @@ def test_commit_version_no_tag_non_setup(backup_another_package, monkeypatch):
 
     mock = Mock()
     monkeypatch.setattr(versioneer, 'call', mock)
+    monkeypatch.setattr(abstractversioner, 'call', mock)
 
     v.commit_version('0.2',
                      msg_template='{package_name} release {new_version}',
@@ -204,6 +205,7 @@ def test_commit_version_tag_non_setup(backup_another_package, monkeypatch):
 
     mock = Mock()
     monkeypatch.setattr(versioneer, 'call', mock)
+    monkeypatch.setattr(abstractversioner, 'call', mock)
 
     v.commit_version('0.2',
                      msg_template='{package_name} release {new_version}',
@@ -340,6 +342,7 @@ def test_release_non_setup(backup_another_package, monkeypatch, selected,
     mock_input.side_effect = [selected, 'y']
 
     monkeypatch.setattr(versioneer, 'call', mock)
+    monkeypatch.setattr(abstractversioner, 'call', mock)
     monkeypatch.setattr(versioneer, '_input', mock_input)
 
     versioneer.version(tag=True, version_package='app')
@@ -409,6 +412,7 @@ def test_pre_release_non_setup(backup_another_package, monkeypatch, selected,
     mock_input.side_effect = [selected, 'y']
 
     monkeypatch.setattr(versioneer, 'call', mock)
+    monkeypatch.setattr(abstractversioner, 'call', mock)
     monkeypatch.setattr(versioneer, '_input', mock_input)
 
     versioneer.version(tag=True, version_package='app')
@@ -472,6 +476,7 @@ def test_release_with_no_changelog_non_setup(backup_another_package,
     mock_input.side_effect = ['', 'y']
 
     monkeypatch.setattr(versioneer, 'call', mock)
+    monkeypatch.setattr(abstractversioner, 'call', mock)
     monkeypatch.setattr(versioneer, '_input', mock_input)
 
     versioneer.version(tag=True, version_package='app')
