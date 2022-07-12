@@ -6,8 +6,8 @@ from pkgmt.versioner.abstractversioner import AbstractVersioner
 
 class VersionerSetup(AbstractVersioner):
 
-    def find_package(self, project_root):
-        path_to_src = Path(project_root, 'src')
+    def find_package(self):
+        path_to_src = Path(self.project_root, 'src')
 
         dirs = sorted([
           f for f in os.listdir(path_to_src)

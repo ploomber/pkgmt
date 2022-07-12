@@ -182,6 +182,7 @@ def test_commit_version_tag(backup_package_name, monkeypatch):
 
     mock = Mock()
     monkeypatch.setattr(versioneer, 'call', mock)
+    monkeypatch.setattr(abstractversioner, 'call', mock)
 
     v.commit_version('0.2',
                      msg_template='{package_name} release {new_version}',
@@ -438,6 +439,7 @@ def test_release_with_no_changelog(backup_package_name, monkeypatch, capsys):
     mock_input.side_effect = ['', 'y']
 
     monkeypatch.setattr(versioneer, 'call', mock)
+    monkeypatch.setattr(abstractversioner, 'call', mock)
     monkeypatch.setattr(versioneer, '_input', mock_input)
 
     versioneer.version(tag=True)

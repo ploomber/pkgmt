@@ -35,18 +35,10 @@ def make_header(content, path, add_date=False):
         raise ValueError('Unsupported format, must be .rst or .md')
 
 
-def validate_version_string(version):
-    if not len(version):
-        raise ValueError(f'Got invalid empty version string: {version!r}')
-
-    if version[0] not in '0123456789':
-        raise ValueError(f'Got invalid version string: {version!r} '
-                         '(first character must be numeric)')
-
-
 class AbstractVersioner(abc.ABC):
     def __init__(self, project_root='.'):
-        self.package_name, self.PACKAGE = self.find_package(project_root)
+        self.project_root = project_root
+        self.package_name, self.PACKAGE = self.find_package()
         if Path(project_root, 'CHANGELOG.rst').exists():
             self.path_to_changelog = Path(project_root, 'CHANGELOG.rst')
         elif Path(project_root, 'CHANGELOG.md').exists():
@@ -178,7 +170,7 @@ class AbstractVersioner(abc.ABC):
             print('No CHANGELOG.{rst,md} found, skipping changelog editing...')
 
     @abc.abstractmethod
-    def find_package(self, project_root):
+    def find_package(self):
         pass
 
     @abc.abstractmethod
