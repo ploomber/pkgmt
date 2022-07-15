@@ -1,6 +1,7 @@
 # CHANGELOG
 
-## 0.0.7dev
+## 0.0.7 (2022-07-14)
+* Adds support for projects that do not have a `setup.py` file
 
 ## 0.0.6 (2022-03-06)
 * Adds `pkgmt new` command to create a new pre-configured package
