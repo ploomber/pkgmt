@@ -21,8 +21,10 @@ from datetime import datetime
 
 import pytest
 
-from pkgmt.versioneer import Versioner
+from pkgmt.versioner.versionersetup import VersionerSetup
+from pkgmt.versioneer import VersionerNonSetup
 from pkgmt import versioneer
+from pkgmt.versioner import abstractversioner
 
 
 # FIXME: use unittest.mock.call instead of unittest.mock._Call
@@ -52,6 +54,25 @@ def backup_package_name(root):
 
 
 @pytest.fixture
+def backup_another_package(root):
+    old = os.getcwd()
+    backup = tempfile.mkdtemp()
+    backup_another_package = str(Path(backup, 'backup-template'))
+    path_to_templates = root / 'tests' / 'assets' / 'another_package'
+    shutil.copytree(str(path_to_templates), backup_another_package)
+
+    os.chdir(path_to_templates)
+
+    yield path_to_templates
+
+    os.chdir(old)
+
+    shutil.rmtree(str(path_to_templates))
+    shutil.copytree(backup_another_package, str(path_to_templates))
+    shutil.rmtree(backup)
+
+
+@pytest.fixture
 def move_to_package_name(root):
     old = os.getcwd()
     p = root / 'tests' / 'assets' / 'package_name'
@@ -60,18 +81,41 @@ def move_to_package_name(root):
     os.chdir(old)
 
 
+@pytest.fixture
+def move_to_another_package(root):
+    old = os.getcwd()
+    p = root / 'tests' / 'assets' / 'another_package'
+    os.chdir(p)
+    yield
+    os.chdir(old)
+
+
 def test_locate_package_and_readme(move_to_package_name):
-    v = Versioner()
+    v = VersionerSetup()
     assert v.PACKAGE == Path('src', 'package_name')
     assert v.path_to_changelog == Path('CHANGELOG.md')
 
 
+def test_locate_package_and_readme_non_setup(move_to_another_package):
+    v = VersionerNonSetup('app')
+    assert v.PACKAGE == Path('app')
+    assert v.path_to_changelog == Path('CHANGELOG.md')
+
+
 def test_current_version(move_to_package_name):
-    assert Versioner().current_version() == '0.1dev'
+    assert VersionerSetup().current_version() == '0.1dev'
+
+
+def test_current_version_non_setup(move_to_another_package):
+    assert VersionerNonSetup('app').current_version() == '0.1dev'
 
 
 def test_release_version(move_to_package_name):
-    assert Versioner().release_version() == '0.1'
+    assert VersionerSetup().release_version() == '0.1'
+
+
+def test_release_version_non_setup(move_to_another_package):
+    assert VersionerNonSetup('app').release_version() == '0.1'
 
 
 @pytest.mark.parametrize('version, version_new', [
@@ -82,17 +126,24 @@ def test_release_version(move_to_package_name):
     ['0.10b1', '0.10dev'],
     ['0.10rc1', '0.10dev'],
 ])
-def test_bump_up_version(monkeypatch, version, version_new,
-                         move_to_package_name):
-    monkeypatch.setattr(Versioner, 'current_version', lambda self: version)
-    assert Versioner().bump_up_version() == version_new
+@pytest.mark.parametrize(
+    'move_to, attr, versioner',
+    [[move_to_package_name, VersionerSetup,
+      VersionerSetup()],
+     [move_to_another_package, VersionerNonSetup,
+      VersionerNonSetup('app')]])
+def test_bump_up_version(monkeypatch, version, version_new, move_to, attr,
+                         versioner):
+    monkeypatch.setattr(attr, 'current_version', lambda self: version)
+    assert versioner.bump_up_version() == version_new
 
 
 def test_commit_version_no_tag(backup_package_name, monkeypatch):
-    v = Versioner()
+    v = VersionerSetup()
 
     mock = Mock()
     monkeypatch.setattr(versioneer, 'call', mock)
+    monkeypatch.setattr(abstractversioner, 'call', mock)
 
     v.commit_version('0.2',
                      msg_template='{package_name} release {new_version}',
@@ -107,11 +158,32 @@ def test_commit_version_no_tag(backup_package_name, monkeypatch):
     assert "__version__ = '0.2'" in (v.PACKAGE / '__init__.py').read_text()
 
 
-def test_commit_version_tag(backup_package_name, monkeypatch):
-    v = Versioner()
+def test_commit_version_no_tag_non_setup(backup_another_package, monkeypatch):
+    v = VersionerNonSetup('app')
 
     mock = Mock()
     monkeypatch.setattr(versioneer, 'call', mock)
+    monkeypatch.setattr(abstractversioner, 'call', mock)
+
+    v.commit_version('0.2',
+                     msg_template='{package_name} release {new_version}',
+                     tag=False)
+
+    assert mock.call_args_list == [
+        _call(['git', 'add', '--all']),
+        _call(['git', 'status']),
+        _call(['git', 'commit', '-m', 'app release 0.2']),
+    ]
+
+    assert "__version__ = '0.2'" in (v.PACKAGE / '_version.py').read_text()
+
+
+def test_commit_version_tag(backup_package_name, monkeypatch):
+    v = VersionerSetup()
+
+    mock = Mock()
+    monkeypatch.setattr(versioneer, 'call', mock)
+    monkeypatch.setattr(abstractversioner, 'call', mock)
 
     v.commit_version('0.2',
                      msg_template='{package_name} release {new_version}',
@@ -128,8 +200,38 @@ def test_commit_version_tag(backup_package_name, monkeypatch):
     assert "__version__ = '0.2'" in (v.PACKAGE / '__init__.py').read_text()
 
 
+def test_commit_version_tag_non_setup(backup_another_package, monkeypatch):
+    v = VersionerNonSetup('app')
+
+    mock = Mock()
+    monkeypatch.setattr(versioneer, 'call', mock)
+    monkeypatch.setattr(abstractversioner, 'call', mock)
+
+    v.commit_version('0.2',
+                     msg_template='{package_name} release {new_version}',
+                     tag=True)
+
+    assert mock.call_args_list == [
+        _call(['git', 'add', '--all']),
+        _call(['git', 'status']),
+        _call(['git', 'commit', '-m', 'app release 0.2']),
+        _call(['git', 'tag', '-a', '0.2', '-m', 'app release 0.2']),
+        _call(['git', 'push', 'origin', '0.2'])
+    ]
+
+    assert "__version__ = '0.2'" in (v.PACKAGE / '_version.py').read_text()
+
+
 def test_update_changelog_release_md(backup_package_name):
-    v = Versioner()
+    v = VersionerSetup()
+    v.update_changelog_release('0.1')
+    today = datetime.now().strftime('%Y-%m-%d')
+    assert v.path_to_changelog.read_text(
+    ) == f'# CHANGELOG\n\n## 0.1 ({today})\n\n* Fixes #1'
+
+
+def test_update_changelog_release_md_non_setup(backup_another_package):
+    v = VersionerNonSetup('app')
     v.update_changelog_release('0.1')
     today = datetime.now().strftime('%Y-%m-%d')
     assert v.path_to_changelog.read_text(
@@ -140,7 +242,18 @@ def test_update_changelog_release_rst(backup_package_name):
     Path('CHANGELOG.md').unlink()
     Path('CHANGELOG.rst').write_text('CHANGELOG\n=========\n\n0.1dev\n------')
 
-    v = Versioner()
+    v = VersionerSetup()
+    v.update_changelog_release('0.1')
+    today = datetime.now().strftime('%Y-%m-%d')
+    assert v.path_to_changelog.read_text(
+    ) == f'CHANGELOG\n=========\n\n0.1 ({today})\n----------------'
+
+
+def test_update_changelog_release_rst_non_setup(backup_another_package):
+    Path('CHANGELOG.md').unlink()
+    Path('CHANGELOG.rst').write_text('CHANGELOG\n=========\n\n0.1dev\n------')
+
+    v = VersionerNonSetup('app')
     v.update_changelog_release('0.1')
     today = datetime.now().strftime('%Y-%m-%d')
     assert v.path_to_changelog.read_text(
@@ -148,7 +261,14 @@ def test_update_changelog_release_rst(backup_package_name):
 
 
 def test_add_changelog_new_dev_section_md(backup_package_name):
-    v = Versioner()
+    v = VersionerSetup()
+    v.add_changelog_new_dev_section('0.2dev')
+    assert v.path_to_changelog.read_text(
+    ) == '# CHANGELOG\n\n## 0.2dev\n\n## 0.1dev\n\n* Fixes #1'
+
+
+def test_add_changelog_new_dev_section_md_non_setup(backup_another_package):
+    v = VersionerNonSetup('app')
     v.add_changelog_new_dev_section('0.2dev')
     assert v.path_to_changelog.read_text(
     ) == '# CHANGELOG\n\n## 0.2dev\n\n## 0.1dev\n\n* Fixes #1'
@@ -158,7 +278,17 @@ def test_add_changelog_new_dev_section_rst(backup_package_name):
     Path('CHANGELOG.md').unlink()
     Path('CHANGELOG.rst').write_text('CHANGELOG\n=========\n\n0.1dev\n------')
 
-    v = Versioner()
+    v = VersionerSetup()
+    v.add_changelog_new_dev_section('0.2dev')
+    assert v.path_to_changelog.read_text(
+    ) == 'CHANGELOG\n=========\n\n0.2dev\n------\n\n0.1dev\n------'
+
+
+def test_add_changelog_new_dev_section_rst_non_setup(backup_another_package):
+    Path('CHANGELOG.md').unlink()
+    Path('CHANGELOG.rst').write_text('CHANGELOG\n=========\n\n0.1dev\n------')
+
+    v = VersionerNonSetup('app')
     v.add_changelog_new_dev_section('0.2dev')
     assert v.path_to_changelog.read_text(
     ) == 'CHANGELOG\n=========\n\n0.2dev\n------\n\n0.1dev\n------'
@@ -174,6 +304,7 @@ def test_release(backup_package_name, monkeypatch, selected, stored, dev):
     mock_input.side_effect = [selected, 'y']
 
     monkeypatch.setattr(versioneer, 'call', mock)
+    monkeypatch.setattr(abstractversioner, 'call', mock)
     monkeypatch.setattr(versioneer, '_input', mock_input)
 
     versioneer.version(tag=True)
@@ -201,6 +332,40 @@ def test_release(backup_package_name, monkeypatch, selected, stored, dev):
 
 
 @pytest.mark.parametrize('selected, stored, dev', [
+    ['', '0.1', '0.1.1dev'],
+    ['0.1', '0.1', '0.1.1dev'],
+])
+def test_release_non_setup(backup_another_package, monkeypatch, selected,
+                           stored, dev):
+    mock = Mock()
+    mock_input = Mock()
+    mock_input.side_effect = [selected, 'y']
+
+    monkeypatch.setattr(versioneer, 'call', mock)
+    monkeypatch.setattr(abstractversioner, 'call', mock)
+    monkeypatch.setattr(versioneer, '_input', mock_input)
+
+    versioneer.version(tag=True, version_package='app')
+
+    assert mock.call_args_list == [
+        _call(['git', 'add', '--all']),
+        _call(['git', 'status']),
+        _call(['git', 'commit', '-m', f'app release {stored}']),
+        _call(['git', 'tag', '-a', stored, '-m', f'app release {stored}']),
+        _call(['git', 'push', 'origin', stored]),
+        _call(['git', 'add', '--all']),
+        _call(['git', 'status']),
+        _call(['git', 'commit', '-m', f'Bumps up app to version {dev}']),
+        _call(['git', 'push'])
+    ]
+
+    today = datetime.now().strftime('%Y-%m-%d')
+    assert Path('CHANGELOG.md').read_text() == (
+        f'# CHANGELOG\n\n## {dev}\n\n## {stored} ({today})\n\n'
+        '* Fixes [#1](https://github.com/edublancas/pkgmt/issues/1)')
+
+
+@pytest.mark.parametrize('selected, stored, dev', [
     ['1.2b1', '1.2b1', '1.2dev'],
 ])
 def test_pre_release(backup_package_name, monkeypatch, selected, stored, dev):
@@ -210,6 +375,8 @@ def test_pre_release(backup_package_name, monkeypatch, selected, stored, dev):
 
     monkeypatch.setattr(versioneer, 'call', mock)
     monkeypatch.setattr(versioneer, '_input', mock_input)
+
+    monkeypatch.setattr(abstractversioner, 'call', mock)
 
     versioneer.version(tag=True)
 
@@ -235,6 +402,39 @@ def test_pre_release(backup_package_name, monkeypatch, selected, stored, dev):
         '* Fixes [#1](https://github.com/edublancas/pkgmt/issues/1)')
 
 
+@pytest.mark.parametrize('selected, stored, dev', [
+    ['1.2b1', '1.2b1', '1.2dev'],
+])
+def test_pre_release_non_setup(backup_another_package, monkeypatch, selected,
+                               stored, dev):
+    mock = Mock()
+    mock_input = Mock()
+    mock_input.side_effect = [selected, 'y']
+
+    monkeypatch.setattr(versioneer, 'call', mock)
+    monkeypatch.setattr(abstractversioner, 'call', mock)
+    monkeypatch.setattr(versioneer, '_input', mock_input)
+
+    versioneer.version(tag=True, version_package='app')
+
+    assert mock.call_args_list == [
+        _call(['git', 'add', '--all']),
+        _call(['git', 'status']),
+        _call(['git', 'commit', '-m', f'app release {stored}']),
+        _call(['git', 'tag', '-a', stored, '-m', f'app release {stored}']),
+        _call(['git', 'push', 'origin', stored]),
+        _call(['git', 'add', '--all']),
+        _call(['git', 'status']),
+        _call(['git', 'commit', '-m', f'Bumps up app to version {dev}']),
+        _call(['git', 'push'])
+    ]
+
+    # changelog must not change
+    assert Path('CHANGELOG.md').read_text() == (
+        '# CHANGELOG\n\n## 0.1dev\n\n'
+        '* Fixes [#1](https://github.com/edublancas/pkgmt/issues/1)')
+
+
 def test_release_with_no_changelog(backup_package_name, monkeypatch, capsys):
     Path('CHANGELOG.md').unlink()
 
@@ -243,6 +443,7 @@ def test_release_with_no_changelog(backup_package_name, monkeypatch, capsys):
     mock_input.side_effect = ['', 'y']
 
     monkeypatch.setattr(versioneer, 'call', mock)
+    monkeypatch.setattr(abstractversioner, 'call', mock)
     monkeypatch.setattr(versioneer, '_input', mock_input)
 
     versioneer.version(tag=True)
@@ -262,6 +463,37 @@ def test_release_with_no_changelog(backup_package_name, monkeypatch, capsys):
         _call([
             'git', 'commit', '-m', 'Bumps up package_name to version 0.1.1dev'
         ]),
+        _call(['git', 'push'])
+    ]
+
+
+def test_release_with_no_changelog_non_setup(backup_another_package,
+                                             monkeypatch, capsys):
+    Path('CHANGELOG.md').unlink()
+
+    mock = Mock()
+    mock_input = Mock()
+    mock_input.side_effect = ['', 'y']
+
+    monkeypatch.setattr(versioneer, 'call', mock)
+    monkeypatch.setattr(abstractversioner, 'call', mock)
+    monkeypatch.setattr(versioneer, '_input', mock_input)
+
+    versioneer.version(tag=True, version_package='app')
+
+    captured = capsys.readouterr()
+    assert ('No CHANGELOG.{rst,md} found, skipping changelog editing...'
+            in captured.out)
+
+    assert mock.call_args_list == [
+        _call(['git', 'add', '--all']),
+        _call(['git', 'status']),
+        _call(['git', 'commit', '-m', 'app release 0.1']),
+        _call(['git', 'tag', '-a', '0.1', '-m', 'app release 0.1']),
+        _call(['git', 'push', 'origin', '0.1']),
+        _call(['git', 'add', '--all']),
+        _call(['git', 'status']),
+        _call(['git', 'commit', '-m', 'Bumps up app to version 0.1.1dev']),
         _call(['git', 'push'])
     ]
 
@@ -310,9 +542,25 @@ def test_invalid_version_string(backup_package_name, monkeypatch, selected):
     assert '(first character must be numeric)' in str(excinfo.value)
 
 
+@pytest.mark.parametrize('selected', ['y', 'n', 'y1.2'])
+def test_invalid_version_string_non_setup(backup_another_package, monkeypatch,
+                                          selected):
+    mock = Mock()
+    mock_input = Mock()
+    mock_input.side_effect = [selected, 'y']
+
+    monkeypatch.setattr(versioneer, 'call', mock)
+    monkeypatch.setattr(versioneer, '_input', mock_input)
+
+    with pytest.raises(ValueError) as excinfo:
+        versioneer.version(tag=True, version_package='app')
+
+    assert '(first character must be numeric)' in str(excinfo.value)
+
+
 def test_picks_up_first_module_under_src(backup_package_name):
     Path('src', 'z').mkdir()
 
-    v = Versioner()
+    v = VersionerSetup()
 
     assert v.package_name == 'package_name'

@@ -25,6 +25,7 @@ def read(*names, **kwargs):
 
 REQUIRES = [
     'toml',
+    'pyyaml',
     'requests',
     'click',
 ]
