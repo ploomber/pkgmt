@@ -1,5 +1,7 @@
 # CHANGELOG
 
+## 0.0.8dev
+
 ## 0.0.7 (2022-07-14)
 * Adds support for projects that do not have a `setup.py` file
 
