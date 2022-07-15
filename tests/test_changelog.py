@@ -76,4 +76,3 @@ pkgmt:
     changelog.expand_github_from_changelog()
 
     assert output == Path('CHANGELOG.md').read_text()
-
