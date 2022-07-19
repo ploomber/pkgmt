@@ -15,7 +15,11 @@ with open('src/$name/__init__.py', 'rb') as f:
 
 REQUIRES = []
 
-DEV = []
+DEV = [
+    'pytest',
+    'flake8',
+    'invoke',
+]
 
 setup(
     name='$name',
