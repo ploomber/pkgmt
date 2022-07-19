@@ -1,6 +1,10 @@
 # CHANGELOG
 
 ## 0.0.8dev
+* Adds sample GitHub Actions files
+* Adds sample test
+* Adds `pytest`, `flake8` and `invoke` as dev dependencies
+* Adds sample `setup.cfg`
 
 ## 0.0.7 (2022-07-14)
 * Adds support for projects that do not have a `setup.py` file
