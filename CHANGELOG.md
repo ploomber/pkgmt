@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 0.0.8dev
+## 0.0.8 (2022-07-19)
 * Adds sample GitHub Actions files
 * Adds sample test
 * Adds `pytest`, `flake8` and `invoke` as dev dependencies
