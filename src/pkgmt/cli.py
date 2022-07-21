@@ -2,7 +2,7 @@ import sys
 
 import click
 
-from pkgmt import links, config
+from pkgmt import links, config, test
 from pkgmt import new as new_
 
 
@@ -30,3 +30,19 @@ def new(name):
     """Create new package
     """
     new_.package(name)
+
+
+@cli.command()
+@click.option('-f',
+              '--file',
+              type=click.Path(dir_okay=False, exists=True),
+              default='README.md')
+@click.option("-i",
+              "--inplace",
+              is_flag=True,
+              show_default=True,
+              default=False)
+def test_md(file, inplace):
+    """Run a markdown file
+    """
+    test.markdown(file, inplace=inplace)

@@ -38,6 +38,13 @@ DEV = [
     'twine',
 ]
 
+# to test markdown files
+ALL = [
+    'nbclient',
+    'jupytext',
+    'ipykernel',
+]
+
 setup(
     name='pkgmt',
     version=VERSION,
@@ -55,6 +62,7 @@ setup(
     install_requires=REQUIRES,
     extras_require={
         'dev': DEV,
+        'all': ALL,
     },
     entry_points={
         'console_scripts': ['pkgmt=pkgmt.cli:cli'],
