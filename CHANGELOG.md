@@ -1,6 +1,7 @@
 # CHANGELOG
 
 ## 0.0.9dev
+* Adds `pkgmt test-md` command to test `README.md` files
 
 ## 0.0.8 (2022-07-19)
 * Adds sample GitHub Actions files
