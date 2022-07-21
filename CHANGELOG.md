@@ -1,5 +1,7 @@
 # CHANGELOG
 
+## 0.0.10dev
+
 ## 0.0.9 (2022-07-20)
 * Adds `pkgmt test-md` command to test `README.md` files
 
