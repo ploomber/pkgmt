@@ -1,3 +1,4 @@
+import shutil
 import tempfile
 import os
 import contextlib
@@ -38,10 +39,16 @@ jupyter:
     if inplace:
         nbclient.execute(nb)
     else:
-        dir_ = tempfile.mkdtemp()
+        dir_ = Path(tempfile.mkdtemp(), 'files')
         click.echo(f'Creating tmp directory: {dir_}')
+
+        click.echo('Copying files to tmp directory...')
+        shutil.copytree('.', dir_)
+
         with chdir(dir_):
             nbclient.execute(nb)
+
+    return nb
 
 
 @contextlib.contextmanager

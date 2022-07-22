@@ -36,6 +36,10 @@ DEV = [
     'flake8',
     'invoke',
     'twine',
+    # optional dependency for test module
+    'jupytext',
+    'nbclient',
+    'ipykernel',
 ]
 
 # to test markdown files
