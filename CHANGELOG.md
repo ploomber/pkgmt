@@ -1,5 +1,7 @@
 # CHANGELOG
 
+## 0.0.11dev
+
 ## 0.0.10 (2022-07-22)
 * Copying files when running `pkgmt test-md` in a temporary directory
 
