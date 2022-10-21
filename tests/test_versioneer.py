@@ -118,6 +118,20 @@ def test_release_version_non_setup(move_to_another_package):
     assert VersionerNonSetup('app').release_version() == '0.1'
 
 
+@pytest.mark.parametrize('folder_name', [
+    '__pycache__',
+    'something.egg-info',
+])
+def test_ignore_special_folders(folder_name, backup_package_name):
+
+    Path('src', folder_name).mkdir()
+
+    name, package = VersionerSetup().find_package()
+
+    assert name == 'package_name'
+    assert package == Path('src', 'package_name')
+
+
 @pytest.mark.parametrize('version, version_new', [
     ['0.1', '0.1.1dev'],
     ['0.1.1', '0.1.2dev'],

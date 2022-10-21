@@ -10,8 +10,8 @@ class VersionerSetup(AbstractVersioner):
         path_to_src = Path(self.project_root, 'src')
 
         dirs = sorted([
-          f for f in os.listdir(path_to_src)
-          if Path('src', f).is_dir() and not f.endswith('.egg-info')
+            f for f in os.listdir(path_to_src) if Path('src', f).is_dir()
+            and not f.endswith('.egg-info') and Path(f).name != '__pycache__'
         ])
 
         if len(dirs) != 1:
