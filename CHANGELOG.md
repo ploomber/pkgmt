@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 0.0.11dev
+## 0.0.11 (2022-11-24)
 * Ignores `src/__pycache__` when looking for package's `__init__.py`
 
 ## 0.0.10 (2022-07-22)
