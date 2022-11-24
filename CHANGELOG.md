@@ -1,6 +1,7 @@
 # CHANGELOG
 
 ## 0.0.11dev
+* Ignores `src/__pycache__` when looking for package's `__init__.py`
 
 ## 0.0.10 (2022-07-22)
 * Copying files when running `pkgmt test-md` in a temporary directory
