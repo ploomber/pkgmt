@@ -5,10 +5,10 @@ from pkgmt import config
 
 
 def test_load_toml(tmp_empty):
-    cfg_ = {'github': 'edublancas/pkgmt'}
-    cfg = {'tool': {'pkgmt': cfg_}}
+    cfg_ = {"github": "edublancas/pkgmt"}
+    cfg = {"tool": {"pkgmt": cfg_}}
 
-    with open('pyproject.toml', 'w') as f:
+    with open("pyproject.toml", "w") as f:
         toml.dump(cfg, f)
 
     loaded = config.load()
@@ -17,10 +17,10 @@ def test_load_toml(tmp_empty):
 
 
 def test_load_yaml(tmp_empty):
-    cfg_ = {'github': 'edublancas/pkgmt'}
-    cfg = {'pkgmt': cfg_}
+    cfg_ = {"github": "edublancas/pkgmt"}
+    cfg = {"pkgmt": cfg_}
 
-    with open('config.yaml', 'w') as f:
+    with open("config.yaml", "w") as f:
         yaml.dump(cfg, f)
 
     loaded = config.load()

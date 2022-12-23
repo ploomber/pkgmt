@@ -4,8 +4,7 @@ from pkgmt.versioner.abstractversioner import AbstractVersioner
 
 
 class VersionerNonSetup(AbstractVersioner):
-
-    def __init__(self, version_package, project_root='.'):
+    def __init__(self, version_package, project_root="."):
         self.version_package = version_package
         super().__init__(project_root)
 
@@ -19,4 +18,4 @@ class VersionerNonSetup(AbstractVersioner):
         return package_name, PACKAGE
 
     def version_file(self):
-        return '_version.py'
+        return "_version.py"

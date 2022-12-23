@@ -7,10 +7,10 @@ import pytest
 @pytest.fixture
 def uninstall():
     yield
-    subprocess.check_call(['pip', 'uninstall', 'somepkg', '-y'])
+    subprocess.check_call(["pip", "uninstall", "somepkg", "-y"])
 
 
 def test_package(tmp_empty, uninstall):
-    new.package('somepkg')
+    new.package("somepkg")
 
-    subprocess.check_call(['pip', 'install', 'somepkg/'])
+    subprocess.check_call(["pip", "install", "somepkg/"])

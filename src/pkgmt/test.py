@@ -34,16 +34,16 @@ jupyter:
 
     nb = jupytext.reads(content)
 
-    click.echo(f'Running {filename}')
+    click.echo(f"Running {filename}")
 
     if inplace:
         nbclient.execute(nb)
     else:
-        dir_ = Path(tempfile.mkdtemp(), 'files')
-        click.echo(f'Creating tmp directory: {dir_}')
+        dir_ = Path(tempfile.mkdtemp(), "files")
+        click.echo(f"Creating tmp directory: {dir_}")
 
-        click.echo('Copying files to tmp directory...')
-        shutil.copytree('.', dir_)
+        click.echo("Copying files to tmp directory...")
+        shutil.copytree(".", dir_)
 
         with chdir(dir_):
             nbclient.execute(nb)

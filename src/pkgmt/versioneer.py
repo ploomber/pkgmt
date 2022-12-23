@@ -12,9 +12,8 @@ from pkgmt.versioner.versionersetup import VersionerSetup
 
 
 def replace_in_file(path_to_file, original, replacement):
-    """Replace string in file
-    """
-    with open(path_to_file, 'r+') as f:
+    """Replace string in file"""
+    with open(path_to_file, "r+") as f:
         content = f.read()
         updated = content.replace(original, replacement)
         f.seek(0)
@@ -37,8 +36,8 @@ def _input(prompt):
 
 
 def input_str(prompt, default):
-    separator = ' ' if len(prompt.splitlines()) == 1 else '\n'
-    response = _input(prompt + f'{separator}(Default: {default}): ')
+    separator = " " if len(prompt.splitlines()) == 1 else "\n"
+    response = _input(prompt + f"{separator}(Default: {default}): ")
 
     if not response:
         response = default
@@ -47,31 +46,33 @@ def input_str(prompt, default):
 
 
 def input_confirm(prompt, abort):
-    separator = ' ' if len(prompt.splitlines()) == 1 else '\n'
-    response_raw = _input(prompt + f'{separator}Confirm? [y/n]: ')
-    response = response_raw in {'y', 'Y', 'yes'}
+    separator = " " if len(prompt.splitlines()) == 1 else "\n"
+    response_raw = _input(prompt + f"{separator}Confirm? [y/n]: ")
+    response = response_raw in {"y", "Y", "yes"}
 
     if not response and abort:
-        print('Aborted!')
+        print("Aborted!")
         sys.exit(1)
 
     return response
 
 
 def is_pre_release(version):
-    return 'a' in version or 'b' in version or 'rc' in version
+    return "a" in version or "b" in version or "rc" in version
 
 
 def validate_version_string(version):
     if not len(version):
-        raise ValueError(f'Got invalid empty version string: {version!r}')
+        raise ValueError(f"Got invalid empty version string: {version!r}")
 
-    if version[0] not in '0123456789':
-        raise ValueError(f'Got invalid version string: {version!r} '
-                         '(first character must be numeric)')
+    if version[0] not in "0123456789":
+        raise ValueError(
+            f"Got invalid version string: {version!r} "
+            "(first character must be numeric)"
+        )
 
 
-def version(project_root='.', tag=True, version_package=None):
+def version(project_root=".", tag=True, version_package=None):
     """
     Create a new version (projects with setup.py) :
     1. version_package will be None
@@ -95,17 +96,18 @@ def version(project_root='.', tag=True, version_package=None):
     """
 
     if version_package:
-        versioner = VersionerNonSetup(version_package,
-                                      project_root=project_root)
+        versioner = VersionerNonSetup(version_package, project_root=project_root)
     else:
         versioner = VersionerSetup(project_root=project_root)
 
     current = versioner.current_version()
     release = versioner.release_version()
 
-    release = input_str('Current version in setup.py is {current}. Enter'
-                        ' release version'.format(current=current),
-                        default=release)
+    release = input_str(
+        "Current version in setup.py is {current}. Enter"
+        " release version".format(current=current),
+        default=release,
+    )
 
     validate_version_string(release)
 
@@ -115,64 +117,69 @@ def version(project_root='.', tag=True, version_package=None):
         changelog = versioner.path_to_changelog.read_text()
 
         input_confirm(
-            f'\n{versioner.path_to_changelog} content:'
-            f'\n\n{changelog}\n',
-            abort=True)
+            f"\n{versioner.path_to_changelog} content:" f"\n\n{changelog}\n", abort=True
+        )
 
     # Expand github links
-    if (versioner.path_to_changelog
-            and versioner.path_to_changelog.suffix == '.md'):
+    if versioner.path_to_changelog and versioner.path_to_changelog.suffix == ".md":
         expand_github_from_changelog(path=versioner.path_to_changelog)
     else:
-        print('Skipping github expansion (only supported in .md files)')
+        print("Skipping github expansion (only supported in .md files)")
 
     # Replace version number and create tag
-    print('Commiting release version: {}'.format(release))
+    print("Commiting release version: {}".format(release))
     versioner.commit_version(
-        release, msg_template='{package_name} release {new_version}', tag=tag)
+        release, msg_template="{package_name} release {new_version}", tag=tag
+    )
 
     # Create a new dev version and save it
     bumped_version = versioner.bump_up_version()
 
     if not is_pre_release(release):
-        print('Creating new section in CHANGELOG...')
+        print("Creating new section in CHANGELOG...")
         versioner.add_changelog_new_dev_section(bumped_version)
 
-    print('Commiting dev version: {}'.format(bumped_version))
+    print("Commiting dev version: {}".format(bumped_version))
     versioner.commit_version(
         bumped_version,
-        msg_template='Bumps up {package_name} to version {new_version}',
-        tag=False)
+        msg_template="Bumps up {package_name} to version {new_version}",
+        tag=False,
+    )
 
-    call(['git', 'push'])
-    print('Version {} was created, you are now in {}'.format(
-        release, bumped_version))
+    call(["git", "push"])
+    print("Version {} was created, you are now in {}".format(release, bumped_version))
 
 
 def upload(tag, production):
     """
     Check outs a tag, uploads to PyPI
     """
-    print('Checking out tag {}'.format(tag))
-    call(['git', 'checkout', tag])
+    print("Checking out tag {}".format(tag))
+    call(["git", "checkout", tag])
 
     versioner = VersionerSetup()
     current = versioner.current_version()
 
-    input_confirm('Version in {} tag is {}. Do you want to continue?'.format(
-        tag, current),
-                  abort=True)
+    input_confirm(
+        "Version in {} tag is {}. Do you want to continue?".format(tag, current),
+        abort=True,
+    )
 
     # create distribution
-    delete_dirs('dist', 'build', f'{versioner.PACKAGE}.egg-info')
-    call(['python', 'setup.py', 'bdist_wheel', 'sdist'])
+    delete_dirs("dist", "build", f"{versioner.PACKAGE}.egg-info")
+    call(["python", "setup.py", "bdist_wheel", "sdist"])
 
-    print('Publishing to PyPI...')
+    print("Publishing to PyPI...")
 
     if not production:
-        call([
-            'twine', 'upload', '--repository-url',
-            'https://test.pypi.org/legacy/', 'dist/*'
-        ])
+        call(
+            [
+                "twine",
+                "upload",
+                "--repository-url",
+                "https://test.pypi.org/legacy/",
+                "dist/*",
+            ]
+        )
     else:
-        call(['twine', 'upload', 'dist/*'])
+        call(["twine", "upload", "dist/*"])

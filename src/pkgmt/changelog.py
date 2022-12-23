@@ -14,14 +14,13 @@ def _replace_issue_number_with_links(url, text):
 
 
 def _expand_github_from_text(text):
-    """Convert strings with the #{number} format into their
-    """
+    """Convert strings with the #{number} format into their"""
     cfg = config.load()
     url = f'https://github.com/{cfg["github"]}/issues/'
     return _replace_issue_number_with_links(url, text)
 
 
-def expand_github_from_changelog(path='CHANGELOG.md'):
+def expand_github_from_changelog(path="CHANGELOG.md"):
     path = Path(path)
     changelog = path.read_text()
     changelog_ = _expand_github_from_text(changelog)

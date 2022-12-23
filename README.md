@@ -1,5 +1,8 @@
 # pkgmt
 
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+
+
 A toolkit for managing Python packages 📦🐍
 
 `pkgmt` allows you to create new Python packages that follow best practices: README, CHANGELOG, a command to bootstrap the environment, CI with GitHub Actions, and more!
