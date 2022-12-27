@@ -1,7 +1,7 @@
 from invoke import task
 
 
-@task
+@task(aliases=['s'])
 def setup(c, version=None):
     """
     Setup dev environment, requires conda
@@ -20,16 +20,16 @@ def setup(c, version=None):
     print(f"Done! Activate your environment with:\nconda activate {env_name}")
 
 
-@task
-def new(c):
+@task(aliases=['v'])
+def version(c):
     """Release a new version"""
     from pkgmt import versioneer
 
     versioneer.version(project_root=".", tag=True)
 
 
-@task
-def upload(c, tag, production=True):
+@task(aliases=['r'])
+def release(c, tag, production=True):
     """Upload to PyPI"""
     from pkgmt import versioneer
 
