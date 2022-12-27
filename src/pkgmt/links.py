@@ -36,6 +36,7 @@ def _find_match(links, broken):
 
     return result
 
+
 def find_broken_in_files(extensions, ignore_substrings=None, verbose=False):
     """
     Parameters
