@@ -40,8 +40,12 @@ expected = [
     "https://docs.ploomber.io",
     "http://docs.ploomber.io",
     "https://github.com/ploomber/ploomber",
-    "gcr.io/PROJECT-ID/my-ploomber-pipeline",
 ]
+
+py = """
+connect = 'postgresql://user:password@ploomber.io/db',
+missing_https = 'ploomber.io/db',
+"""
 
 
 @pytest.mark.parametrize(
@@ -49,10 +53,12 @@ expected = [
     [
         (md, expected),
         (rst, expected),
+        (py, []),
     ],
     ids=[
         "md",
         "rst",
+        "py",
     ],
 )
 def test_find(text, expected):

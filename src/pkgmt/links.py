@@ -121,7 +121,11 @@ def _find(text, ignore_substrings=None):
     url = re.findall(regex, text)
 
     return [
-        x[0] for x in url if not any(substr in x[0] for substr in ignore_substrings)
+        x[0]
+        for x in url
+        if not any(substr in x[0] for substr in ignore_substrings)
+        # TODO: we should add this to the regex, and remove it from here
+        and x[0].startswith("http")
     ]
 
 
