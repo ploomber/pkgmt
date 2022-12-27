@@ -93,7 +93,7 @@ def test_find_broken_in_files(tmp_empty, extensions, expected):
         "https://ploomber.io/broken-another"
     )
 
-    assert links.find_broken_in_files(extensions) == expected
+    assert set(links.find_broken_in_files(extensions)) == expected
 
 
 @pytest.fixture

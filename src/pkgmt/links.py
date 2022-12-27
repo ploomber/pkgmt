@@ -3,16 +3,38 @@ import concurrent.futures
 from pathlib import Path
 from glob import iglob
 import re
-from collections import namedtuple
 from itertools import chain
 import requests
 
-Response = namedtuple("Response", ["url", "code", "broken"])
+
+class Response:
+    def __init__(self, url, code, broken) -> None:
+        self.url = url
+        self.code = code
+        self.broken = broken
+
+    def __hash__(self) -> int:
+        return hash(self.url)
+
+    def __eq__(self, another) -> bool:
+        return self.url == another
+
+    def __repr__(self) -> str:
+        return f"({self.code}) {self.url}"
 
 
 def _make_glob_exp(extension):
     return f"**/*.{extension}"
 
+
+def _find_match(links, broken):
+    result = []
+
+    for link in links:
+        if link in broken:
+            result.append(broken[link])
+
+    return result
 
 def find_broken_in_files(extensions, ignore_substrings=None, verbose=False):
     """
@@ -27,17 +49,17 @@ def find_broken_in_files(extensions, ignore_substrings=None, verbose=False):
 
     mapping = _find_links_in_files(extensions, ignore_substrings=ignore_substrings)
 
-    broken = _find_broken_links(mapping)
+    broken = {response.url: response for response in _find_broken_links(mapping)}
 
     if verbose:
         for file, links in mapping.items():
-            match = set(broken) & set(links)
+            match = _find_match(links, broken)
 
             if match:
                 print(f"*** {file} ***")
-                print("\n".join(match))
+                print("\n".join([repr(m) for m in match]))
 
-    return set(broken)
+    return broken
 
 
 def _find_links_in_files(extensions, ignore_substrings=None):
@@ -71,7 +93,7 @@ def _find_broken_links(mapping):
             else:
 
                 if response.broken:
-                    broken.append(url)
+                    broken.append(response)
 
     return broken
 
