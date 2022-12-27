@@ -1,6 +1,8 @@
 import subprocess
 from pathlib import Path
+from unittest.mock import Mock
 
+import requests
 import pytest
 
 from pkgmt import links
@@ -183,3 +185,32 @@ def test_find_links_in_files_on_ipynb(tmp_empty, root):
     assert links._find_links_in_files(["ipynb"]) == {
         "notebook.ipynb": ["https://ploomber.io"]
     }
+
+
+def test_find_broken_in_files_only_hits_urls_once(monkeypatch, tmp_empty):
+    mock = Mock(wraps=requests.head)
+    monkeypatch.setattr(requests, "head", mock)
+
+    Path("doc.md").write_text(
+        """
+https://ploomber.io
+
+https://ploomber.io
+
+https://ploomber.io
+"""
+    )
+
+    Path("another.md").write_text(
+        """
+https://ploomber.io
+
+https://ploomber.io
+
+https://ploomber.io
+"""
+    )
+
+    links.find_broken_in_files(extensions=["md"])
+
+    mock.assert_called_once_with("https://ploomber.io")

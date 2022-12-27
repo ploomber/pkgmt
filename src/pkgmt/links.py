@@ -92,7 +92,7 @@ def _find_links_in_files(extensions, ignore_substrings=None):
 
 
 def _find_broken_links(mapping):
-    urls = [item for sublist in mapping.values() for item in sublist]
+    urls = {item for sublist in mapping.values() for item in sublist}
 
     broken = []
 
