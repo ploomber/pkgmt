@@ -1,6 +1,8 @@
 # CHANGELOG
 
 ## 0.0.12dev
+* Faster `pkgmt check-links`
+* `pkgmt check-links` ignores files not tracked by `git`
 
 ## 0.0.11 (2022-11-24)
 * Ignores `src/__pycache__` when looking for package's `__init__.py`

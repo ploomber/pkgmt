@@ -59,7 +59,7 @@ def _find_broken_links(mapping):
 
     broken = []
 
-    with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=20) as executor:
         future_to_url = {executor.submit(_check_if_broken, url): url for url in urls}
 
         for future in concurrent.futures.as_completed(future_to_url):
@@ -69,6 +69,7 @@ def _find_broken_links(mapping):
             except Exception as exc:
                 print("%r generated an exception: %s" % (url, exc))
             else:
+
                 if response.broken:
                     broken.append(url)
 
