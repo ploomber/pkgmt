@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 0.0.15dev
+## 0.0.15 (2022-12-27)
 * Faster `pkgmt check-links` (making a HEAD request instead of GET)
 
 ## 0.0.14 (2022-12-27)
