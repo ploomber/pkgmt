@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 0.0.12dev
+## 0.0.12 (2022-12-26)
 * Faster `pkgmt check-links`
 * `pkgmt check-links` ignores files not tracked by `git`
 
