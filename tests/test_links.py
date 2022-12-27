@@ -36,15 +36,27 @@ rst = """
     repository: gcr.io/PROJECT-ID/my-ploomber-pipeline
 """
 
+expected = [
+    "https://docs.ploomber.io",
+    "http://docs.ploomber.io",
+    "https://github.com/ploomber/ploomber",
+    "gcr.io/PROJECT-ID/my-ploomber-pipeline",
+]
 
-@pytest.mark.parametrize("text", [md, rst])
-def test_find(text):
-    assert links._find(text) == [
-        "https://docs.ploomber.io",
-        "http://docs.ploomber.io",
-        "https://github.com/ploomber/ploomber",
-        "gcr.io/PROJECT-ID/my-ploomber-pipeline",
-    ]
+
+@pytest.mark.parametrize(
+    "text, expected",
+    [
+        (md, expected),
+        (rst, expected),
+    ],
+    ids=[
+        "md",
+        "rst",
+    ],
+)
+def test_find(text, expected):
+    assert links._find(text) == expected
 
 
 @pytest.mark.parametrize("text", [md, rst])
@@ -150,4 +162,12 @@ def test_find_links_in_files_ignores_nontracked_files(sample_files):
 
     assert links._find_links_in_files(["py"]) == {
         "script.py": ["https://ploomber.io/first"],
+    }
+
+
+def test_find_links_in_files_on_ipynb(tmp_empty, root):
+    text = Path(root / "tests" / "assets" / "notebook.ipynb").read_text()
+    Path("notebook.ipynb").write_text(text)
+    assert links._find_links_in_files(["ipynb"]) == {
+        "notebook.ipynb": ["https://ploomber.io"]
     }

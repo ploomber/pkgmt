@@ -1,3 +1,4 @@
+import json
 import subprocess
 import concurrent.futures
 from pathlib import Path
@@ -37,6 +38,19 @@ def _find_match(links, broken):
     return result
 
 
+def _read_file(file):
+    file = Path(file)
+
+    if file.suffix == ".ipynb":
+        # we need to load the notebook's content; otherwise special characters
+        # are not resolved correctly since they're double escaped in the
+        # JSON file. Also, notebooks are always encoded as UTF-8
+        nb = json.loads(file.read_text(encoding="utf-8"))
+        return "\n".join(["\n".join(cell["source"]) for cell in nb["cells"]])
+    else:
+        return file.read_text()
+
+
 def find_broken_in_files(extensions, ignore_substrings=None, verbose=False):
     """
     Parameters
@@ -71,7 +85,7 @@ def _find_links_in_files(extensions, ignore_substrings=None):
 
     for file in chain(*globs):
         if error or file in tracked_by_git:
-            text = Path(file).read_text()
+            text = _read_file(file)
             content[file] = _find(text, ignore_substrings=ignore_substrings)
 
     return content
