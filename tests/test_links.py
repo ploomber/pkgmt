@@ -81,6 +81,12 @@ def test_check_if_broken(url, code, broken):
     assert response.broken == broken
 
 
+def test_check_if_broken_doesnt_accept_head_request():
+    response = links._check_if_broken("https://binder.ploomber.io")
+    assert response.code == 405
+    assert not response.broken
+
+
 @pytest.mark.parametrize(
     "extensions, expected",
     [

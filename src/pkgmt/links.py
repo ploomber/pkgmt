@@ -128,7 +128,7 @@ def _find(text, ignore_substrings=None):
 def _check_if_broken(url):
     """Check if a link is broken"""
     try:
-        res = requests.get(url)
+        res = requests.head(url)
         code = res.status_code
         broken = not res.ok
     except requests.exceptions.ConnectionError:
@@ -137,6 +137,10 @@ def _check_if_broken(url):
     except requests.exceptions.MissingSchema:
         code = None
         broken = True
+
+    # https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/405
+    if code == 405:
+        broken = False
 
     response = Response(url, code, broken)
 
