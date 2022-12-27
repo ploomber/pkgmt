@@ -1,6 +1,7 @@
 # CHANGELOG
 
 ## 0.0.13dev
+* `pkgmt check-links` reports HTTP response code
 
 ## 0.0.12 (2022-12-26)
 * Faster `pkgmt check-links`
