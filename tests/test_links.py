@@ -1,3 +1,4 @@
+import subprocess
 from pathlib import Path
 
 import pytest
@@ -68,42 +69,20 @@ def test_check_if_broken(url, code, broken):
     assert response.broken == broken
 
 
-def test_find_broken_in_text():
-    text = """
-https://ploomber.io
-
-https://ploomber.io/broken
-
-https://github.com/ploomber/ploomber
-
-https://github.com/ploomber/unknown-repo
-
-https://127.0.0.1:2746
-"""
-    assert links.find_broken_in_text(text) == [
-        "https://ploomber.io/broken",
-        "https://github.com/ploomber/unknown-repo",
-        "https://127.0.0.1:2746",
-    ]
-
-
 @pytest.mark.parametrize(
     "extensions, expected",
     [
         [
             ("md", "rst"),
-            {
-                "file.md": ["https://ploomber.io/broken"],
-                "nested/dir/another.rst": ["https://ploomber.io/broken-another"],
-            },
+            {"https://ploomber.io/broken-another", "https://ploomber.io/broken"},
         ],
         [
             "md",
-            {"file.md": ["https://ploomber.io/broken"]},
+            {"https://ploomber.io/broken"},
         ],
         [
             "rst",
-            {"nested/dir/another.rst": ["https://ploomber.io/broken-another"]},
+            {"https://ploomber.io/broken-another"},
         ],
     ],
 )
@@ -115,3 +94,60 @@ def test_find_broken_in_files(tmp_empty, extensions, expected):
     )
 
     assert links.find_broken_in_files(extensions) == expected
+
+
+@pytest.fixture
+def sample_files(tmp_empty):
+    Path("script.py").write_text(
+        """
+
+def function():
+    '''
+    Notes
+    -----
+    https://ploomber.io/first
+    '''
+"""
+    )
+
+    dir = Path("some/nested/dir")
+    dir.mkdir(parents=True)
+
+    (dir / "another.py").write_text(
+        """
+def another_function():
+    '''
+    Notes
+    -----
+    https://ploomber.io/second
+    '''
+"""
+    )
+
+    Path("doc.md").write_text(
+        """
+# heading
+
+![img](https://ploomber.io/should-not-appear)
+"""
+    )
+
+
+def test_find_links_in_files(sample_files):
+    assert links._find_links_in_files(["py"]) == {
+        "script.py": ["https://ploomber.io/first"],
+        "some/nested/dir/another.py": ["https://ploomber.io/second"],
+    }
+
+
+def test_find_links_in_files_ignores_nontracked_files(sample_files):
+    subprocess.check_call(["git", "init"])
+    subprocess.check_call(["git", "config", "commit.gpgsign", "false"])
+    subprocess.check_call(["git", "config", "user.email", "ci@ploomberio"])
+    subprocess.check_call(["git", "config", "user.name", "Ploomber"])
+    subprocess.check_call(["git", "add", "script.py"])
+    subprocess.check_call(["git", "commit", "-m", "first-commit"])
+
+    assert links._find_links_in_files(["py"]) == {
+        "script.py": ["https://ploomber.io/first"],
+    }

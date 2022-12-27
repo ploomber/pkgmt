@@ -1,7 +1,9 @@
+import subprocess
+import concurrent.futures
 from pathlib import Path
 from glob import iglob
 import re
-from collections import namedtuple, defaultdict
+from collections import namedtuple
 from itertools import chain
 import requests
 
@@ -23,31 +25,54 @@ def find_broken_in_files(extensions, ignore_substrings=None, verbose=False):
     if isinstance(extensions, str):
         extensions = [extensions]
 
-    broken = defaultdict(lambda: [])
-    globs = (iglob(_make_glob_exp(ext), recursive=True) for ext in extensions)
+    mapping = _find_links_in_files(extensions, ignore_substrings=ignore_substrings)
 
-    for file in chain(*globs):
-        text = Path(file).read_text()
-        broken[file].extend(
-            find_broken_in_text(text, ignore_substrings=ignore_substrings)
-        )
-
-    out = {file: urls for file, urls in broken.items() if urls}
+    broken = _find_broken_links(mapping)
 
     if verbose:
-        for file, broken in out.items():
-            if broken:
+        for file, links in mapping.items():
+            match = set(broken) & set(links)
+
+            if match:
                 print(f"*** {file} ***")
-                print("\n".join(broken))
+                print("\n".join(match))
 
-    return out
+    return set(broken)
 
 
-def find_broken_in_text(text, ignore_substrings=None):
-    """Find broken links"""
-    links = _find(text, ignore_substrings=ignore_substrings)
-    responses = [_check_if_broken(link) for link in links]
-    return [res.url for res in responses if res.broken]
+def _find_links_in_files(extensions, ignore_substrings=None):
+    globs = (iglob(_make_glob_exp(ext), recursive=True) for ext in extensions)
+    content = dict()
+
+    tracked_by_git, error = _git_tracked_files()
+
+    for file in chain(*globs):
+        if error or file in tracked_by_git:
+            text = Path(file).read_text()
+            content[file] = _find(text, ignore_substrings=ignore_substrings)
+
+    return content
+
+
+def _find_broken_links(mapping):
+    urls = [item for sublist in mapping.values() for item in sublist]
+
+    broken = []
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+        future_to_url = {executor.submit(_check_if_broken, url): url for url in urls}
+
+        for future in concurrent.futures.as_completed(future_to_url):
+            url = future_to_url[future]
+            try:
+                response = future.result()
+            except Exception as exc:
+                print("%r generated an exception: %s" % (url, exc))
+            else:
+                if response.broken:
+                    broken.append(url)
+
+    return broken
 
 
 def _find(text, ignore_substrings=None):
@@ -78,3 +103,25 @@ def _check_if_broken(url):
     response = Response(url, code, broken)
 
     return response
+
+
+# copied from soopervisor
+def _git_tracked_files():
+    """
+    Returns
+    -------
+    list or None
+        List of tracked files or None if an error happened
+    None of str
+        None if successfully retrieved tracked files, str if an error happened
+    """
+    res = subprocess.run(
+        ["git", "ls-tree", "-r", "HEAD", "--name-only"],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+
+    if not res.returncode:
+        return set(res.stdout.decode().splitlines()), None
+    else:
+        return None, res.stderr.decode().strip()
