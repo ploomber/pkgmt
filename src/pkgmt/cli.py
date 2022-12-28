@@ -12,11 +12,22 @@ def cli():
 
 
 @cli.command()
-def check_links():
+@click.option(
+    "--only-404",
+    is_flag=True,
+    default=False,
+    help="Only consider 404 code as broken",
+)
+def check_links(only_404):
     """Check for broken links"""
+    broken_http_codes = None if not only_404 else [404]
+
     cfg = config.load()["check_links"]
     out = links.find_broken_in_files(
-        cfg["extensions"], cfg.get("ignore_substrings"), verbose=True
+        cfg["extensions"],
+        cfg.get("ignore_substrings"),
+        verbose=True,
+        broken_http_codes=broken_http_codes,
     )
 
     if out:

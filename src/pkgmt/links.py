@@ -51,20 +51,36 @@ def _read_file(file):
         return file.read_text()
 
 
-def find_broken_in_files(extensions, ignore_substrings=None, verbose=False):
+def find_broken_in_files(
+    extensions, ignore_substrings=None, verbose=False, broken_http_codes=None
+):
     """
     Parameters
     ----------
+    extensions : list
+        A list of extensions to consider when looking for files. Example:
+        `["py", "rst", "md", "ipynb"]`
+
     find_broken_in_files : str or list
         File extensions to check. Can be a str ("md") or a list such as
-        ["md", "rst"]
+        `["md", "rst"]`
+
+    verbose : bool, deefault=False
+        Prints broken links
+
+    broken_http_codes : list, default=None
+        Only consider these HTTP codes as broken links, example: `[404]`.
+        By default, it considers all non-200 HTTP codes as broken.
     """
     if isinstance(extensions, str):
         extensions = [extensions]
 
     mapping = _find_links_in_files(extensions, ignore_substrings=ignore_substrings)
 
-    broken = {response.url: response for response in _find_broken_links(mapping)}
+    broken = {
+        response.url: response
+        for response in _find_broken_links(mapping, broken_http_codes=broken_http_codes)
+    }
 
     if verbose:
         for file, links in mapping.items():
@@ -91,13 +107,18 @@ def _find_links_in_files(extensions, ignore_substrings=None):
     return content
 
 
-def _find_broken_links(mapping):
+def _find_broken_links(mapping, broken_http_codes):
     urls = {item for sublist in mapping.values() for item in sublist}
 
     broken = []
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=20) as executor:
-        future_to_url = {executor.submit(_check_if_broken, url): url for url in urls}
+        future_to_url = {
+            executor.submit(
+                _check_if_broken, url, broken_http_codes=broken_http_codes
+            ): url
+            for url in urls
+        }
 
         for future in concurrent.futures.as_completed(future_to_url):
             url = future_to_url[future]
@@ -129,7 +150,7 @@ def _find(text, ignore_substrings=None):
     ]
 
 
-def _check_if_broken(url):
+def _check_if_broken(url, broken_http_codes=None):
     """Check if a link is broken"""
     try:
         res = requests.head(url)
@@ -142,9 +163,12 @@ def _check_if_broken(url):
         code = None
         broken = True
 
-    # https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/405
-    if code == 405:
-        broken = False
+    if broken_http_codes:
+        broken = code in broken_http_codes
+    else:
+        # https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/405
+        if code == 405:
+            broken = False
 
     response = Response(url, code, broken)
 

@@ -214,3 +214,19 @@ https://ploomber.io
     links.find_broken_in_files(extensions=["md"])
 
     mock.assert_called_once_with("https://ploomber.io")
+
+
+def test_only_consider_404_as_broken(tmp_empty):
+    # mock = Mock(wraps=requests.head)
+    # monkeypatch.setattr(requests, "head", mock)
+
+    Path("doc.md").write_text(
+        """
+https://api.ploomber.io
+
+"""
+    )
+
+    broken = links.find_broken_in_files(extensions=["md"], broken_http_codes=[404])
+
+    assert not broken
