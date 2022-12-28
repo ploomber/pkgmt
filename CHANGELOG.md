@@ -1,6 +1,7 @@
 # CHANGELOG
 
-## 0.0.17dev
+## 0.0.17 (2022-12-27)
+* Adds `--only-404` option to `check-links` to only consider `404` HTTP codes as broken links
 
 ## 0.0.16 (2022-12-27)
 * `pkgmt check-links` only hits URLs once
