@@ -1,7 +1,7 @@
 from invoke import task
 
 
-@task(aliases=['s'])
+@task(aliases=["s"])
 def setup(c, version=None):
     """
     Setup dev environment, requires conda
@@ -20,7 +20,7 @@ def setup(c, version=None):
     print(f"Done! Activate your environment with:\nconda activate {env_name}")
 
 
-@task(aliases=['v'])
+@task(aliases=["v"])
 def version(c):
     """Release a new version"""
     from pkgmt import versioneer
@@ -28,9 +28,15 @@ def version(c):
     versioneer.version(project_root=".", tag=True)
 
 
-@task(aliases=['r'])
+@task(aliases=["r"])
 def release(c, tag, production=True):
     """Upload to PyPI"""
     from pkgmt import versioneer
 
     versioneer.upload(tag, production=production)
+
+
+@task(aliases=["d"])
+def doc(c):
+    """Build documentation"""
+    c.run("jupyter-book build doc/")
