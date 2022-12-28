@@ -1,5 +1,7 @@
 # CHANGELOG
 
+## 0.0.18dev
+
 ## 0.0.17 (2022-12-27)
 * Adds `--only-404` option to `check-links` to only consider `404` HTTP codes as broken links
 
