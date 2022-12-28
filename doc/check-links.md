@@ -22,3 +22,14 @@ an [issue.](https://github.com/ploomber/pkgmt/issues/new)
 ```sh
 pkgmt check-links
 ```
+
+To only consider 404 as broken:
+
+```sh
+pkgmt check-links --only-404
+```
+
+```{tip}
+Run `pkgmt check-links` without the `--only-404` to ensure
+you are not dismissing any broken link
+```
