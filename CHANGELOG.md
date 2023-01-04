@@ -1,5 +1,7 @@
 # CHANGELOG
 
+## 0.0.19dev
+
 ## 0.0.18 (2023-01-03)
 * `pkgmt check-links` prints invalid urls
 * `pkgmt check-links` throttles requests to the same domain ([#19](https://github.com/ploomber/pkgmt/issues/19))
