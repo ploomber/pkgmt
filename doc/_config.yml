@@ -3,6 +3,7 @@
 
 title: pkgmt
 author: Ploomber
+copyright: 2022
 # logo: logo.png
 
 # Force re-execution of notebooks on each build.
