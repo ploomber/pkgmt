@@ -49,18 +49,19 @@ connect = 'postgresql://user:password@ploomber.io/db',
 missing_https = 'ploomber.io/db',
 """
 
+template = """
+https://ploomber.io/{something}
+"""
+
 
 @pytest.mark.parametrize(
     "text, expected",
-    [
-        (md, expected),
-        (rst, expected),
-        (py, []),
-    ],
+    [(md, expected), (rst, expected), (py, []), (template, [])],
     ids=[
         "md",
         "rst",
         "py",
+        "template",
     ],
 )
 def test_find(text, expected):
@@ -83,14 +84,14 @@ def test_find_ignore(text):
     ],
 )
 def test_check_if_broken(url, code, broken):
-    response = links._check_if_broken(url)
+    response = links.LinkChecker().check_if_broken(url)
     assert response.url == url
     assert response.code == code
     assert response.broken == broken
 
 
 def test_check_if_broken_doesnt_accept_head_request():
-    response = links._check_if_broken("https://binder.ploomber.io")
+    response = links.LinkChecker().check_if_broken("https://binder.ploomber.io")
     assert response.code == 405
     assert not response.broken
 
@@ -217,9 +218,6 @@ https://ploomber.io
 
 
 def test_only_consider_404_as_broken(tmp_empty):
-    # mock = Mock(wraps=requests.head)
-    # monkeypatch.setattr(requests, "head", mock)
-
     Path("doc.md").write_text(
         """
 https://api.ploomber.io
@@ -230,3 +228,25 @@ https://api.ploomber.io
     broken = links.find_broken_in_files(extensions=["md"], broken_http_codes=[404])
 
     assert not broken
+
+
+def test_throttles_requests_to_the_same_domain():
+    checker = links.LinkChecker()
+
+    checker.check_if_broken("https://ploomber.io/something")
+    checker.check_if_broken("https://ploomber.io/another")
+
+
+def test_verbose_shows_invalid_links(tmp_empty, capsys):
+    Path("doc.md").write_text(
+        """
+https://api.ploomber.io/{something}
+
+https://ploomber.io/something
+"""
+    )
+
+    links.find_broken_in_files(extensions=["md"], verbose=True)
+
+    captured = capsys.readouterr()
+    assert "*** Found invalid links in doc.md ***" in captured.out

@@ -1,3 +1,5 @@
+import time
+from datetime import datetime
 import json
 import subprocess
 import concurrent.futures
@@ -5,6 +7,9 @@ from pathlib import Path
 from glob import iglob
 import re
 from itertools import chain
+from collections import defaultdict
+from urllib.parse import urlparse
+
 import requests
 
 
@@ -22,6 +27,22 @@ class Response:
 
     def __repr__(self) -> str:
         return f"({self.code}) {self.url}"
+
+
+class LinksInFile:
+    def __init__(self, *, valid, invalid) -> None:
+        self.valid = valid
+        self.invalid = invalid
+
+    def __iter__(self):
+        for link in self.valid:
+            yield link
+
+    def __repr__(self) -> str:
+        return f"{type(self).__name__}({self.valid!r})"
+
+    def __eq__(self, other: object) -> bool:
+        return self.valid == other
 
 
 def _make_glob_exp(extension):
@@ -84,11 +105,20 @@ def find_broken_in_files(
 
     if verbose:
         for file, links in mapping.items():
+            if links.invalid:
+                print(f"*** Found invalid links in {file} ***")
+                print("\n".join(links.invalid))
+
+        print("=" * 80)
+
+        for file, links in mapping.items():
             match = _find_match(links, broken)
 
             if match:
                 print(f"*** {file} ***")
                 print("\n".join([repr(m) for m in match]))
+
+        print("=" * 80)
 
     return broken
 
@@ -112,10 +142,12 @@ def _find_broken_links(mapping, broken_http_codes):
 
     broken = []
 
+    checker = LinkChecker()
+
     with concurrent.futures.ThreadPoolExecutor(max_workers=20) as executor:
         future_to_url = {
             executor.submit(
-                _check_if_broken, url, broken_http_codes=broken_http_codes
+                checker.check_if_broken, url, broken_http_codes=broken_http_codes
             ): url
             for url in urls
         }
@@ -141,7 +173,7 @@ def _find(text, ignore_substrings=None):
     regex = r"(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'\".,<>?«»“”‘’]))"  # noqa
     url = re.findall(regex, text)
 
-    return [
+    candidates = [
         x[0]
         for x in url
         if not any(substr in x[0] for substr in ignore_substrings)
@@ -149,30 +181,67 @@ def _find(text, ignore_substrings=None):
         and x[0].startswith("http")
     ]
 
+    valid, invalid = _split_valid_invalid(candidates)
 
-def _check_if_broken(url, broken_http_codes=None):
-    """Check if a link is broken"""
-    try:
-        res = requests.head(url)
-        code = res.status_code
-        broken = not res.ok
-    except requests.exceptions.ConnectionError:
-        code = None
-        broken = True
-    except requests.exceptions.MissingSchema:
-        code = None
-        broken = True
+    return LinksInFile(valid=valid, invalid=invalid)
 
-    if broken_http_codes:
-        broken = code in broken_http_codes
-    else:
-        # https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/405
-        if code == 405:
-            broken = False
 
-    response = Response(url, code, broken)
+def _is_invalid(link):
+    # these are most likely templates or examples
+    if any(char in link for char in {"{", "}", "{{", "}}"}):
+        return True
 
-    return response
+    return False
+
+
+def _split_valid_invalid(candidates):
+    valid, invalid = [], []
+
+    for candidate in candidates:
+        if _is_invalid(candidate):
+            invalid.append(candidate)
+        else:
+            valid.append(candidate)
+
+    return valid, invalid
+
+
+class LinkChecker:
+    def __init__(self) -> None:
+        self.last_timestamp = defaultdict(lambda: datetime.min)
+
+    def check_if_broken(self, url, broken_http_codes=None):
+        """Check if a link is broken"""
+        netloc = urlparse(url).netloc
+        then = self.last_timestamp[netloc]
+        now = datetime.now()
+        seconds = (now - then).seconds
+        self.last_timestamp[netloc] = now
+
+        if seconds < 1:
+            time.sleep(1 - seconds)
+
+        try:
+            res = requests.head(url)
+            code = res.status_code
+            broken = not res.ok
+        except requests.exceptions.ConnectionError:
+            code = None
+            broken = True
+        except requests.exceptions.MissingSchema:
+            code = None
+            broken = True
+
+        if broken_http_codes:
+            broken = code in broken_http_codes
+        else:
+            # https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/405
+            if code == 405:
+                broken = False
+
+        response = Response(url, code, broken)
+
+        return response
 
 
 # copied from soopervisor

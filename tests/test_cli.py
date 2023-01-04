@@ -18,4 +18,4 @@ extensions = ["md"]
     runner = CliRunner()
     result = runner.invoke(cli, ["check-links"])
     assert result.exit_code == 1
-    assert result.output == "*** file.md ***\n(404) https://ploomber.io/broken\n"
+    assert "*** file.md ***\n(404) https://ploomber.io/broken\n" in result.output
