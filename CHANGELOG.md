@@ -1,8 +1,8 @@
 # CHANGELOG
 
-## 0.0.18dev
+## 0.0.18 (2023-01-03)
 * `pkgmt check-links` prints invalid urls
-* `pkgmt check-links` throttles requests to the same domain (#19)
+* `pkgmt check-links` throttles requests to the same domain ([#19](https://github.com/ploomber/pkgmt/issues/19))
 
 ## 0.0.17 (2022-12-27)
 * Adds `--only-404` option to `check-links` to only consider `404` HTTP codes as broken links
