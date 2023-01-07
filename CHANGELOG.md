@@ -1,6 +1,7 @@
 # CHANGELOG
 
-## 0.0.19dev
+## 0.1.0 (2023-01-06)
+* Completing version string when missing components. (e.g., `1.0` -> `1.0.0`) ([#18](https://github.com/ploomber/pkgmt/issues/18))
 
 ## 0.0.18 (2023-01-03)
 * `pkgmt check-links` prints invalid urls
