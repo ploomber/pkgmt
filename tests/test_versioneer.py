@@ -109,12 +109,25 @@ def test_current_version_non_setup(move_to_another_package):
     assert VersionerNonSetup("app").current_version() == "0.1dev"
 
 
-def test_release_version(move_to_package_name):
-    assert VersionerSetup().release_version() == "0.1"
+@pytest.mark.parametrize(
+    "version_current, version_release",
+    [
+        ["0.1dev", "0.1.0"],
+        ["0.1.0dev", "0.1.0"],
+        ["0.2.1dev", "0.2.1"],
+        ["1.2.6dev", "1.2.6"],
+        ["1.2dev", "1.2.0"],
+    ],
+)
+def test_release_version(
+    monkeypatch, move_to_package_name, version_current, version_release
+):
+    monkeypatch.setattr(VersionerSetup, "current_version", lambda self: version_current)
+    assert VersionerSetup().release_version() == version_release
 
 
 def test_release_version_non_setup(move_to_another_package):
-    assert VersionerNonSetup("app").release_version() == "0.1"
+    assert VersionerNonSetup("app").release_version() == "0.1.0"
 
 
 @pytest.mark.parametrize(
@@ -138,8 +151,10 @@ def test_ignore_special_folders(folder_name, backup_package_name):
     "version, version_new",
     [
         ["0.1", "0.1.1dev"],
+        ["0.1.0", "0.1.1dev"],
         ["0.1.1", "0.1.2dev"],
         ["0.9", "0.9.1dev"],
+        ["0.9.0", "0.9.1dev"],
         ["0.10a1", "0.10dev"],
         ["0.10b1", "0.10dev"],
         ["0.10rc1", "0.10dev"],
@@ -330,16 +345,16 @@ def test_add_changelog_new_dev_section_rst_non_setup(backup_another_package):
 
 
 @pytest.mark.parametrize(
-    "selected, stored, dev",
+    "submitted, stored, dev",
     [
-        ["", "0.1", "0.1.1dev"],
-        ["0.1", "0.1", "0.1.1dev"],
+        ["", "0.1.0", "0.1.1dev"],
+        ["0.1", "0.1.0", "0.1.1dev"],
     ],
 )
-def test_release(backup_package_name, monkeypatch, selected, stored, dev):
+def test_release(backup_package_name, monkeypatch, submitted, stored, dev):
     mock = Mock()
     mock_input = Mock()
-    mock_input.side_effect = [selected, "y"]
+    mock_input.side_effect = [submitted, "y"]
 
     monkeypatch.setattr(versioneer, "call", mock)
     monkeypatch.setattr(abstractversioner, "call", mock)
@@ -367,16 +382,16 @@ def test_release(backup_package_name, monkeypatch, selected, stored, dev):
 
 
 @pytest.mark.parametrize(
-    "selected, stored, dev",
+    "submitted, stored, dev",
     [
-        ["", "0.1", "0.1.1dev"],
-        ["0.1", "0.1", "0.1.1dev"],
+        ["", "0.1.0", "0.1.1dev"],
+        ["0.1", "0.1.0", "0.1.1dev"],
     ],
 )
-def test_release_non_setup(backup_another_package, monkeypatch, selected, stored, dev):
+def test_release_non_setup(backup_another_package, monkeypatch, submitted, stored, dev):
     mock = Mock()
     mock_input = Mock()
-    mock_input.side_effect = [selected, "y"]
+    mock_input.side_effect = [submitted, "y"]
 
     monkeypatch.setattr(versioneer, "call", mock)
     monkeypatch.setattr(abstractversioner, "call", mock)
@@ -404,15 +419,17 @@ def test_release_non_setup(backup_another_package, monkeypatch, selected, stored
 
 
 @pytest.mark.parametrize(
-    "selected, stored, dev",
+    "submitted, stored, dev",
     [
-        ["1.2b1", "1.2b1", "1.2dev"],
+        ["1a10", "1.0.0a10", "1.0.0dev"],
+        ["1.2b1", "1.2.0b1", "1.2.0dev"],
+        ["1.2.5rc1", "1.2.5rc1", "1.2.5dev"],
     ],
 )
-def test_pre_release(backup_package_name, monkeypatch, selected, stored, dev):
+def test_pre_release(backup_package_name, monkeypatch, submitted, stored, dev):
     mock = Mock()
     mock_input = Mock()
-    mock_input.side_effect = [selected, "y"]
+    mock_input.side_effect = [submitted, "y"]
 
     monkeypatch.setattr(versioneer, "call", mock)
     monkeypatch.setattr(versioneer, "_input", mock_input)
@@ -443,7 +460,9 @@ def test_pre_release(backup_package_name, monkeypatch, selected, stored, dev):
 @pytest.mark.parametrize(
     "selected, stored, dev",
     [
-        ["1.2b1", "1.2b1", "1.2dev"],
+        ["1a10", "1.0.0a10", "1.0.0dev"],
+        ["1.2b1", "1.2.0b1", "1.2.0dev"],
+        ["1.2.5rc1", "1.2.5rc1", "1.2.5dev"],
     ],
 )
 def test_pre_release_non_setup(
@@ -497,9 +516,9 @@ def test_release_with_no_changelog(backup_package_name, monkeypatch, capsys):
     assert mock.call_args_list == [
         _call(["git", "add", "--all"]),
         _call(["git", "status"]),
-        _call(["git", "commit", "-m", "package_name release 0.1"]),
-        _call(["git", "tag", "-a", "0.1", "-m", "package_name release 0.1"]),
-        _call(["git", "push", "origin", "0.1"]),
+        _call(["git", "commit", "-m", "package_name release 0.1.0"]),
+        _call(["git", "tag", "-a", "0.1.0", "-m", "package_name release 0.1.0"]),
+        _call(["git", "push", "origin", "0.1.0"]),
         _call(["git", "add", "--all"]),
         _call(["git", "status"]),
         _call(["git", "commit", "-m", "Bumps up package_name to version 0.1.1dev"]),
@@ -528,9 +547,9 @@ def test_release_with_no_changelog_non_setup(
     assert mock.call_args_list == [
         _call(["git", "add", "--all"]),
         _call(["git", "status"]),
-        _call(["git", "commit", "-m", "app release 0.1"]),
-        _call(["git", "tag", "-a", "0.1", "-m", "app release 0.1"]),
-        _call(["git", "push", "origin", "0.1"]),
+        _call(["git", "commit", "-m", "app release 0.1.0"]),
+        _call(["git", "tag", "-a", "0.1.0", "-m", "app release 0.1.0"]),
+        _call(["git", "push", "origin", "0.1.0"]),
         _call(["git", "add", "--all"]),
         _call(["git", "status"]),
         _call(["git", "commit", "-m", "Bumps up app to version 0.1.1dev"]),
@@ -614,3 +633,31 @@ def test_picks_up_first_module_under_src(backup_package_name):
     v = VersionerSetup()
 
     assert v.package_name == "package_name"
+
+
+@pytest.mark.parametrize(
+    "version, expected_error",
+    [
+        ["hello", "first character must be numeric"],
+        ["", "invalid empty version string"],
+    ],
+)
+def test_validate_version_string_error(version, expected_error):
+    with pytest.raises(ValueError) as excinfo:
+        versioneer.validate_version_string(version)
+
+    assert expected_error in str(excinfo.value)
+
+
+@pytest.mark.parametrize(
+    "version, expected",
+    [
+        ["1.1.1", "1.1.1"],
+        ["0.1.9", "0.1.9"],
+        ["1", "1.0.0"],
+        ["2.1", "2.1.0"],
+        ["0.1", "0.1.0"],
+    ],
+)
+def test_validate_version_string(version, expected):
+    assert versioneer.validate_version_string(version) == expected

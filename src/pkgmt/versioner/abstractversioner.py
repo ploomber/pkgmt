@@ -6,6 +6,8 @@ import subprocess
 
 from pathlib import Path
 
+from pkgmt.versioner.util import complete_version_string
+
 
 def replace_in_file(path_to_file, original, replacement):
     """Replace string in file"""
@@ -67,12 +69,15 @@ class AbstractVersioner(abc.ABC):
         if "dev" not in current:
             raise ValueError("Current version is not a dev version")
 
-        return current.replace("dev", "")
+        new = current.replace("dev", "")
+
+        return complete_version_string(new)
 
     def bump_up_version(self):
         """
-        Gets gets a release version and returns the next value value.
+        Gets a the current released version and returns the next value.
         e.g. 1.2.5 -> 1.2.6dev
+
         Notes
         -----
         If a doing a pre-release (e.g., 1.0b1), the new version returns to dev

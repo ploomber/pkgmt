@@ -9,6 +9,7 @@ from pathlib import Path
 from pkgmt.changelog import expand_github_from_changelog
 from pkgmt.versioner.versionernonsetup import VersionerNonSetup
 from pkgmt.versioner.versionersetup import VersionerSetup
+from pkgmt.versioner.util import complete_version_string, is_pre_release
 
 
 def replace_in_file(path_to_file, original, replacement):
@@ -57,10 +58,6 @@ def input_confirm(prompt, abort):
     return response
 
 
-def is_pre_release(version):
-    return "a" in version or "b" in version or "rc" in version
-
-
 def validate_version_string(version):
     if not len(version):
         raise ValueError(f"Got invalid empty version string: {version!r}")
@@ -70,6 +67,8 @@ def validate_version_string(version):
             f"Got invalid version string: {version!r} "
             "(first character must be numeric)"
         )
+
+    return complete_version_string(version)
 
 
 def version(project_root=".", tag=True, version_package=None):
@@ -109,7 +108,7 @@ def version(project_root=".", tag=True, version_package=None):
         default=release,
     )
 
-    validate_version_string(release)
+    release = validate_version_string(release)
 
     if versioner.path_to_changelog and not is_pre_release(release):
         versioner.update_changelog_release(release)
