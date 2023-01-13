@@ -84,3 +84,94 @@ pkgmt:
     changelog.expand_github_from_changelog()
 
     assert output == Path("CHANGELOG.md").read_text()
+
+
+@pytest.mark.parametrize(
+    "text, items",
+    [
+        [
+            """
+# CHANGELOG
+
+## 0.1dev
+
+- Stuff
+- More stuff
+""",
+            ["Stuff", "More stuff"],
+        ],
+        [
+            """
+# CHANGELOG
+
+## 0.1dev
+
+* Stuff #39
+*    More stuff (#35)
+""",
+            ["Stuff #39", "More stuff (#35)"],
+        ],
+        [
+            """
+# CHANGELOG
+
+## 0.1dev
+
+- Stuff [#39](https://ploomber.io)
+- More stuff ([#35](https://ploomber.io))
+""",
+            ["Stuff ", "More stuff ("],
+        ],
+    ],
+)
+def test_get_latest_changelog_entries(text, items):
+    assert changelog._get_latest_changelog_entries(text) == items
+
+
+def test_check_latest_changelog_entries():
+    assert changelog.check_latest_changelog_entries(
+        """
+# CHANGELOG
+
+## 0.1dev
+
+- [API Change] Stuff
+- [Doc] More stuff
+- [Fix] More stuff
+- [Feature] More stuff
+"""
+    )
+
+
+@pytest.mark.parametrize(
+    "text, error",
+    [
+        [
+            """
+# CHANGELOG
+
+## 0.1dev
+
+- Stuff
+- More stuff
+""",
+            "['Stuff', 'More stuff']",
+        ],
+        [
+            """
+# CHANGELOG
+
+## 0.1dev
+
+- [API Change] Stuff
+- More stuff
+""",
+            "['More stuff']",
+        ],
+    ],
+)
+def test_check_latest_changelog_entries_error(text, error):
+    with pytest.raises(ValueError) as excinfo:
+        changelog.check_latest_changelog_entries(text)
+
+    assert error in str(excinfo.value)

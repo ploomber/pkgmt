@@ -1,8 +1,9 @@
 import sys
+from pathlib import Path
 
 import click
 
-from pkgmt import links, config, test
+from pkgmt import links, config, test, changelog
 from pkgmt import new as new_
 
 
@@ -49,3 +50,10 @@ def new(name):
 def test_md(file, inplace):
     """Run a markdown file"""
     test.markdown(file, inplace=inplace)
+
+
+@cli.command()
+def check_project():
+    """Run general checks in the project"""
+    text = Path("CHANGELOG.md").read_text()
+    changelog.check_latest_changelog_entries(text)
