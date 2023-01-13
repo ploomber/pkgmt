@@ -29,6 +29,8 @@ REQUIRES = [
     "pyyaml",
     "requests",
     "click",
+    # for check-project
+    "mistune",
 ]
 
 DEV = [
