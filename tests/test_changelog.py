@@ -133,6 +133,8 @@ def test_check_latest_changelog_entries():
         """
 # CHANGELOG
 
+This is some text that should not [affect](https://ploomber.io)
+
 ## 0.1dev
 
 - [API Change] Stuff
@@ -175,3 +177,18 @@ def test_check_latest_changelog_entries_error(text, error):
         changelog.check_latest_changelog_entries(text)
 
     assert error in str(excinfo.value)
+
+
+def test_check_latest_changelog_entries_ignore_if_empty():
+    assert changelog.check_latest_changelog_entries(
+        """
+# CHANGELOG
+
+## 0.2dev
+
+## 0.1dev
+
+- Stuff
+- More stuff
+"""
+    )

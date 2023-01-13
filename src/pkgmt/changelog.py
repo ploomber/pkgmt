@@ -48,8 +48,10 @@ def _find_first_subheading(tree):
 
 
 def _find_first_list_after(tree, idx):
-    for element in tree[2:]:
-        if element["type"] == "list":
+    for element in tree[idx + 1 :]:
+        if element["type"] == "heading":
+            return None
+        elif element["type"] == "list":
             return element
 
     raise ValueError(
@@ -70,8 +72,12 @@ def _get_latest_changelog_entries(text):
 
     idx_subheading = _find_first_subheading(tree)
     changes = _find_first_list_after(tree, idx_subheading)
-    items_text = _extract_text_from_items(changes)
-    return items_text
+
+    if changes:
+        items_text = _extract_text_from_items(changes)
+        return items_text
+    else:
+        return []
 
 
 def _valid_item(item):
