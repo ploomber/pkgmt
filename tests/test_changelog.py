@@ -120,7 +120,7 @@ pkgmt:
 - Stuff [#39](https://ploomber.io)
 - More stuff ([#35](https://ploomber.io))
 """,
-            ["Stuff ", "More stuff ("],
+            ["Stuff #39", "More stuff (#35)"],
         ],
     ],
 )

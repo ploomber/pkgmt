@@ -50,8 +50,23 @@ def _find_first_list_after(tree, idx):
     )
 
 
+def _extract_text_from_token(token):
+    if token["type"] == "text":
+        return token["raw"]
+    elif token["type"] == "link":
+        return token["children"][0]["raw"]
+    else:
+        raise NotImplementedError(f"Unable to extract text from token: {token}")
+
+
+def _extract_text_from_item(item):
+    return "".join(
+        [_extract_text_from_token(ch) for ch in item["children"][0]["children"]]
+    )
+
+
 def _extract_text_from_items(list_):
-    return [item["children"][0]["children"][0]["text"] for item in list_["children"]]
+    return [_extract_text_from_item(item) for item in list_["children"]]
 
 
 def _valid_item(item):
@@ -66,7 +81,7 @@ class CHANGELOG:
     """Run several checks in the CHANGELOG.md file"""
 
     def __init__(self, text) -> None:
-        markdown = mistune.create_markdown(renderer="ast")
+        markdown = mistune.create_markdown(renderer=None)
         self.tree = markdown(text)
 
         versioner = VersionerSetup()
@@ -81,13 +96,14 @@ class CHANGELOG:
         """Find the first H2 heading. Returns index (in the tree) and text"""
         subheading = {
             "type": "heading",
-            "children": [{"type": "text", "text": ANY}],
-            "level": 2,
+            "attrs": {"level": 2},
+            "style": "axt",
+            "children": [{"type": "text", "raw": ANY}],
         }
 
         for idx, element in enumerate(self.tree):
             if element == subheading:
-                return idx, element["children"][0]["text"]
+                return idx, element["children"][0]["raw"]
 
         raise ValueError("Error parsing CHANGELOG: Could not find an H2 heading")
 
