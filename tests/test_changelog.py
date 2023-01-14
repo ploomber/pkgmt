@@ -3,6 +3,7 @@ from pathlib import Path
 import pytest
 
 from pkgmt import changelog
+from pkgmt.exceptions import ProjectValidationError
 
 
 @pytest.mark.parametrize(
@@ -157,7 +158,7 @@ This is some text that should not [affect](https://ploomber.io)
 - Stuff
 - More stuff
 """,
-            "['Stuff', 'More stuff']",
+            "'Stuff', 'More stuff'",
         ],
         [
             """
@@ -168,12 +169,12 @@ This is some text that should not [affect](https://ploomber.io)
 - [API Change] Stuff
 - More stuff
 """,
-            "['More stuff']",
+            "'More stuff'",
         ],
     ],
 )
 def test_check_latest_changelog_entries_error(text, error):
-    with pytest.raises(ValueError) as excinfo:
+    with pytest.raises(ProjectValidationError) as excinfo:
         changelog.CHANGELOG(text).check_latest_changelog_entries()
 
     assert error in str(excinfo.value)
@@ -213,7 +214,7 @@ __version__ = "0.1.1dev"
 - Stuff
 - More stuff
 """
-    with pytest.raises(ValueError, match="Expected a major version"):
+    with pytest.raises(ProjectValidationError, match="Expected a major version"):
         changelog.CHANGELOG(text).check_consistent_dev_version()
 
 
@@ -230,12 +231,10 @@ def test_check_consistent_changelog_and_version(backup_package_name):
 - Stuff
 - More stuff
 """
-    with pytest.raises(
-        ValueError,
-        match="Inconsistent version. Version in  top section in "
-        "CHANGELOG is 0.1.1dev. Version in __init__.py is 0.1dev",
-    ):
+    with pytest.raises(ProjectValidationError) as excinfo:
         changelog.CHANGELOG(text).check_consistent_changelog_and_version()
+
+    assert "[Inconsistent version]" in str(excinfo.value)
 
 
 def test_check(backup_package_name):
@@ -259,22 +258,25 @@ __version__ = "0.1.2dev"
 - More stuff
 """
 
-    with pytest.raises(ValueError) as excinfo:
+    with pytest.raises(ProjectValidationError) as excinfo:
         changelog.CHANGELOG(text).check()
 
-    assert "Expected a major version" in str(excinfo.value)
-    assert "Found invalid items" in str(excinfo.value)
-    assert "Inconsistent version" in str(excinfo.value)
+    assert "[Unexpected version]" in str(excinfo.value)
+    assert "[Invalid CHANGELOG]" in str(excinfo.value)
+    assert "[Inconsistent version]" in str(excinfo.value)
 
 
-def test_sort_last_section(backup_package_name):
-    text = """
+@pytest.mark.parametrize(
+    "text, expected",
+    [
+        [
+            """\
 # CHANGELOG
 
 ## 0.1.1dev
 
 - [Fix] fix 1
-- [API Change] some breaking change
+- [API Change] some breaking change in `some_module`
 - [Doc] doc 1
 - [Fix] fix 2
 
@@ -282,25 +284,44 @@ def test_sort_last_section(backup_package_name):
 
 - Stuff
 - More stuff
-"""
+""",
+            """\
+# CHANGELOG
+
+## 0.1.1dev
+
+- [API Change] some breaking change in `some_module`
+- [Fix] fix 1
+- [Fix] fix 2
+- [Doc] doc 1
+
+## 0.1.0
+
+- Stuff
+- More stuff
+""",
+        ],
+        [
+            """\
+# CHANGELOG
+
+## 0.1.1dev
+
+## 0.1.0
+""",
+            """\
+# CHANGELOG
+
+## 0.1.1dev
+
+## 0.1.0
+""",
+        ],
+    ],
+    ids=["unsorted", "empty"],
+)
+def test_sort_last_section(text, expected):
 
     text_sorted = changelog.CHANGELOG(text).sort_last_section()
 
-    assert (
-        text_sorted
-        == """
-# CHANGELOG
-
-## 0.1.1dev
-
-- [API Change] some breaking change
-- [Fix] fix 1
-- [Fix] fix 2
-- [Doc] doc 1
-
-## 0.1.0
-
-- Stuff
-- More stuff
-"""
-    )
+    assert text_sorted == expected

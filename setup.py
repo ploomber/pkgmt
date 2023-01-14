@@ -30,12 +30,12 @@ REQUIRES = [
     "requests",
     "click",
     # for check-project
-    "mistune",
+    "mistune>=3rc",
 ]
 
 DEV = [
     "pytest",
-    "yapf",
+    "black",
     "flake8",
     "invoke",
     "twine",
