@@ -56,4 +56,4 @@ def test_md(file, inplace):
 def check_project():
     """Run general checks in the project"""
     text = Path("CHANGELOG.md").read_text()
-    changelog.check_latest_changelog_entries(text)
+    changelog.CHANGELOG(text).check()

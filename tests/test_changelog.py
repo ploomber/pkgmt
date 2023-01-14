@@ -125,11 +125,11 @@ pkgmt:
     ],
 )
 def test_get_latest_changelog_entries(text, items):
-    assert changelog._get_latest_changelog_entries(text) == items
+    assert changelog.CHANGELOG(text).get_latest_changelog_section() == items
 
 
 def test_check_latest_changelog_entries():
-    assert changelog.check_latest_changelog_entries(
+    assert changelog.CHANGELOG(
         """
 # CHANGELOG
 
@@ -142,7 +142,7 @@ This is some text that should not [affect](https://ploomber.io)
 - [Fix] More stuff
 - [Feature] More stuff
 """
-    )
+    ).check_latest_changelog_entries()
 
 
 @pytest.mark.parametrize(
@@ -174,19 +174,131 @@ This is some text that should not [affect](https://ploomber.io)
 )
 def test_check_latest_changelog_entries_error(text, error):
     with pytest.raises(ValueError) as excinfo:
-        changelog.check_latest_changelog_entries(text)
+        changelog.CHANGELOG(text).check_latest_changelog_entries()
 
     assert error in str(excinfo.value)
 
 
 def test_check_latest_changelog_entries_ignore_if_empty():
-    assert changelog.check_latest_changelog_entries(
+    assert changelog.CHANGELOG(
         """
 # CHANGELOG
 
 ## 0.2dev
 
 ## 0.1dev
+
+- Stuff
+- More stuff
+"""
+    ).check_latest_changelog_entries()
+
+
+def test_check_consistent_dev_version(backup_package_name):
+    Path("src", "package_name", "__init__.py").write_text(
+        """
+__version__ = "0.1.1dev"
+"""
+    )
+
+    text = """
+# CHANGELOG
+
+## 0.1.1dev
+
+- [API Change] some breaking change
+
+## 0.1.0
+
+- Stuff
+- More stuff
+"""
+    with pytest.raises(ValueError, match="Expected a major version"):
+        changelog.CHANGELOG(text).check_consistent_dev_version()
+
+
+def test_check_consistent_changelog_and_version(backup_package_name):
+    text = """
+# CHANGELOG
+
+## 0.1.1dev
+
+- [API Change] some breaking change
+
+## 0.1.0
+
+- Stuff
+- More stuff
+"""
+    with pytest.raises(
+        ValueError,
+        match="Inconsistent version. Version in  top section in "
+        "CHANGELOG is 0.1.1dev. Version in __init__.py is 0.1dev",
+    ):
+        changelog.CHANGELOG(text).check_consistent_changelog_and_version()
+
+
+def test_check(backup_package_name):
+    Path("src", "package_name", "__init__.py").write_text(
+        """
+__version__ = "0.1.2dev"
+"""
+    )
+
+    text = """
+# CHANGELOG
+
+## 0.1.1dev
+
+- [API Change] some breaking change
+- Some other change
+
+## 0.1.0
+
+- Stuff
+- More stuff
+"""
+
+    with pytest.raises(ValueError) as excinfo:
+        changelog.CHANGELOG(text).check()
+
+    assert "Expected a major version" in str(excinfo.value)
+    assert "Found invalid items" in str(excinfo.value)
+    assert "Inconsistent version" in str(excinfo.value)
+
+
+def test_sort_last_section(backup_package_name):
+    text = """
+# CHANGELOG
+
+## 0.1.1dev
+
+- [Fix] fix 1
+- [API Change] some breaking change
+- [Doc] doc 1
+- [Fix] fix 2
+
+## 0.1.0
+
+- Stuff
+- More stuff
+"""
+
+    text_sorted = changelog.CHANGELOG(text).sort_last_section()
+
+    assert (
+        text_sorted
+        == """
+# CHANGELOG
+
+## 0.1.1dev
+
+- [API Change] some breaking change
+- [Fix] fix 1
+- [Fix] fix 2
+- [Doc] doc 1
+
+## 0.1.0
 
 - Stuff
 - More stuff

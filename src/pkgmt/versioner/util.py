@@ -5,6 +5,11 @@ def is_pre_release(version):
     return "a" in version or "b" in version or "rc" in version
 
 
+def is_major_version(version):
+    _, major, minor = complete_version_string(version.replace("dev", "")).split(".")
+    return (minor == "0") or (major == "0" and minor == "0")
+
+
 def _split_prerelease_part(version):
     if is_pre_release(version):
         prerelease_part = re.search(r"(a|b|rc)\d+", version).group(0)
