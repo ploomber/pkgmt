@@ -3,13 +3,17 @@ import re
 from glob import iglob
 from collections import defaultdict
 
+import click
+
 from pkgmt.versioner.versionersetup import VersionerSetup
 from pkgmt.versioner.util import complete_version_string
 from pkgmt.exceptions import ProjectValidationError
 
 
 class Deprecations:
-    def __init__(self) -> None:
+    def __init__(self, root_dir=None) -> None:
+        self.root_dir = root_dir
+
         versioner = VersionerSetup()
         self.current = complete_version_string(
             versioner.current_version().replace("dev", "")
@@ -17,7 +21,7 @@ class Deprecations:
 
     def check(self):
         """Check if there are pending deprecations"""
-        deprecations = find_deprecations()
+        deprecations = find_deprecations(root_dir=self.root_dir)
 
         mapping = defaultdict(lambda: [])
 
@@ -89,3 +93,13 @@ def find_deprecations(root_dir=None):
             deprecations.append(DeprecationItem(body, version, path))
 
     return deprecations
+
+
+@click.command()
+@click.argument("root")
+def _cli(root):
+    Deprecations(root).check()
+
+
+if __name__ == "__main__":
+    _cli()

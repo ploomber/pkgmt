@@ -209,7 +209,7 @@ def test_commit_version_tag(backup_package_name, monkeypatch):
         _call(["git", "status"]),
         _call(["git", "commit", "-m", "package_name release 0.2"]),
         _call(["git", "tag", "-a", "0.2", "-m", "package_name release 0.2"]),
-        _call(["git", "push", "origin", "0.2"]),
+        _call(["git", "push", "origin", "0.2", "--no-verify"]),
     ]
 
     assert '__version__ = "0.2"' in (v.PACKAGE / "__init__.py").read_text()
@@ -231,7 +231,7 @@ def test_commit_version_tag_non_setup(backup_another_package, monkeypatch):
         _call(["git", "status"]),
         _call(["git", "commit", "-m", "app release 0.2"]),
         _call(["git", "tag", "-a", "0.2", "-m", "app release 0.2"]),
-        _call(["git", "push", "origin", "0.2"]),
+        _call(["git", "push", "origin", "0.2", "--no-verify"]),
     ]
 
     assert '__version__ = "0.2"' in (v.PACKAGE / "_version.py").read_text()
@@ -348,11 +348,11 @@ def test_release(backup_package_name, monkeypatch, submitted, stored, dev):
         _call(["git", "status"]),
         _call(["git", "commit", "-m", f"package_name release {stored}"]),
         _call(["git", "tag", "-a", stored, "-m", f"package_name release {stored}"]),
-        _call(["git", "push", "origin", stored]),
+        _call(["git", "push", "origin", stored, "--no-verify"]),
         _call(["git", "add", "--all"]),
         _call(["git", "status"]),
         _call(["git", "commit", "-m", f"Bumps up package_name to version {dev}"]),
-        _call(["git", "push"]),
+        _call(["git", "push", "--no-verify"]),
     ]
 
     today = datetime.now().strftime("%Y-%m-%d")
@@ -385,11 +385,11 @@ def test_release_non_setup(backup_another_package, monkeypatch, submitted, store
         _call(["git", "status"]),
         _call(["git", "commit", "-m", f"app release {stored}"]),
         _call(["git", "tag", "-a", stored, "-m", f"app release {stored}"]),
-        _call(["git", "push", "origin", stored]),
+        _call(["git", "push", "origin", stored, "--no-verify"]),
         _call(["git", "add", "--all"]),
         _call(["git", "status"]),
         _call(["git", "commit", "-m", f"Bumps up app to version {dev}"]),
-        _call(["git", "push"]),
+        _call(["git", "push", "--no-verify"]),
     ]
 
     today = datetime.now().strftime("%Y-%m-%d")
@@ -424,11 +424,11 @@ def test_pre_release(backup_package_name, monkeypatch, submitted, stored, dev):
         _call(["git", "status"]),
         _call(["git", "commit", "-m", f"package_name release {stored}"]),
         _call(["git", "tag", "-a", stored, "-m", f"package_name release {stored}"]),
-        _call(["git", "push", "origin", stored]),
+        _call(["git", "push", "origin", stored, "--no-verify"]),
         _call(["git", "add", "--all"]),
         _call(["git", "status"]),
         _call(["git", "commit", "-m", f"Bumps up package_name to version {dev}"]),
-        _call(["git", "push"]),
+        _call(["git", "push", "--no-verify"]),
     ]
 
     # changelog must not change
@@ -464,11 +464,11 @@ def test_pre_release_non_setup(
         _call(["git", "status"]),
         _call(["git", "commit", "-m", f"app release {stored}"]),
         _call(["git", "tag", "-a", stored, "-m", f"app release {stored}"]),
-        _call(["git", "push", "origin", stored]),
+        _call(["git", "push", "origin", stored, "--no-verify"]),
         _call(["git", "add", "--all"]),
         _call(["git", "status"]),
         _call(["git", "commit", "-m", f"Bumps up app to version {dev}"]),
-        _call(["git", "push"]),
+        _call(["git", "push", "--no-verify"]),
     ]
 
     # changelog must not change
@@ -499,11 +499,11 @@ def test_release_with_no_changelog(backup_package_name, monkeypatch, capsys):
         _call(["git", "status"]),
         _call(["git", "commit", "-m", "package_name release 0.1.0"]),
         _call(["git", "tag", "-a", "0.1.0", "-m", "package_name release 0.1.0"]),
-        _call(["git", "push", "origin", "0.1.0"]),
+        _call(["git", "push", "origin", "0.1.0", "--no-verify"]),
         _call(["git", "add", "--all"]),
         _call(["git", "status"]),
         _call(["git", "commit", "-m", "Bumps up package_name to version 0.1.1dev"]),
-        _call(["git", "push"]),
+        _call(["git", "push", "--no-verify"]),
     ]
 
 
@@ -530,11 +530,11 @@ def test_release_with_no_changelog_non_setup(
         _call(["git", "status"]),
         _call(["git", "commit", "-m", "app release 0.1.0"]),
         _call(["git", "tag", "-a", "0.1.0", "-m", "app release 0.1.0"]),
-        _call(["git", "push", "origin", "0.1.0"]),
+        _call(["git", "push", "origin", "0.1.0", "--no-verify"]),
         _call(["git", "add", "--all"]),
         _call(["git", "status"]),
         _call(["git", "commit", "-m", "Bumps up app to version 0.1.1dev"]),
-        _call(["git", "push"]),
+        _call(["git", "push", "--no-verify"]),
     ]
 
 
