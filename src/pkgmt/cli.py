@@ -3,7 +3,7 @@ from pathlib import Path
 
 import click
 
-from pkgmt import links, config, test, changelog
+from pkgmt import links, config, test, changelog, hook as hook_
 from pkgmt import new as new_
 
 
@@ -57,3 +57,20 @@ def check_project():
     """Run general checks in the project"""
     text = Path("CHANGELOG.md").read_text()
     changelog.CHANGELOG(text).check()
+
+
+@cli.command()
+@click.option(
+    "--uninstall",
+    is_flag=True,
+    default=False,
+    help="Uninstall hook",
+)
+def hook(uninstall):
+    """Install pre-push hook"""
+
+    if uninstall:
+        hook_.uninstall_hook()
+        click.echo("hook uninstalled.")
+    else:
+        hook_.install_hook()
