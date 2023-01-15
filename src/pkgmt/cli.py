@@ -53,7 +53,7 @@ def test_md(file, inplace):
 
 
 @cli.command()
-def check_project():
+def check():
     """Run general checks in the project"""
     text = Path("CHANGELOG.md").read_text()
     changelog.CHANGELOG(text).check(verbose=True)
