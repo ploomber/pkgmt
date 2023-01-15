@@ -4,6 +4,7 @@ import re
 from enum import IntEnum
 from functools import total_ordering
 from copy import deepcopy
+import click
 
 import mistune
 from mistune.renderers.markdown import MarkdownRenderer
@@ -224,25 +225,30 @@ class CHANGELOG:
                 "fix them so they match"
             )
 
-    def check(self):
+    def check(self, *, verbose=False):
         """Runs all checks"""
         errors = []
 
-        for function in (
-            self.check_consistent_dev_version,
-            self.check_latest_changelog_entries,
-            self.check_consistent_changelog_and_version,
+        for function, name in (
+            (self.check_latest_changelog_entries, "CHANGELOG entries prefixes"),
+            (
+                self.check_consistent_changelog_and_version,
+                "CHANGELOG and __init__.py consistency",
+            ),
+            (self.check_consistent_dev_version, "consistent dev version"),
         ):
             try:
                 function()
             except Exception as e:
                 errors.append(str(e))
+                if verbose:
+                    click.secho(f"Checking {name}... ERROR!", fg="red")
+            else:
+                if verbose:
+                    click.secho(f"Checking {name}... OK!", fg="green")
 
         if errors:
             errors_ = "\n\n".join(f"- {e}" for e in errors)
             raise ProjectValidationError(
                 f"Found the following errors in the project:\n{errors_}"
             )
-
-        print("Sorting CHANGELOG's last section...")
-        self.sort_last_section()
