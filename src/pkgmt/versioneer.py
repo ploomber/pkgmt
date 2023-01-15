@@ -145,7 +145,7 @@ def version(project_root=".", tag=True, version_package=None):
         tag=False,
     )
 
-    call(["git", "push"])
+    call(["git", "push", "--no-verify"])
     print("Version {} was created, you are now in {}".format(release, bumped_version))
 
 

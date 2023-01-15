@@ -145,7 +145,7 @@ class AbstractVersioner(abc.ABC):
             call(["git", "tag", "-a", new_version, "-m", message])
 
             print("Pushing tags...")
-            call(["git", "push", "origin", new_version])
+            call(["git", "push", "origin", new_version, "--no-verify"])
 
     def update_changelog_release(self, new_version):
         """Updates changelog file, adding a new section"""
