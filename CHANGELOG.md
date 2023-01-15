@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 0.1.1dev
+## 0.1.1 (2023-01-15)
 * [Feature] Adds `pkgmt check`
 * [Feature] Adds `pkgmt hook`
 
