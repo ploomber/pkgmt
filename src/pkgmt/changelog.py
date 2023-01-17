@@ -6,18 +6,14 @@ from functools import total_ordering
 from copy import deepcopy
 import click
 
-import mistune
 
-
-# these two are new in mistune 3
 try:
+    import mistune
     from mistune.renderers.markdown import MarkdownRenderer
-except ModuleNotFoundError:
-    MarkdownRenderer = None
-
-try:
     from mistune.core import BlockState
 except ModuleNotFoundError:
+    mistune = None
+    MarkdownRenderer = None
     BlockState = None
 
 from pkgmt import config
@@ -136,6 +132,12 @@ class CHANGELOG:
     """Run several checks in the CHANGELOG.md file"""
 
     def __init__(self, text, project_root=".") -> None:
+        if not mistune:
+            raise ModuleNotFoundError(
+                "Checking CHANGELOG.md requires mistune 3. "
+                "Install it with: pip install 'pkgmt[check]'"
+            )
+
         if mistune.__version__[0] != "3":
             raise ModuleNotFoundError(
                 "Checking CHANGELOG.md requires mistune 3. "
