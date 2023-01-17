@@ -1,6 +1,7 @@
 # CHANGELOG
 
 ## 0.1.4dev
+* [Feature] Adds `python -m pkgmt.dependencies` to find recently updated dependencies
 
 ## 0.1.3 (2023-01-17)
 
