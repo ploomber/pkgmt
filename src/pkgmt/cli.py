@@ -3,7 +3,7 @@ from pathlib import Path
 
 import click
 
-from pkgmt import links, config, test, changelog, hook as hook_
+from pkgmt import links, config, test, changelog, hook as hook_, versioneer
 from pkgmt import new as new_
 
 
@@ -74,3 +74,28 @@ def hook(uninstall):
         click.echo("hook uninstalled.")
     else:
         hook_.install_hook()
+
+
+@cli.command()
+@click.option(
+    "--yes",
+    is_flag=True,
+    default=False,
+    help="Do not ask for confirmation",
+)
+def version(yes):
+    """Create a new package version"""
+    versioneer.version(project_root=".", tag=True, yes=yes)
+
+
+@cli.command()
+@click.argument("tag")
+@click.option(
+    "--production",
+    is_flag=True,
+    default=False,
+    help="Upload to the production PyPI server",
+)
+def release(tag, production):
+    """Release this package from a given tag"""
+    versioneer.upload(tag, production)

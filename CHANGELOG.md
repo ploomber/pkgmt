@@ -1,6 +1,8 @@
 # CHANGELOG
 
 ## 0.1.2dev
+* [Feature] Adds `pkgmt version`
+* [Feature] Adds `pkgmt release`
 
 ## 0.1.1 (2023-01-15)
 * [Feature] Adds `pkgmt check`
