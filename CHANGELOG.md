@@ -1,6 +1,7 @@
 # CHANGELOG
 
 ## 0.1.5dev
+* [Fix] Moving back to master/main after uploading a package
 
 ## 0.1.4 (2023-01-17)
 
