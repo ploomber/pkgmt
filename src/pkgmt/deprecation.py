@@ -14,7 +14,7 @@ class Deprecations:
     def __init__(self, root_dir=None) -> None:
         self.root_dir = root_dir
 
-        versioner = VersionerSetup()
+        versioner = VersionerSetup(project_root=root_dir)
         self.current = complete_version_string(
             versioner.current_version().replace("dev", "")
         )

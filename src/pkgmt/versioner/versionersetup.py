@@ -8,6 +8,11 @@ class VersionerSetup(AbstractVersioner):
     def find_package(self):
         path_to_src = Path(self.project_root, "src")
 
+        if not path_to_src.is_dir():
+            raise NotADirectoryError(
+                f"Expected a directory at {str(path_to_src)!r} but it doesn't exist"
+            )
+
         dirs = sorted(
             [
                 f

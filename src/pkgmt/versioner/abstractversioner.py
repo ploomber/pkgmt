@@ -38,12 +38,12 @@ def make_header(content, path, add_date=False):
 
 class AbstractVersioner(abc.ABC):
     def __init__(self, project_root="."):
-        self.project_root = project_root
+        self.project_root = project_root or "."
         self.package_name, self.PACKAGE = self.find_package()
-        if Path(project_root, "CHANGELOG.rst").exists():
-            self.path_to_changelog = Path(project_root, "CHANGELOG.rst")
-        elif Path(project_root, "CHANGELOG.md").exists():
-            self.path_to_changelog = Path(project_root, "CHANGELOG.md")
+        if Path(self.project_root, "CHANGELOG.rst").exists():
+            self.path_to_changelog = Path(self.project_root, "CHANGELOG.rst")
+        elif Path(self.project_root, "CHANGELOG.md").exists():
+            self.path_to_changelog = Path(self.project_root, "CHANGELOG.md")
         else:
             self.path_to_changelog = None
         self.version_file = self.version_file()

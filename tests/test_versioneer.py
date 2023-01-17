@@ -25,6 +25,7 @@ from pkgmt.versioner.versionersetup import VersionerSetup
 from pkgmt.versioneer import VersionerNonSetup
 from pkgmt import versioneer
 from pkgmt.versioner import abstractversioner
+from pkgmt.exceptions import ProjectValidationError
 
 
 # FIXME: use unittest.mock.call instead of unittest.mock._Call
@@ -648,6 +649,40 @@ def test_sorts_changelog_entries(backup_package_name, monkeypatch):
 * [Doc] doc 1
 """
     )
+
+
+def test_checks_pending_deprecations(backup_package_name, monkeypatch):
+    mock = Mock()
+    mock_input = Mock()
+    mock_input.side_effect = ["0.1", "y"]
+
+    monkeypatch.setattr(versioneer, "call", mock)
+    monkeypatch.setattr(abstractversioner, "call", mock)
+    monkeypatch.setattr(versioneer, "_input", mock_input)
+
+    Path("src", "package_name", "__init__.py").write_text(
+        """
+__version__ = "0.3dev"
+"""
+    )
+
+    Path("src", "package_name", "functions.py").write_text(
+        '''
+def do_stuff():
+    """
+    Notes
+    -----
+    .. deprecated:: 0.1
+        This will be removed in version 0.3
+    """
+'''
+    )
+
+    with pytest.raises(ProjectValidationError) as excinfo:
+        versioneer.version(tag=True)
+
+    assert "Found the following pending deprecations" in str(excinfo.value)
+    assert "This will be removed in version 0.3" in str(excinfo.value)
 
 
 def test_picks_up_first_module_under_src(backup_package_name):
