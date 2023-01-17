@@ -599,6 +599,7 @@ def test_upload(backup_package_name, monkeypatch, production):
         _call(["git", "checkout", "0.1"]),
         _call(["python", "setup.py", "bdist_wheel", "sdist"]),
         upload_call,
+        _call(["git", "checkout", "main"]),
     ]
 
     mock_delete.assert_called_once_with(
