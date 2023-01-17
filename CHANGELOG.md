@@ -1,7 +1,7 @@
 # CHANGELOG
 
 ## 0.1.3dev
-* Fixes `check_consistent_changelog_and_version` when `CHANGELOG.md` contains date
+* [Fix] Fixes `check_consistent_changelog_and_version` when `CHANGELOG.md` contains date
 
 ## 0.1.2 (2023-01-16)
 
