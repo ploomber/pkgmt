@@ -363,6 +363,35 @@ def test_release(backup_package_name, monkeypatch, submitted, stored, dev):
     )
 
 
+def test_release_yes(backup_package_name, monkeypatch):
+    mock = Mock()
+    monkeypatch.setattr(versioneer, "call", mock)
+    monkeypatch.setattr(abstractversioner, "call", mock)
+
+    stored = "0.1.0"
+    dev = "0.1.1dev"
+
+    versioneer.version(yes=True)
+
+    assert mock.call_args_list == [
+        _call(["git", "add", "--all"]),
+        _call(["git", "status"]),
+        _call(["git", "commit", "-m", f"package_name release {stored}"]),
+        _call(["git", "tag", "-a", stored, "-m", f"package_name release {stored}"]),
+        _call(["git", "push", "origin", stored, "--no-verify"]),
+        _call(["git", "add", "--all"]),
+        _call(["git", "status"]),
+        _call(["git", "commit", "-m", f"Bumps up package_name to version {dev}"]),
+        _call(["git", "push", "--no-verify"]),
+    ]
+
+    today = datetime.now().strftime("%Y-%m-%d")
+    assert Path("CHANGELOG.md").read_text() == (
+        f"# CHANGELOG\n\n## {dev}\n\n## {stored} ({today})\n\n"
+        "* [Fix] Fixes [#1](https://github.com/edublancas/pkgmt/issues/1)\n"
+    )
+
+
 @pytest.mark.parametrize(
     "submitted, stored, dev",
     [

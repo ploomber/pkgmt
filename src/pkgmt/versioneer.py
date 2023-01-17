@@ -72,7 +72,7 @@ def validate_version_string(version):
     return complete_version_string(version)
 
 
-def version(project_root=".", tag=True, version_package=None):
+def version(project_root=".", tag=True, version_package=None, yes=False):
     """
     Create a new version (projects with setup.py) :
     1. version_package will be None
@@ -106,11 +106,14 @@ def version(project_root=".", tag=True, version_package=None):
     current = versioner.current_version()
     release = versioner.release_version()
 
-    release = input_str(
-        "Current version in setup.py is {current}. Enter"
-        " release version".format(current=current),
-        default=release,
-    )
+    if yes:
+        print(f"Releasing version: {release}")
+    else:
+        release = input_str(
+            "Current version in setup.py is {current}. Enter"
+            " release version".format(current=current),
+            default=release,
+        )
 
     release = validate_version_string(release)
 
@@ -119,9 +122,11 @@ def version(project_root=".", tag=True, version_package=None):
 
         changelog = versioner.path_to_changelog.read_text()
 
-        input_confirm(
-            f"\n{versioner.path_to_changelog} content:" f"\n\n{changelog}\n", abort=True
-        )
+        if not yes:
+            input_confirm(
+                f"\n{versioner.path_to_changelog} content:" f"\n\n{changelog}\n",
+                abort=True,
+            )
 
     # Expand github links and sort secions
     if versioner.path_to_changelog and versioner.path_to_changelog.suffix == ".md":
