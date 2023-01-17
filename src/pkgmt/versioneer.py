@@ -211,3 +211,16 @@ def upload(tag, production):
         )
     else:
         call(["twine", "upload", "dist/*"])
+
+    try:
+        call(["git", "checkout", "main"])
+    except subprocess.CalledProcessError:
+        try_master = True
+    else:
+        try_master = False
+
+    if try_master:
+        try:
+            call(["git", "checkout", "master"])
+        except subprocess.CalledProcessError:
+            pass
