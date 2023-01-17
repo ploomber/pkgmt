@@ -2,4 +2,4 @@
 
 ## 0.1dev
 
-* Fixes #1
+* [Fix] Fixes #1

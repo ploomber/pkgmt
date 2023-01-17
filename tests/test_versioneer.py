@@ -243,7 +243,7 @@ def test_update_changelog_release_md(backup_package_name):
     today = datetime.now().strftime("%Y-%m-%d")
     assert (
         v.path_to_changelog.read_text()
-        == f"# CHANGELOG\n\n## 0.1 ({today})\n\n* Fixes #1"
+        == f"# CHANGELOG\n\n## 0.1 ({today})\n\n* [Fix] Fixes #1"
     )
 
 
@@ -288,7 +288,7 @@ def test_add_changelog_new_dev_section_md(backup_package_name):
     v.add_changelog_new_dev_section("0.2dev")
     assert (
         v.path_to_changelog.read_text()
-        == "# CHANGELOG\n\n## 0.2dev\n\n## 0.1dev\n\n* Fixes #1"
+        == "# CHANGELOG\n\n## 0.2dev\n\n## 0.1dev\n\n* [Fix] Fixes #1"
     )
 
 
@@ -358,7 +358,7 @@ def test_release(backup_package_name, monkeypatch, submitted, stored, dev):
     today = datetime.now().strftime("%Y-%m-%d")
     assert Path("CHANGELOG.md").read_text() == (
         f"# CHANGELOG\n\n## {dev}\n\n## {stored} ({today})\n\n"
-        "* Fixes [#1](https://github.com/edublancas/pkgmt/issues/1)"
+        "* [Fix] Fixes [#1](https://github.com/edublancas/pkgmt/issues/1)\n"
     )
 
 
@@ -434,7 +434,7 @@ def test_pre_release(backup_package_name, monkeypatch, submitted, stored, dev):
     # changelog must not change
     assert Path("CHANGELOG.md").read_text() == (
         "# CHANGELOG\n\n## 0.1dev\n\n"
-        "* Fixes [#1](https://github.com/edublancas/pkgmt/issues/1)"
+        "* [Fix] Fixes [#1](https://github.com/edublancas/pkgmt/issues/1)\n"
     )
 
 
@@ -606,6 +606,48 @@ def test_invalid_version_string_non_setup(
         versioneer.version(tag=True, version_package="app")
 
     assert "(first character must be numeric)" in str(excinfo.value)
+
+
+def test_sorts_changelog_entries(backup_package_name, monkeypatch):
+    Path("CHANGELOG.md").write_text(
+        """
+# CHANGELOG
+
+## 0.1dev
+
+* [Fix] fix 1
+* [Doc] doc 1
+* [API Change] change 1
+* [Feature] feature 1
+"""
+    )
+
+    mock = Mock()
+    mock_input = Mock()
+    mock_input.side_effect = ["0.1", "y"]
+
+    monkeypatch.setattr(versioneer, "call", mock)
+    monkeypatch.setattr(abstractversioner, "call", mock)
+    monkeypatch.setattr(versioneer, "_input", mock_input)
+
+    versioneer.version(tag=True)
+    today = datetime.now().strftime("%Y-%m-%d")
+
+    assert (
+        Path("CHANGELOG.md").read_text()
+        == f"""\
+# CHANGELOG
+
+## 0.1.1dev
+
+## 0.1.0 ({today})
+
+* [API Change] change 1
+* [Feature] feature 1
+* [Fix] fix 1
+* [Doc] doc 1
+"""
+    )
 
 
 def test_picks_up_first_module_under_src(backup_package_name):

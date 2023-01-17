@@ -6,7 +6,7 @@ import shutil
 import subprocess
 from pathlib import Path
 
-from pkgmt.changelog import expand_github_from_changelog
+from pkgmt.changelog import expand_github_from_changelog, CHANGELOG
 from pkgmt.versioner.versionernonsetup import VersionerNonSetup
 from pkgmt.versioner.versionersetup import VersionerSetup
 from pkgmt.versioner.util import complete_version_string, is_pre_release
@@ -119,11 +119,18 @@ def version(project_root=".", tag=True, version_package=None):
             f"\n{versioner.path_to_changelog} content:" f"\n\n{changelog}\n", abort=True
         )
 
-    # Expand github links
+    # Expand github links and sort secions
     if versioner.path_to_changelog and versioner.path_to_changelog.suffix == ".md":
         expand_github_from_changelog(path=versioner.path_to_changelog)
+
+        if not version_package:
+            changelod_sorted = CHANGELOG.from_path(
+                path=versioner.path_to_changelog, project_root=project_root
+            ).sort_last_section()
+            Path(versioner.path_to_changelog).write_text(changelod_sorted)
+
     else:
-        print("Skipping github expansion (only supported in .md files)")
+        print("Skipping CHANGELOG processing (only supported in .md files)")
 
     # Replace version number and create tag
     print("Commiting release version: {}".format(release))

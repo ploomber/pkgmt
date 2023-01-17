@@ -125,17 +125,23 @@ class ListItemType(IntEnum):
 class CHANGELOG:
     """Run several checks in the CHANGELOG.md file"""
 
-    def __init__(self, text) -> None:
+    def __init__(self, text, project_root=".") -> None:
         self.text = text
 
         markdown = mistune.create_markdown(renderer=None)
         self.tree = markdown(text)
 
-        versioner = VersionerSetup()
+        versioner = VersionerSetup(project_root=project_root)
         self.current = versioner.current_version()
+
+    @classmethod
+    def from_path(cls, path, project_root="."):
+        return cls(text=Path(path).read_text(), project_root=project_root)
 
     def sort_last_section(self):
         """Sorts last section depending on the prefix"""
+        self.check_latest_changelog_entries()
+
         idx_subheading, _ = self.get_first_subheading()
         list_, idx = _find_first_list_after(self.tree, idx_subheading)
         renderer = MarkdownRenderer()
