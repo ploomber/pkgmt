@@ -72,7 +72,7 @@ setup(
     keywords=[],
     install_requires=REQUIRES,
     extras_require={
-        "dev": DEV,
+        "dev": DEV + CHECK,
         "all": ALL,
         "check": CHECK,
     },
