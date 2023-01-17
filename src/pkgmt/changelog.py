@@ -223,7 +223,13 @@ class CHANGELOG:
         """
         _, subheading = self.get_first_subheading()
 
-        if subheading != self.current:
+        # when making stable releases, the format is: "{version} {date}"
+        # in such cases, we only compare the "{version}" part
+        date_match = re.match(r"([\w\.]+)( \([0-9]{4}-[0-9]{2}-[0-9]{2}\))", subheading)
+
+        if (date_match and date_match.group(1) != self.current) or (
+            date_match is None and subheading != self.current
+        ):
             raise ProjectValidationError(
                 "[Inconsistent version] Version in  top section in "
                 f"CHANGELOG is {subheading!r}, "
