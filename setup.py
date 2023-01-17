@@ -29,8 +29,6 @@ REQUIRES = [
     "pyyaml",
     "requests",
     "click",
-    # for check-project
-    "mistune>=3rc",
 ]
 
 DEV = [
@@ -52,6 +50,12 @@ ALL = [
     "ipykernel",
 ]
 
+# to run: pkgmt check
+CHECK = [
+    # for check-project
+    "mistune>=3rc",
+]
+
 setup(
     name="pkgmt",
     version=VERSION,
@@ -70,6 +74,7 @@ setup(
     extras_require={
         "dev": DEV,
         "all": ALL,
+        "check": CHECK,
     },
     entry_points={
         "console_scripts": ["pkgmt=pkgmt.cli:cli"],

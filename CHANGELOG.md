@@ -2,6 +2,7 @@
 
 ## 0.1.4dev
 * [Feature] Adds `python -m pkgmt.dependencies` to find recently updated dependencies
+* [Fix] Makes `mistune 3` an optional dependency
 
 ## 0.1.3 (2023-01-17)
 

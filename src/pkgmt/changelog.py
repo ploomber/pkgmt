@@ -7,8 +7,18 @@ from copy import deepcopy
 import click
 
 import mistune
-from mistune.renderers.markdown import MarkdownRenderer
-from mistune.core import BlockState
+
+
+# these two are new in mistune 3
+try:
+    from mistune.renderers.markdown import MarkdownRenderer
+except ModuleNotFoundError:
+    MarkdownRenderer = None
+
+try:
+    from mistune.core import BlockState
+except ModuleNotFoundError:
+    BlockState = None
 
 from pkgmt import config
 from pkgmt.versioner.versionersetup import VersionerSetup
@@ -126,6 +136,13 @@ class CHANGELOG:
     """Run several checks in the CHANGELOG.md file"""
 
     def __init__(self, text, project_root=".") -> None:
+        if mistune.__version__[0] != "3":
+            raise ModuleNotFoundError(
+                "Checking CHANGELOG.md requires mistune 3. "
+                f"You have {mistune.__version__}. Install it with: "
+                "pip install 'pkgmt[check]'"
+            )
+
         self.text = text
 
         markdown = mistune.create_markdown(renderer=None)
