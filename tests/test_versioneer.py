@@ -689,6 +689,17 @@ def test_checks_pending_deprecations(backup_package_name, monkeypatch):
     monkeypatch.setattr(abstractversioner, "call", mock)
     monkeypatch.setattr(versioneer, "_input", mock_input)
 
+    Path("CHANGELOG.md").write_text(
+        """
+# CHANGELOG
+
+## 0.3dev
+
+- [Fix] fix 1
+
+"""
+    )
+
     Path("src", "package_name", "__init__.py").write_text(
         """
 __version__ = "0.3dev"
@@ -712,6 +723,51 @@ def do_stuff():
 
     assert "Found the following pending deprecations" in str(excinfo.value)
     assert "This will be removed in version 0.3" in str(excinfo.value)
+
+
+def test_checks_changelog(backup_package_name, monkeypatch):
+    mock = Mock()
+    mock_input = Mock()
+    mock_input.side_effect = ["0.1", "y"]
+
+    monkeypatch.setattr(versioneer, "call", mock)
+    monkeypatch.setattr(abstractversioner, "call", mock)
+    monkeypatch.setattr(versioneer, "_input", mock_input)
+
+    Path("CHANGELOG.md").write_text(
+        """
+# CHANGELOG
+
+## 0.3dev
+
+- fix 1
+
+"""
+    )
+
+    Path("src", "package_name", "__init__.py").write_text(
+        """
+__version__ = "0.3dev"
+"""
+    )
+
+    Path("src", "package_name", "functions.py").write_text(
+        '''
+def do_stuff():
+    """
+    Notes
+    -----
+    .. deprecated:: 0.1
+        This will be removed in version 0.3
+    """
+'''
+    )
+
+    with pytest.raises(ProjectValidationError) as excinfo:
+        versioneer.version(tag=True)
+
+    assert "Found the following errors in the project" in str(excinfo.value)
+    assert "[Invalid CHANGELOG]" in str(excinfo.value)
 
 
 def test_picks_up_first_module_under_src(backup_package_name):

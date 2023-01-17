@@ -94,13 +94,24 @@ def version(project_root=".", tag=True, version_package=None, yes=False):
     6. Set new development version in package_name/_version.py, and CHANGELOG
     7. Commit new development version and push
     """
+
     if version_package:
         versioner = VersionerNonSetup(version_package, project_root=project_root)
     else:
         versioner = VersionerSetup(project_root=project_root)
 
+    changelog_md_exists = (
+        versioner.path_to_changelog and versioner.path_to_changelog.suffix == ".md"
+    )
+
+    # TODO: make it compatible with VersionerNonSetup
+    if not version_package and changelog_md_exists:
+        # check changelog
+        CHANGELOG.from_path(
+            path=versioner.path_to_changelog, project_root=project_root
+        ).check()
+
         # look for deprecations
-        # TODO: make it compatible with VersionerNonSetup
         Deprecations(root_dir=project_root).check()
 
     current = versioner.current_version()
@@ -129,7 +140,7 @@ def version(project_root=".", tag=True, version_package=None, yes=False):
             )
 
     # Expand github links and sort secions
-    if versioner.path_to_changelog and versioner.path_to_changelog.suffix == ".md":
+    if changelog_md_exists:
         expand_github_from_changelog(path=versioner.path_to_changelog)
 
         # TODO: make it compatible with VersionerNonSetup
