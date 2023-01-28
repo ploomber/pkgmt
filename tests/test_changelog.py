@@ -325,7 +325,7 @@ __version__ = "0.1.2dev"
 
 ## 0.1.1dev
 
-- [Fix] fix 1
+- [Fix] fix 1, pins `package<2`
 - [API Change] some breaking change in `some_module`
 - [Doc] doc 1
 - [Fix] fix 2
@@ -341,7 +341,7 @@ __version__ = "0.1.2dev"
 ## 0.1.1dev
 
 - [API Change] some breaking change in `some_module`
-- [Fix] fix 1
+- [Fix] fix 1, pins `package<2`
 - [Fix] fix 2
 - [Doc] doc 1
 

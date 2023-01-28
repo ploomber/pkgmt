@@ -11,10 +11,12 @@ try:
     import mistune
     from mistune.renderers.markdown import MarkdownRenderer
     from mistune.core import BlockState
+    from mistune.inline_parser import InlineParser
 except ModuleNotFoundError:
     mistune = None
     MarkdownRenderer = None
     BlockState = None
+    InlineParser = object
 
 from pkgmt import config
 from pkgmt.versioner.versionersetup import VersionerSetup
@@ -23,6 +25,35 @@ from pkgmt._format import pretty_iterator
 from pkgmt.exceptions import ProjectValidationError
 
 _PREFIXES = {"[API Change]", "[Feature]", "[Fix]", "[Doc]"}
+
+
+class CustomInlineParser(InlineParser):
+    """
+    Custom parser to prevent escaping characters inside `code spans`
+    """
+
+    def parse_codespan(self, m, state) -> int:
+        marker = m.group(0)
+        # require same marker with same length at end
+
+        pattern = re.compile(r"(.*?(?:[^`]))" + marker + r"(?!`)", re.S)
+
+        pos = m.end()
+        m = pattern.match(state.src, pos)
+        if m:
+            end_pos = m.end()
+            code = m.group(1)
+            # Line endings are treated like spaces
+            code = code.replace("\n", " ")
+            if len(code.strip()):
+                if code.startswith(" ") and code.endswith(" "):
+                    code = code[1:-1]
+            # removed the escaping here
+            state.append_token({"type": "codespan", "raw": code})
+            return end_pos
+        else:
+            state.append_token({"type": "text", "raw": marker})
+            return pos
 
 
 def _replace_issue_number_with_links(url, text):
@@ -147,7 +178,9 @@ class CHANGELOG:
 
         self.text = text
 
-        markdown = mistune.create_markdown(renderer=None)
+        markdown = mistune.Markdown(
+            renderer=None, inline=CustomInlineParser(hard_wrap=False), plugins=None
+        )
         self.tree = markdown(text)
 
         versioner = VersionerSetup(project_root=project_root)
@@ -169,7 +202,6 @@ class CHANGELOG:
             li = sorted([ListItem(ch) for ch in list_["children"]])
             tree = deepcopy(self.tree)
             tree[idx]["children"] = [item.token for item in li]
-
             return renderer(tree, state=BlockState())
         else:
             # list is empty, nothing to sort

@@ -2,6 +2,7 @@
 
 ## 0.1.5dev
 * [Fix] Moving back to master/main after uploading a package
+* [Fix] No longer escaping characters in `code fences` when sorting `CHANGELOG`
 
 ## 0.1.4 (2023-01-17)
 
