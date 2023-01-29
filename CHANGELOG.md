@@ -1,6 +1,7 @@
 # CHANGELOG
 
 ## 0.1.6dev
+* [Feature] `pkgmt release` prints confirmation message upon upload
 
 ## 0.1.5 (2023-01-28)
 
