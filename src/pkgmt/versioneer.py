@@ -5,6 +5,7 @@ import sys
 import shutil
 import subprocess
 from pathlib import Path
+import click
 
 from pkgmt.changelog import expand_github_from_changelog, CHANGELOG
 from pkgmt.versioner.versionernonsetup import VersionerNonSetup
@@ -224,3 +225,8 @@ def upload(tag, production):
             call(["git", "checkout", "master"])
         except subprocess.CalledProcessError:
             pass
+
+    if production:
+        click.secho("Published to PyPI.", fg="green")
+    else:
+        click.secho("Published to PyPI test server.", fg="yellow")
