@@ -73,7 +73,7 @@ def validate_version_string(version):
     return complete_version_string(version)
 
 
-def version(project_root=".", tag=True, version_package=None, yes=False):
+def version(project_root=".", tag=True, version_package=None, yes=False, push=True):
     """
     Create a new version (projects with setup.py) :
     1. version_package will be None
@@ -158,7 +158,10 @@ def version(project_root=".", tag=True, version_package=None, yes=False):
     # Replace version number and create tag
     print("Commiting release version: {}".format(release))
     versioner.commit_version(
-        release, msg_template="{package_name} release {new_version}", tag=tag
+        release,
+        msg_template="{package_name} release {new_version}",
+        tag=tag,
+        push=push,
     )
 
     # Create a new dev version and save it
@@ -175,7 +178,9 @@ def version(project_root=".", tag=True, version_package=None, yes=False):
         tag=False,
     )
 
-    call(["git", "push", "--no-verify"])
+    if push:
+        call(["git", "push", "--no-verify"])
+
     print("Version {} was created, you are now in {}".format(release, bumped_version))
 
 

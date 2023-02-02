@@ -333,7 +333,7 @@ def test_add_changelog_new_dev_section_rst_non_setup(backup_another_package):
         ["0.1", "0.1.0", "0.1.1dev"],
     ],
 )
-def test_release(backup_package_name, monkeypatch, submitted, stored, dev):
+def test_version(backup_package_name, monkeypatch, submitted, stored, dev):
     mock = Mock()
     mock_input = Mock()
     mock_input.side_effect = [submitted, "y"]
@@ -363,7 +363,36 @@ def test_release(backup_package_name, monkeypatch, submitted, stored, dev):
     )
 
 
-def test_release_yes(backup_package_name, monkeypatch):
+def test_version_no_push(backup_package_name, monkeypatch):
+    submitted, stored, dev = "0.1", "0.1.0", "0.1.1dev"
+    mock = Mock()
+    mock_input = Mock()
+    mock_input.side_effect = [submitted, "y"]
+
+    monkeypatch.setattr(versioneer, "call", mock)
+    monkeypatch.setattr(abstractversioner, "call", mock)
+    monkeypatch.setattr(versioneer, "_input", mock_input)
+
+    versioneer.version(push=False)
+
+    assert mock.call_args_list == [
+        _call(["git", "add", "--all"]),
+        _call(["git", "status"]),
+        _call(["git", "commit", "-m", f"package_name release {stored}"]),
+        _call(["git", "tag", "-a", stored, "-m", f"package_name release {stored}"]),
+        _call(["git", "add", "--all"]),
+        _call(["git", "status"]),
+        _call(["git", "commit", "-m", f"Bumps up package_name to version {dev}"]),
+    ]
+
+    today = datetime.now().strftime("%Y-%m-%d")
+    assert Path("CHANGELOG.md").read_text() == (
+        f"# CHANGELOG\n\n## {dev}\n\n## {stored} ({today})\n\n"
+        "* [Fix] Fixes [#1](https://github.com/edublancas/pkgmt/issues/1)\n"
+    )
+
+
+def test_version_yes(backup_package_name, monkeypatch):
     mock = Mock()
     monkeypatch.setattr(versioneer, "call", mock)
     monkeypatch.setattr(abstractversioner, "call", mock)
@@ -399,7 +428,7 @@ def test_release_yes(backup_package_name, monkeypatch):
         ["0.1", "0.1.0", "0.1.1dev"],
     ],
 )
-def test_release_non_setup(backup_another_package, monkeypatch, submitted, stored, dev):
+def test_version_non_setup(backup_another_package, monkeypatch, submitted, stored, dev):
     mock = Mock()
     mock_input = Mock()
     mock_input.side_effect = [submitted, "y"]
@@ -437,7 +466,7 @@ def test_release_non_setup(backup_another_package, monkeypatch, submitted, store
         ["1.2.5rc1", "1.2.5rc1", "1.2.5dev"],
     ],
 )
-def test_pre_release(backup_package_name, monkeypatch, submitted, stored, dev):
+def test_version_pre_release(backup_package_name, monkeypatch, submitted, stored, dev):
     mock = Mock()
     mock_input = Mock()
     mock_input.side_effect = [submitted, "y"]
@@ -476,7 +505,7 @@ def test_pre_release(backup_package_name, monkeypatch, submitted, stored, dev):
         ["1.2.5rc1", "1.2.5rc1", "1.2.5dev"],
     ],
 )
-def test_pre_release_non_setup(
+def test_version_pre_release_non_setup(
     backup_another_package, monkeypatch, selected, stored, dev
 ):
     mock = Mock()
@@ -508,7 +537,7 @@ def test_pre_release_non_setup(
     )
 
 
-def test_release_with_no_changelog(backup_package_name, monkeypatch, capsys):
+def test_version_with_no_changelog(backup_package_name, monkeypatch, capsys):
     Path("CHANGELOG.md").unlink()
 
     mock = Mock()
@@ -537,7 +566,7 @@ def test_release_with_no_changelog(backup_package_name, monkeypatch, capsys):
     ]
 
 
-def test_release_with_no_changelog_non_setup(
+def test_version_with_no_changelog_non_setup(
     backup_another_package, monkeypatch, capsys
 ):
     Path("CHANGELOG.md").unlink()

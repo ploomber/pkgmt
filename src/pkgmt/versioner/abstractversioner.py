@@ -114,10 +114,19 @@ class AbstractVersioner(abc.ABC):
 
         return new_version
 
-    def commit_version(self, new_version, msg_template, tag=False):
+    def commit_version(self, new_version, msg_template, tag=False, push=True):
         """
         Replaces version in  __init__ and optionally creates a tag in the git
         repository (also saves a commit)
+
+        Parameters
+        ----------
+        tag: bool, default=False
+            If True, it adds ``new_version`` as tag.
+
+        push : bool, default=True
+            If True, it pushes the commit with ``new_version`` and the tag. Ignored if
+            ``tag=False``
         """
         current = self.current_version()
 
@@ -144,8 +153,9 @@ class AbstractVersioner(abc.ABC):
             )
             call(["git", "tag", "-a", new_version, "-m", message])
 
-            print("Pushing tags...")
-            call(["git", "push", "origin", new_version, "--no-verify"])
+            if push:
+                print("Pushing tags...")
+                call(["git", "push", "origin", new_version, "--no-verify"])
 
     def update_changelog_release(self, new_version):
         """Updates changelog file, adding a new section"""
