@@ -1,8 +1,10 @@
 # CHANGELOG
 
-## 0.1.6dev
+## 0.1.6 (2023-02-02)
+
 * [Feature] `pkgmt release` prints confirmation message upon upload
 * [Feature] Adds `--no-push` to `pkgmt version` to skip `git push`
+
 ## 0.1.5 (2023-01-28)
 
 * [Fix] Moving back to master/main after uploading a package
