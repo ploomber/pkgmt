@@ -83,7 +83,7 @@ def hook(uninstall):
     default=False,
     help="Do not ask for confirmation",
 )
-@click.option('--push/--no-push', default=True)
+@click.option("--push/--no-push", default=True)
 def version(yes, push):
     """Create a new package version"""
     versioneer.version(project_root=".", tag=True, yes=yes, push=push)

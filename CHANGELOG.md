@@ -2,6 +2,8 @@
 
 ## 0.1.7dev
 
+* [Feature] Adds `pkgmt.github` module with a function to determine the repository URL and branch for a readthedocs build
+
 ## 0.1.6 (2023-02-02)
 
 * [Feature] `pkgmt release` prints confirmation message upon upload
