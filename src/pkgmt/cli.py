@@ -66,10 +66,18 @@ def check():
     default=False,
     help="Uninstall hook",
 )
-def hook(uninstall):
+@click.option(
+    "--run",
+    is_flag=True,
+    default=False,
+    help="Run hook without installing it",
+)
+def hook(uninstall, run):
     """Install pre-push hook"""
 
-    if uninstall:
+    if run:
+        hook_.run_hook()
+    elif uninstall:
         hook_.uninstall_hook()
         click.echo("hook uninstalled.")
     else:
