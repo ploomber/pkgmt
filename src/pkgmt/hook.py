@@ -1,7 +1,9 @@
+import subprocess
 from pathlib import Path
 import stat
 import click
 import shutil
+from contextlib import contextmanager
 
 
 pre_push_hook = """\
@@ -10,6 +12,18 @@ pre_push_hook = """\
 from pathlib import Path
 import sys
 import subprocess
+
+try:
+    import jupytext
+except ModuleNotFoundError:
+    jupytext = None
+
+
+try:
+    import nbqa
+except ModuleNotFoundError:
+    nbqa = None
+
 
 def find_root():
     current = Path().resolve()
@@ -22,14 +36,38 @@ def find_root():
 
     return str(current)
 
+
 current = find_root()
 
-print(f'Running flake8 from {current!r}')
-res = subprocess.run(['flake8'])
+print("*** Running: flake8 ***")
+res = subprocess.run(['flake8'], cwd=current)
+
+error = False
 
 if res.returncode:
+    error = True
+
+if not nbqa:
+    print("nbqa is missing, flake8 won't run on notebooks. "
+          "Fix it with: pip install nbqa")
+
+if not jupytext:
+    print("jupytext is missing, flake8 won't run on notebooks. "
+          "Fix it with: pip install jupytext")
+
+
+if nbqa and jupytext:
+    print("*** Running: nbqa flake8 ***")
+    res_nb = subprocess.run(["nbqa", "flake8", "."], cwd=current)
+
+    if res_nb.returncode:
+        error = True
+
+if error:
     print()
     sys.exit('***flake8 returned errors. Fix and push again.***')
+
+print("flake8 passed!")
 """
 
 
@@ -73,3 +111,21 @@ def install_hook():
 
 def uninstall_hook():
     _delete_hook(Path(".git", "hooks", "pre-push"))
+
+
+def run_hook():
+    """Run hook without installing it"""
+    with tmp_file() as path:
+        path.write_text(pre_push_hook)
+        subprocess.run(["python", "_pkgmt_hook.py"])
+
+
+@contextmanager
+def tmp_file():
+    path = Path("_pkgmt_hook.py")
+
+    try:
+        yield path
+    finally:
+        if path.exists():
+            path.unlink()
