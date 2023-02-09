@@ -2,6 +2,9 @@
 
 ## 0.1.8dev
 
+* [Feature] Adds `pkgmt hook --run` for a one-time run
+* [Feature] `pkgmt hook` Now runs `flake8` on notebooks via `nbqa`
+
 ## 0.1.7 (2023-02-09)
 
 * [Feature] Adds `pkgmt.github` module with a function to determine the repository URL and branch for a readthedocs build
