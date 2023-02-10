@@ -92,9 +92,10 @@ def hook(uninstall, run):
     help="Do not ask for confirmation",
 )
 @click.option("--push/--no-push", default=True)
-def version(yes, push):
+@click.option("--tag/--no-tag", default=True)
+def version(yes, push, tag):
     """Create a new package version"""
-    versioneer.version(project_root=".", tag=True, yes=yes, push=push)
+    versioneer.version(project_root=".", tag=tag, yes=yes, push=push)
 
 
 @cli.command()

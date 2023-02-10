@@ -1,6 +1,7 @@
 # CHANGELOG
 
 ## 0.1.9dev
+* [Feature] Adds `--no-tag` option to `pkgmt version`
 
 ## 0.1.8 (2023-02-09)
 
