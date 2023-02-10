@@ -2,6 +2,7 @@
 
 ## 0.1.10dev
 
+* [API Change] `pkgmt version` pushes when `--no-tag` is passed
 ## 0.1.9 (2023-02-10)
 
 * [Feature] Adds `--no-tag` option to `pkgmt version`

@@ -125,8 +125,7 @@ class AbstractVersioner(abc.ABC):
             If True, it adds ``new_version`` as tag.
 
         push : bool, default=True
-            If True, it pushes the commit with ``new_version`` and the tag. Ignored if
-            ``tag=False``
+            If True, it pushes the commit with ``new_version`` and the tag
         """
         current = self.current_version()
 
@@ -156,6 +155,10 @@ class AbstractVersioner(abc.ABC):
             if push:
                 print("Pushing tags...")
                 call(["git", "push", "origin", new_version, "--no-verify"])
+        elif push:
+            # no tag but push
+            print("Pushing...")
+            call(["git", "push", "--no-verify"])
 
     def update_changelog_release(self, new_version):
         """Updates changelog file, adding a new section"""

@@ -169,6 +169,7 @@ def test_commit_version_no_tag(backup_package_name, monkeypatch):
         _call(["git", "add", "--all"]),
         _call(["git", "status"]),
         _call(["git", "commit", "-m", "package_name release 0.2"]),
+        _call(["git", "push", "--no-verify"]),
     ]
 
     assert '__version__ = "0.2"' in (v.PACKAGE / "__init__.py").read_text()
@@ -189,6 +190,7 @@ def test_commit_version_no_tag_non_setup(backup_another_package, monkeypatch):
         _call(["git", "add", "--all"]),
         _call(["git", "status"]),
         _call(["git", "commit", "-m", "app release 0.2"]),
+        _call(["git", "push", "--no-verify"]),
     ]
 
     assert '__version__ = "0.2"' in (v.PACKAGE / "_version.py").read_text()

@@ -203,10 +203,8 @@ def version(
         bumped_version,
         msg_template="Bumps up {package_name} to version {new_version}",
         tag=False,
+        push=push,
     )
-
-    if push:
-        call(["git", "push", "--no-verify"])
 
     print("Version {} was created, you are now in {}".format(release, bumped_version))
 
