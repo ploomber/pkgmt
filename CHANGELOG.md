@@ -1,6 +1,7 @@
 # CHANGELOG
 
-## 0.1.9dev
+## 0.1.9 (2023-02-10)
+
 * [Feature] Adds `--no-tag` option to `pkgmt version`
 * [Feature] Adds `--target stable` option to `pkgmt version`
 
