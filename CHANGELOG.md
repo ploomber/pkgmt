@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 0.1.10dev
+## 0.2dev
 
 * [API Change] `pkgmt version` pushes when `--no-tag` is passed
 ## 0.1.9 (2023-02-10)
