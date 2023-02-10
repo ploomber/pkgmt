@@ -93,9 +93,10 @@ def hook(uninstall, run):
 )
 @click.option("--push/--no-push", default=True)
 @click.option("--tag/--no-tag", default=True)
-def version(yes, push, tag):
+@click.option("--target", default=None)
+def version(yes, push, tag, target):
     """Create a new package version"""
-    versioneer.version(project_root=".", tag=tag, yes=yes, push=push)
+    versioneer.version(project_root=".", tag=tag, yes=yes, push=push, target=target)
 
 
 @cli.command()

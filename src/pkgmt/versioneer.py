@@ -73,8 +73,31 @@ def validate_version_string(version):
     return complete_version_string(version)
 
 
-def version(project_root=".", tag=True, version_package=None, yes=False, push=True):
+def version(
+    project_root=".", tag=True, version_package=None, yes=False, push=True, target=None
+):
     """
+
+    Parameters
+    ----------
+    tag : bool, default=True
+        Tags the commit with the stable version
+
+    yes : bool, default=False
+        Skips user prompt before applying changes
+
+    push : bool, default=True
+        Pushes the changes to the remote repository
+
+    target : {None, "stable"}, default=None
+        If None, it assumes the repository is in a dev version, so it creates a
+        stable version and a new dev version. If stable, it assumes the repo is in a
+        dev version and creates a stable version (skipping bumping to a new dev
+        version)
+
+
+    Notes
+    -----
     Create a new version (projects with setup.py) :
     1. version_package will be None
     2. Set new stable version in package_name/__init__.py
@@ -163,6 +186,10 @@ def version(project_root=".", tag=True, version_package=None, yes=False, push=Tr
         tag=tag,
         push=push,
     )
+
+    if target == "stable":
+        print(f"Version {release} was created.")
+        return
 
     # Create a new dev version and save it
     bumped_version = versioner.bump_up_version()

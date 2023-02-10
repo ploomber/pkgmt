@@ -24,18 +24,19 @@ extensions = ["md"]
 
 
 @pytest.mark.parametrize(
-    "args, yes, push, tag",
+    "args, yes, push, tag, target",
     [
-        [["version"], False, True, True],
-        [["version", "--yes"], True, True, True],
-        [["version", "--yes", "--push"], True, True, True],
-        [["version", "--push"], False, True, True],
-        [["version", "--no-push"], False, False, True],
-        [["version", "--no-push", "--tag"], False, False, True],
-        [["version", "--push", "--no-tag"], False, True, False],
+        [["version"], False, True, True, None],
+        [["version", "--yes"], True, True, True, None],
+        [["version", "--yes", "--push"], True, True, True, None],
+        [["version", "--push"], False, True, True, None],
+        [["version", "--no-push"], False, False, True, None],
+        [["version", "--no-push", "--tag"], False, False, True, None],
+        [["version", "--push", "--no-tag"], False, True, False, None],
+        [["version", "--target", "stable"], False, True, True, "stable"],
     ],
 )
-def test_version(backup_package_name, monkeypatch, args, yes, push, tag):
+def test_version(backup_package_name, monkeypatch, args, yes, push, tag, target):
     mock = Mock()
 
     monkeypatch.setattr(cli.versioneer, "version", mock)
@@ -43,4 +44,6 @@ def test_version(backup_package_name, monkeypatch, args, yes, push, tag):
     runner = CliRunner()
     runner.invoke(cli.cli, args)
 
-    mock.assert_called_once_with(project_root=".", tag=tag, yes=yes, push=push)
+    mock.assert_called_once_with(
+        project_root=".", tag=tag, yes=yes, push=push, target=target
+    )
