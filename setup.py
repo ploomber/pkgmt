@@ -25,18 +25,23 @@ def read(*names, **kwargs):
 
 
 REQUIRES = [
+    # core dependencies
     "toml",
     "pyyaml",
     "requests",
     "click",
     "invoke",
+
+    # dependencies for linting and formatting
+    "black",
+    "nbqa",
+    "flake8",
+    "jupytext",
 ]
+
 
 DEV = [
     "pytest",
-    "black",
-    "flake8",
-    "invoke",
     "twine",
     # optional dependency for test module
     "jupytext",

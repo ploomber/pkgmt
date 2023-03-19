@@ -8,6 +8,7 @@ from invoke import Context, UnexpectedExit
 from pkgmt import links, config, test, changelog, hook as hook_, versioneer
 from pkgmt import new as new_
 from pkgmt import dev
+from pkgmt import formatting
 
 
 @click.group()
@@ -146,3 +147,15 @@ def doc():
         dev.doc(Context())
     except UnexpectedExit as e:
         raise SystemExit(f"Error running: {e.result.command}") from e
+
+
+@cli.command()
+def format():
+    """Run black on .py files and notebooks (.ipynb, .md)"""
+    formatting.format()
+
+
+@cli.command()
+def lint():
+    """Lint .py files and notebooks (.ipynb, .md) with flake8"""
+    hook_.run_hook()
