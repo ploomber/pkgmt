@@ -117,7 +117,7 @@ def run_hook():
     """Run hook without installing it"""
     with tmp_file() as path:
         path.write_text(pre_push_hook)
-        subprocess.run(["python", "_pkgmt_hook.py"])
+        return subprocess.run(["python", "_pkgmt_hook.py"]).returncode
 
 
 @contextmanager

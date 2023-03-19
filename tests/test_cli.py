@@ -47,3 +47,20 @@ def test_version(backup_package_name, monkeypatch, args, yes, push, tag, target)
     mock.assert_called_once_with(
         project_root=".", tag=tag, yes=yes, push=push, target=target
     )
+
+
+def test_lint(tmp_empty):
+    Path("file.py").write_text(
+        """
+def stuff():
+    pass
+
+
+
+"""
+    )
+
+    runner = CliRunner()
+    result = runner.invoke(cli.cli, ["lint"])
+    assert result.exit_code == 1
+    assert "Error linting" in result.output

@@ -158,4 +158,7 @@ def format():
 @cli.command()
 def lint():
     """Lint .py files and notebooks (.ipynb, .md) with flake8"""
-    hook_.run_hook()
+    returncode = hook_.run_hook()
+
+    if returncode:
+        raise SystemExit("Error linting")

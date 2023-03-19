@@ -2,6 +2,8 @@
 
 ## 0.2.3dev
 
+* [Fix] `pkgmt lint` exists with `1` return code if linting fails
+
 ## 0.2.2 (2023-03-19)
 
 * [Feature] Adds `pkgmt format` and `pkgmt lint`
