@@ -39,7 +39,7 @@ def find_root():
 
 current = find_root()
 
-print("*** Running: flake8 ***")
+print("Running: flake8")
 res = subprocess.run(['flake8'], cwd=current)
 
 error = False
@@ -57,7 +57,7 @@ if not jupytext:
 
 
 if nbqa and jupytext:
-    print("*** Running: nbqa flake8 ***")
+    print("Running: nbqa flake8 .")
     res_nb = subprocess.run(["nbqa", "flake8", "."], cwd=current)
 
     if res_nb.returncode:
