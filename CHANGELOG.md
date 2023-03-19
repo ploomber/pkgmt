@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 0.2.1dev
+## 0.2.1 (2023-03-18)
 
 * [Feature] Adds `pkgmt setup` and `pkgmt doc`
 
