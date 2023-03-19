@@ -371,7 +371,6 @@ __version__ = "0.1.2dev"
     ids=["unsorted", "empty"],
 )
 def test_sort_last_section(text, expected):
-
     text_sorted = changelog.CHANGELOG(text).sort_last_section()
 
     assert text_sorted == expected

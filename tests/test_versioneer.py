@@ -120,7 +120,6 @@ def test_release_version_non_setup(move_to_another_package):
     ],
 )
 def test_ignore_special_folders(folder_name, backup_package_name):
-
     Path("src", folder_name).mkdir()
 
     name, package = VersionerSetup().find_package()

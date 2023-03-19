@@ -159,7 +159,6 @@ def _find_broken_links(mapping, broken_http_codes):
             except Exception as exc:
                 print("%r generated an exception: %s" % (url, exc))
             else:
-
                 if response.broken:
                     broken.append(response)
 
