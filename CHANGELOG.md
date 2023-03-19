@@ -4,6 +4,7 @@
 
 ## 0.2.2 (2023-03-19)
 
+* [Feature] Adds `pkgmt format` and `pkgmt lint`
 ## 0.2.1 (2023-03-18)
 
 * [Feature] Adds `pkgmt setup` and `pkgmt doc`
