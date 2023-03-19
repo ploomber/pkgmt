@@ -1,12 +1,13 @@
 # CHANGELOG
 
-## 0.2.3dev
+## 0.2.3 (2023-03-19)
 
 * [Fix] `pkgmt lint` exists with `1` return code if linting fails
 
 ## 0.2.2 (2023-03-19)
 
 * [Feature] Adds `pkgmt format` and `pkgmt lint`
+
 ## 0.2.1 (2023-03-18)
 
 * [Feature] Adds `pkgmt setup` and `pkgmt doc`
