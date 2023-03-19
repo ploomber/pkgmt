@@ -29,6 +29,7 @@ REQUIRES = [
     "pyyaml",
     "requests",
     "click",
+    "invoke",
 ]
 
 DEV = [

@@ -2,6 +2,8 @@
 
 ## 0.2.1dev
 
+* [Feature] Adds `pkgmt setup` and `pkgmt doc`
+
 ## 0.2.0 (2023-02-10)
 
 * [API Change] `pkgmt version` pushes when `--no-tag` is passed

@@ -2,9 +2,12 @@ import sys
 from pathlib import Path
 
 import click
+from invoke import Context, UnexpectedExit
+
 
 from pkgmt import links, config, test, changelog, hook as hook_, versioneer
 from pkgmt import new as new_
+from pkgmt import dev
 
 
 @click.group()
@@ -110,3 +113,36 @@ def version(yes, push, tag, target):
 def release(tag, production):
     """Release this package from a given tag"""
     versioneer.upload(tag, production)
+
+
+@cli.command()
+@click.option(
+    "--doc",
+    is_flag=True,
+    default=False,
+    help="Install documentation dependencies",
+)
+def setup(doc):
+    """Setup development environment
+
+    Create conda environment and install dependencies:
+
+        $ pkgmt setup
+
+    Install dependencies required to build documentation:
+
+        $ pkgmt setup --doc
+    """
+    try:
+        dev.setup(Context(), doc=doc)
+    except UnexpectedExit as e:
+        raise SystemExit(f"Error running: {e.result.command}") from e
+
+
+@cli.command()
+def doc():
+    """Build docs"""
+    try:
+        dev.doc(Context())
+    except UnexpectedExit as e:
+        raise SystemExit(f"Error running: {e.result.command}") from e
