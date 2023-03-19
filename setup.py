@@ -31,7 +31,6 @@ REQUIRES = [
     "requests",
     "click",
     "invoke",
-
     # dependencies for linting and formatting
     "black",
     "nbqa",
