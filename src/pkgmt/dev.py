@@ -92,8 +92,14 @@ def setup(c, version=None, doc=False):
 
 
 @task()
-def doc(c):
+def doc(c, clean):
     _check()
+
+    if clean:
+        path_to_build = Path("doc", "_build")
+
+        if path_to_build.exists():
+            shutil.rmtree(str(path_to_build))
 
     if Path("doc", "conf.py").exists():
         with c.cd("doc"):
@@ -102,7 +108,7 @@ def doc(c):
                 "-d _build/doctrees -D language=en . _build/html"
             )
     elif Path("doc", "_config.yml").exists():
-        c.run("jupyter-book build doc/")
+        c.run("jupyter-book build doc/ --warningiserror --keep-going")
     else:
         raise CommandError(
             "This command only works for projects with a doc/conf.py "

@@ -141,10 +141,16 @@ def setup(doc):
 
 
 @cli.command()
-def doc():
+@click.option(
+    "--clean",
+    is_flag=True,
+    default=False,
+    help="Perform a clean build",
+)
+def doc(clean):
     """Build docs"""
     try:
-        dev.doc(Context())
+        dev.doc(Context(), clean=clean)
     except UnexpectedExit as e:
         raise SystemExit(f"Error running: {e.result.command}") from e
 

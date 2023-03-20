@@ -2,6 +2,8 @@
 
 ## 0.2.4dev
 
+* [Feature] Adds `--clean` option to `pkgmt doc`
+
 ## 0.2.3 (2023-03-19)
 
 * [Fix] `pkgmt lint` exists with `1` return code if linting fails
