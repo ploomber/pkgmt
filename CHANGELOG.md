@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 0.2.4dev
+## 0.2.4 (2023-03-19)
 
 * [Feature] Adds `--clean` option to `pkgmt doc`
 
