@@ -1,5 +1,7 @@
 # CHANGELOG
 
+## 0.2.6dev
+
 ## 0.2.5 (2023-03-22)
 
 * [Feature] Printing `package_name` at the end of the `setup` command
