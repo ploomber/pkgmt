@@ -88,6 +88,7 @@ def setup(c, version=None, doc=False):
     if "site-packages" in r.stdout:
         raise ValueError(f"Error! {r.stdout}")
 
+    print(f"Package name: {pkg_name}")
     print(f"Done! Activate your environment with:\nconda activate {env_name}")
 
 
