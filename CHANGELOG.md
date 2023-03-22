@@ -1,8 +1,9 @@
 # CHANGELOG
 
-## 0.2.5dev
+## 0.2.5 (2023-03-22)
 
 * [Feature] Printing `package_name` at the end of the `setup` command
+
 ## 0.2.4 (2023-03-19)
 
 * [Feature] Adds `--clean` option to `pkgmt doc`
