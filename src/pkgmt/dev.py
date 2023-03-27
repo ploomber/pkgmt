@@ -82,7 +82,7 @@ def setup(c, version=None, doc=False):
 
     r = c.run(
         f"{conda_hook} && conda activate {env_name} && "
-        f"python -c 'import {pkg_name}; print({pkg_name})'"
+        f'python -c "import {pkg_name}; print({pkg_name})"'
     )
 
     if "site-packages" in r.stdout:
