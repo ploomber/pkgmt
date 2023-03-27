@@ -1,5 +1,7 @@
 # CHANGELOG
 
+## 0.2.7dev
+
 ## 0.2.6 (2023-03-27)
 
 * [Fix] Fixes error when running `pkgmt setup` on Windows
