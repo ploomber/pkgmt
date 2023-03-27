@@ -82,6 +82,7 @@ def setup(c, version=None, doc=False):
 
     r = c.run(
         f"{conda_hook} && conda activate {env_name} && "
+        # fix for windows: https://github.com/ploomber/pkgmt/pull/36
         f'python -c "import {pkg_name}; print({pkg_name})"'
     )
 
