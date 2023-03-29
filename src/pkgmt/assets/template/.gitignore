@@ -1,5 +1,12 @@
+# documentation builds
 doc/_build
+
+# vscode stuff
 .vscode
+.virtual_documents
+
+# macOS files
+.DS_Store
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
