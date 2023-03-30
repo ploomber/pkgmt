@@ -1,6 +1,8 @@
 # CHANGELOG
 
-## 0.2.8dev
+## 0.2.8 (2023-03-30)
+
+* [Feature] There are no new features, this is just a release to test our GitHub Actions scripts
 
 ## 0.2.7 (2023-03-30)
 
