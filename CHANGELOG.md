@@ -1,14 +1,16 @@
 # CHANGELOG
 
-## 0.2.10dev
+## 0.2.10 (2023-03-30)
+
+* [Feature] Test release, no changes
 
 ## 0.2.9 (2023-03-30)
 
-* [Feature] Another test
+* [Feature] Test release, no changes
 
 ## 0.2.8 (2023-03-30)
 
-* [Feature] There are no new features, this is just a release to test our GitHub Actions scripts
+* [Feature] Test release, no changes
 
 ## 0.2.7 (2023-03-30)
 
