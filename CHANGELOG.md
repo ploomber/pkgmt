@@ -1,6 +1,8 @@
 # CHANGELOG
 
-## 0.2.9dev
+## 0.2.9 (2023-03-30)
+
+* [Feature] Another test
 
 ## 0.2.8 (2023-03-30)
 
