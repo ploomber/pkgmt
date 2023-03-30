@@ -1,5 +1,7 @@
 # CHANGELOG
 
+## 0.2.8dev
+
 ## 0.2.7 (2023-03-30)
 
 * [Feature] Adds `--yes` argument to `pkgmt release`
