@@ -661,6 +661,27 @@ def test_upload(backup_package_name, monkeypatch, production):
     )
 
 
+def test_upload_yes(backup_package_name, monkeypatch):
+    mock = Mock()
+    mock_delete = Mock()
+
+    monkeypatch.setattr(versioneer, "call", mock)
+    monkeypatch.setattr(versioneer, "delete_dirs", mock_delete)
+
+    versioneer.upload(tag="0.1", production=True, yes=True)
+
+    assert mock.call_args_list == [
+        _call(["git", "checkout", "0.1"]),
+        _call(["python", "setup.py", "bdist_wheel", "sdist"]),
+        _call(["twine", "upload", "dist/*"]),
+        _call(["git", "checkout", "main"]),
+    ]
+
+    mock_delete.assert_called_once_with(
+        "dist", "build", str(Path("src", "package_name.egg-info"))
+    )
+
+
 @pytest.mark.parametrize("selected", ["y", "n", "y1.2"])
 def test_invalid_version_string(backup_package_name, monkeypatch, selected):
     mock = Mock()

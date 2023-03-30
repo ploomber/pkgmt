@@ -111,9 +111,15 @@ def version(yes, push, tag, target):
     default=False,
     help="Upload to the production PyPI server",
 )
-def release(tag, production):
+@click.option(
+    "--yes",
+    is_flag=True,
+    default=False,
+    help="Do not ask for confirmation",
+)
+def release(tag, production, yes):
     """Release this package from a given tag"""
-    versioneer.upload(tag, production)
+    versioneer.upload(tag, production, yes=yes)
 
 
 @cli.command()

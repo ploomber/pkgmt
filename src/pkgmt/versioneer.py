@@ -209,7 +209,7 @@ def version(
     print("Version {} was created, you are now in {}".format(release, bumped_version))
 
 
-def upload(tag, production):
+def upload(tag, production, yes=False):
     """
     Check outs a tag, uploads to PyPI
     """
@@ -219,10 +219,11 @@ def upload(tag, production):
     versioner = VersionerSetup()
     current = versioner.current_version()
 
-    input_confirm(
-        "Version in {} tag is {}. Do you want to continue?".format(tag, current),
-        abort=True,
-    )
+    if not yes:
+        input_confirm(
+            "Version in {} tag is {}. Do you want to continue?".format(tag, current),
+            abort=True,
+        )
 
     # create distribution
     delete_dirs("dist", "build", f"{versioner.PACKAGE}.egg-info")

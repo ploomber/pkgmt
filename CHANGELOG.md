@@ -2,6 +2,8 @@
 
 ## 0.2.7dev
 
+* [Feature] Adds `--yes` argument to `pkgmt release`
+
 ## 0.2.6 (2023-03-27)
 
 * [Fix] Fixes error when running `pkgmt setup` on Windows
