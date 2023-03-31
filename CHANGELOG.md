@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 0.2.11dev
+## 0.2.11 (2023-03-30)
 
 * [Feature] Test release, no changes
 
