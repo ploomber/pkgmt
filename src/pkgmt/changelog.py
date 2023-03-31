@@ -65,11 +65,17 @@ def _replace_issue_number_with_links(url, text):
     )
 
 
+def _replace_handles_with_links(text):
+    pattern = r"(?<!\[)@(\w+)(?!\]\(https:\/\/github\.com\/\w+\))"
+    repl = r"[\g<0>](https://github.com/\g<1>)"
+    return re.sub(pattern, repl, text)
+
+
 def _expand_github_from_text(text):
     """Convert strings with the #{number} format into their"""
     cfg = config.load()
     url = f'https://github.com/{cfg["github"]}/issues/'
-    return _replace_issue_number_with_links(url, text)
+    return _replace_handles_with_links(_replace_issue_number_with_links(url, text))
 
 
 def expand_github_from_changelog(path="CHANGELOG.md"):

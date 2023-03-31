@@ -37,9 +37,21 @@ def test_replace_issue_numbers_with_links(input, output):
             "Issue [#535](https://github.com/edublancas/pkgmt/issues/535)",
         ),
         (
+            "Issue [#535](https://github.com/edublancas/pkgmt/issues/535)",
+            "Issue [#535](https://github.com/edublancas/pkgmt/issues/535)",
+        ),
+        (
             "Multiline\ntext (#123)",
             "Multiline\ntext ([#123]"
             "(https://github.com/edublancas/pkgmt/issues/123))",
+        ),
+        (
+            "by @edublancas",
+            "by [@edublancas](https://github.com/edublancas)",
+        ),
+        (
+            "by [@edublancas](https://github.com/edublancas)",
+            "by [@edublancas](https://github.com/edublancas)",
         ),
     ],
 )
