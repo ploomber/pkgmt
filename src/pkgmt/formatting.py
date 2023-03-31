@@ -60,4 +60,4 @@ def format():
         print()
         sys.exit("***black returned errors.***")
 
-    print("black passed!")
+    print("Finished formatting with black!")

@@ -1,6 +1,7 @@
 # CHANGELOG
 
 ## 0.2.12dev
+* [Fix] Updates inaccurate confirmation message when running `pkgmt format`
 
 ## 0.2.11 (2023-03-30)
 
