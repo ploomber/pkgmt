@@ -49,7 +49,7 @@ def test_version(backup_package_name, monkeypatch, args, yes, push, tag, target)
     )
 
 
-def test_lint(tmp_empty):
+def test_lint_error(tmp_empty):
     Path("file.py").write_text(
         """
 def stuff():
@@ -63,4 +63,4 @@ def stuff():
     runner = CliRunner()
     result = runner.invoke(cli.cli, ["lint"])
     assert result.exit_code == 1
-    assert "Error linting" in result.output
+    assert "Could not find project root" in result.output

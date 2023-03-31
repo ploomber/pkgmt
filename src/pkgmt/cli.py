@@ -80,7 +80,7 @@ def hook(uninstall, run):
     """Install pre-push hook"""
 
     if run:
-        hook_.run_hook()
+        hook_._lint()
     elif uninstall:
         hook_.uninstall_hook()
         click.echo("hook uninstalled.")
@@ -170,7 +170,7 @@ def format():
 @cli.command()
 def lint():
     """Lint .py files and notebooks (.ipynb, .md) with flake8"""
-    returncode = hook_.run_hook()
+    returncode = hook_._lint()
 
     if returncode:
         raise SystemExit("Error linting")

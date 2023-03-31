@@ -1,15 +1,7 @@
-import subprocess
 from pathlib import Path
 import stat
 import click
 import shutil
-from contextlib import contextmanager
-
-
-pre_push_hook = """\
-#!/usr/bin/env python3
-
-from pathlib import Path
 import sys
 import subprocess
 
@@ -28,46 +20,76 @@ except ModuleNotFoundError:
 def find_root():
     current = Path().resolve()
 
-    while not (current / 'pyproject.toml').exists():
+    while not (current / "pyproject.toml").exists():
         if current == current.parent:
-            sys.exit('Could not find project root.')
+            sys.exit("Could not find project root.")
 
         current = current.parent
 
     return str(current)
 
 
-current = find_root()
+class Runner:
+    def __init__(self, cwd) -> None:
+        self._cwd = cwd
+        self._errors = []
 
-print("Running: flake8")
-res = subprocess.run(['flake8'], cwd=current)
+    def run(self, cmd, fix):
+        cmd_ = " ".join(cmd)
+        header = "=" * 20
+        print(f"{header} Running: {cmd_} {header}")
+        res = subprocess.run(cmd, cwd=self._cwd)
 
-error = False
+        if res.returncode:
+            self._errors.append((cmd_, fix))
 
-if res.returncode:
-    error = True
+    def check(self):
+        if self._errors:
+            for cmd, fix in self._errors:
+                print(f"The following command failed: {cmd}\\nTo fix it: {fix}")
 
-if not nbqa:
-    print("nbqa is missing, flake8 won't run on notebooks. "
-          "Fix it with: pip install nbqa")
-
-if not jupytext:
-    print("jupytext is missing, flake8 won't run on notebooks. "
-          "Fix it with: pip install jupytext")
+            return 1
+        else:
+            print("All checks passed!")
+            return 0
 
 
-if nbqa and jupytext:
-    print("Running: nbqa flake8 .")
-    res_nb = subprocess.run(["nbqa", "flake8", "."], cwd=current)
+def _lint():
+    runner = Runner(find_root())
+    runner.run(["flake8"], fix="Run: pkgmt format")
+    runner.run(["black", "--check", "."], fix="Run: pkgmt format")
 
-    if res_nb.returncode:
-        error = True
+    if not nbqa:
+        print(
+            "nbqa is missing, flake8 won't run on notebooks. "
+            "Fix it with: pip install nbqa"
+        )
 
-if error:
-    print()
-    sys.exit('***flake8 returned errors. Fix and push again.***')
+    if not jupytext:
+        print(
+            "jupytext is missing, flake8 won't run on notebooks. "
+            "Fix it with: pip install jupytext"
+        )
 
-print("flake8 passed!")
+    if nbqa and jupytext:
+        runner.run(
+            ["nbqa", "flake8", "."], fix="Install nbqa jupytext and run: pkgmt format"
+        )
+
+    return runner.check()
+
+
+pre_push_hook = """\
+#!/usr/bin/env python3
+import sys
+
+try:
+    from pkgmt.hook import _lint
+except ModuleNotFoundError:
+    sys.exit("Cannot run pre-push hook. Install pkgmt (pip install pkgmt)")
+
+if _lint():
+    sys.exit()
 """
 
 
@@ -111,21 +133,3 @@ def install_hook():
 
 def uninstall_hook():
     _delete_hook(Path(".git", "hooks", "pre-push"))
-
-
-def run_hook():
-    """Run hook without installing it"""
-    with tmp_file() as path:
-        path.write_text(pre_push_hook)
-        return subprocess.run(["python", "_pkgmt_hook.py"]).returncode
-
-
-@contextmanager
-def tmp_file():
-    path = Path("_pkgmt_hook.py")
-
-    try:
-        yield path
-    finally:
-        if path.exists():
-            path.unlink()

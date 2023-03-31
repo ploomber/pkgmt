@@ -2,6 +2,7 @@
 
 ## 0.2.12dev
 * [Fix] Updates inaccurate confirmation message when running `pkgmt format`
+* [Feature] Running `black --check .` when running `pkgmt lint`
 
 ## 0.2.11 (2023-03-30)
 
