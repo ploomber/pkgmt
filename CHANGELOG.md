@@ -1,9 +1,10 @@
 # CHANGELOG
 
-## 0.2.12dev
-* [Fix] Updates inaccurate confirmation message when running `pkgmt format`
+## 0.3.0 (2023-03-31)
+
 * [Feature] Running `black --check .` when running `pkgmt lint`
 * [Feature] Expanding GitHub handles when processing `CHANGELOG.md` files
+* [Fix] Updates inaccurate confirmation message when running `pkgmt format`
 
 ## 0.2.11 (2023-03-30)
 
