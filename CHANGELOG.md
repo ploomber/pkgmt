@@ -1,5 +1,7 @@
 # CHANGELOG
 
+## 0.3.1dev
+
 ## 0.3.0 (2023-03-31)
 
 * [Feature] Running `black --check .` when running `pkgmt lint`
