@@ -1,6 +1,7 @@
 # CHANGELOG
 
 ## 0.3.1dev
+* [Fix] `pkgmt check-links` no longer reports `403` codes from `twitter.com` as errors
 
 ## 0.3.0 (2023-03-31)
 

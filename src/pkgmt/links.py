@@ -205,6 +205,19 @@ def _split_valid_invalid(candidates):
     return valid, invalid
 
 
+# domains that we know return 403 (forbidden) if they're accessed from requests
+# instead of a browser
+KNOWN_403_DOMAINS = {"https://twitter.com"}
+
+
+def known_403(url):
+    for domain in KNOWN_403_DOMAINS:
+        if domain in url:
+            return True
+
+    return False
+
+
 class LinkChecker:
     def __init__(self) -> None:
         self.last_timestamp = defaultdict(lambda: datetime.min)
@@ -236,6 +249,8 @@ class LinkChecker:
         else:
             # https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/405
             if code == 405:
+                broken = False
+            elif code == 403 and known_403(url):
                 broken = False
 
         response = Response(url, code, broken)
