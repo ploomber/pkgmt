@@ -118,6 +118,7 @@ def version(
     6. Set new development version in package_name/_version.py, and CHANGELOG
     7. Commit new development version and push
     """
+    _git_checkout_main_branch(pull=True)
 
     if version_package:
         versioner = VersionerNonSetup(version_package, project_root=project_root)
@@ -209,6 +210,24 @@ def version(
     print("Version {} was created, you are now in {}".format(release, bumped_version))
 
 
+def _git_checkout_main_branch(pull=False):
+    try:
+        call(["git", "checkout", "main"])
+    except subprocess.CalledProcessError:
+        try_master = True
+    else:
+        try_master = False
+
+    if try_master:
+        try:
+            call(["git", "checkout", "master"])
+        except subprocess.CalledProcessError:
+            pass
+
+    if pull:
+        call(["git", "pull"])
+
+
 def upload(tag, production, yes=False):
     """
     Check outs a tag, uploads to PyPI
@@ -244,18 +263,7 @@ def upload(tag, production, yes=False):
     else:
         call(["twine", "upload", "dist/*"])
 
-    try:
-        call(["git", "checkout", "main"])
-    except subprocess.CalledProcessError:
-        try_master = True
-    else:
-        try_master = False
-
-    if try_master:
-        try:
-            call(["git", "checkout", "master"])
-        except subprocess.CalledProcessError:
-            pass
+    _git_checkout_main_branch()
 
     if production:
         click.secho("Published to PyPI.", fg="green")

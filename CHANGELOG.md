@@ -1,6 +1,7 @@
 # CHANGELOG
 
-## 0.3.2dev
+## 0.4.0dev
+* [API Change] `pkgmt version` checks out and pulls the main/master branch as the first step
 
 ## 0.3.1 (2023-04-24)
 

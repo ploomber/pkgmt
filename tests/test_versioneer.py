@@ -346,6 +346,8 @@ def test_version(backup_package_name, monkeypatch, submitted, stored, dev):
     versioneer.version(tag=True)
 
     assert mock.call_args_list == [
+        _call(["git", "checkout", "main"]),
+        _call(["git", "pull"]),
         _call(["git", "add", "--all"]),
         _call(["git", "status"]),
         _call(["git", "commit", "-m", f"package_name release {stored}"]),
@@ -377,6 +379,8 @@ def test_version_no_push(backup_package_name, monkeypatch):
     versioneer.version(push=False)
 
     assert mock.call_args_list == [
+        _call(["git", "checkout", "main"]),
+        _call(["git", "pull"]),
         _call(["git", "add", "--all"]),
         _call(["git", "status"]),
         _call(["git", "commit", "-m", f"package_name release {stored}"]),
@@ -404,6 +408,8 @@ def test_version_yes(backup_package_name, monkeypatch):
     versioneer.version(yes=True)
 
     assert mock.call_args_list == [
+        _call(["git", "checkout", "main"]),
+        _call(["git", "pull"]),
         _call(["git", "add", "--all"]),
         _call(["git", "status"]),
         _call(["git", "commit", "-m", f"package_name release {stored}"]),
@@ -432,6 +438,8 @@ def test_version_target_stable(backup_package_name, monkeypatch):
     versioneer.version(yes=True, target="stable")
 
     assert mock.call_args_list == [
+        _call(["git", "checkout", "main"]),
+        _call(["git", "pull"]),
         _call(["git", "add", "--all"]),
         _call(["git", "status"]),
         _call(["git", "commit", "-m", f"package_name release {stored}"]),
@@ -465,6 +473,8 @@ def test_version_non_setup(backup_another_package, monkeypatch, submitted, store
     versioneer.version(tag=True, version_package="app")
 
     assert mock.call_args_list == [
+        _call(["git", "checkout", "main"]),
+        _call(["git", "pull"]),
         _call(["git", "add", "--all"]),
         _call(["git", "status"]),
         _call(["git", "commit", "-m", f"app release {stored}"]),
@@ -504,6 +514,8 @@ def test_version_pre_release(backup_package_name, monkeypatch, submitted, stored
     versioneer.version(tag=True)
 
     assert mock.call_args_list == [
+        _call(["git", "checkout", "main"]),
+        _call(["git", "pull"]),
         _call(["git", "add", "--all"]),
         _call(["git", "status"]),
         _call(["git", "commit", "-m", f"package_name release {stored}"]),
@@ -544,6 +556,8 @@ def test_version_pre_release_non_setup(
     versioneer.version(tag=True, version_package="app")
 
     assert mock.call_args_list == [
+        _call(["git", "checkout", "main"]),
+        _call(["git", "pull"]),
         _call(["git", "add", "--all"]),
         _call(["git", "status"]),
         _call(["git", "commit", "-m", f"app release {stored}"]),
@@ -579,6 +593,8 @@ def test_version_with_no_changelog(backup_package_name, monkeypatch, capsys):
     assert "No CHANGELOG.{rst,md} found, skipping changelog editing..." in captured.out
 
     assert mock.call_args_list == [
+        _call(["git", "checkout", "main"]),
+        _call(["git", "pull"]),
         _call(["git", "add", "--all"]),
         _call(["git", "status"]),
         _call(["git", "commit", "-m", "package_name release 0.1.0"]),
@@ -610,6 +626,8 @@ def test_version_with_no_changelog_non_setup(
     assert "No CHANGELOG.{rst,md} found, skipping changelog editing..." in captured.out
 
     assert mock.call_args_list == [
+        _call(["git", "checkout", "main"]),
+        _call(["git", "pull"]),
         _call(["git", "add", "--all"]),
         _call(["git", "status"]),
         _call(["git", "commit", "-m", "app release 0.1.0"]),
