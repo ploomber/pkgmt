@@ -100,7 +100,7 @@ def test_release_version_non_setup(move_to_another_package):
         "something.egg-info",
     ],
 )
-def test_ignore_special_folders(folder_name, backup_package_name):
+def test_ignore_special_folders(folder_name, tmp_package_name):
     Path("src", folder_name).mkdir()
 
     name, package = VersionerSetup().find_package()
@@ -134,7 +134,7 @@ def test_bump_up_version(monkeypatch, version, version_new, move_to, attr, versi
     assert versioner.bump_up_version() == version_new
 
 
-def test_commit_version_no_tag(backup_package_name, monkeypatch):
+def test_commit_version_no_tag(tmp_package_name, monkeypatch):
     v = VersionerSetup()
 
     mock = Mock()
@@ -176,7 +176,7 @@ def test_commit_version_no_tag_non_setup(backup_another_package, monkeypatch):
     assert '__version__ = "0.2"' in (v.PACKAGE / "_version.py").read_text()
 
 
-def test_commit_version_tag(backup_package_name, monkeypatch):
+def test_commit_version_tag(tmp_package_name, monkeypatch):
     v = VersionerSetup()
 
     mock = Mock()
@@ -220,7 +220,7 @@ def test_commit_version_tag_non_setup(backup_another_package, monkeypatch):
     assert '__version__ = "0.2"' in (v.PACKAGE / "_version.py").read_text()
 
 
-def test_update_changelog_release_md(backup_package_name):
+def test_update_changelog_release_md(tmp_package_name):
     v = VersionerSetup()
     v.update_changelog_release("0.1")
     today = datetime.now().strftime("%Y-%m-%d")
@@ -240,7 +240,7 @@ def test_update_changelog_release_md_non_setup(backup_another_package):
     )
 
 
-def test_update_changelog_release_rst(backup_package_name):
+def test_update_changelog_release_rst(tmp_package_name):
     Path("CHANGELOG.md").unlink()
     Path("CHANGELOG.rst").write_text("CHANGELOG\n=========\n\n0.1dev\n------")
 
@@ -266,7 +266,7 @@ def test_update_changelog_release_rst_non_setup(backup_another_package):
     )
 
 
-def test_add_changelog_new_dev_section_md(backup_package_name):
+def test_add_changelog_new_dev_section_md(tmp_package_name):
     v = VersionerSetup()
     v.add_changelog_new_dev_section("0.2dev")
     assert (
@@ -284,7 +284,7 @@ def test_add_changelog_new_dev_section_md_non_setup(backup_another_package):
     )
 
 
-def test_add_changelog_new_dev_section_rst(backup_package_name):
+def test_add_changelog_new_dev_section_rst(tmp_package_name):
     Path("CHANGELOG.md").unlink()
     Path("CHANGELOG.rst").write_text("CHANGELOG\n=========\n\n0.1dev\n------")
 
@@ -643,7 +643,7 @@ def test_version_with_no_changelog_non_setup(tmp_another_package, monkeypatch, c
 
 
 @pytest.mark.parametrize("production", [False, True])
-def test_upload(backup_package_name, monkeypatch, production):
+def test_upload(tmp_package_name, monkeypatch, production):
     mock = Mock()
     mock_input = Mock()
     mock_delete = Mock()
@@ -681,7 +681,7 @@ def test_upload(backup_package_name, monkeypatch, production):
     )
 
 
-def test_upload_yes(backup_package_name, monkeypatch):
+def test_upload_yes(tmp_package_name, monkeypatch):
     mock = Mock()
     mock_delete = Mock()
 
@@ -872,7 +872,7 @@ def do_stuff():
     assert "[Invalid CHANGELOG]" in str(excinfo.value)
 
 
-def test_picks_up_first_module_under_src(backup_package_name):
+def test_picks_up_first_module_under_src(tmp_package_name):
     Path("src", "z").mkdir()
 
     v = VersionerSetup()

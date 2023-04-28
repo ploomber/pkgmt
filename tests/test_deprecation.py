@@ -167,7 +167,7 @@ def stuff():
     assert set(deprecation.find_deprecations(root_dir=".")) == expected
 
 
-def test_check(backup_package_name):
+def test_check(tmp_package_name):
     Path("src", "package_name", "__init__.py").write_text(
         """
 __version__ = "0.9dev"
