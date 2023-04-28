@@ -1,5 +1,7 @@
 # CHANGELOG
 
+## 0.4.3dev
+
 ## 0.4.2 (2023-04-28)
 
 * [Fix] note: No changes
