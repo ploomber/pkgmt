@@ -12,13 +12,13 @@ we should migrate those projects to
 https://github.com/python-versioneer/python-versioneer
 and get rid of this.
 """
-import tempfile
-import shutil
+import subprocess
 import os
 from pathlib import Path
 from unittest.mock import Mock, _Call
 from datetime import datetime
 
+import click
 import pytest
 
 from pkgmt.versioner.versionersetup import VersionerSetup
@@ -32,25 +32,6 @@ from pkgmt.exceptions import ProjectValidationError
 def _call(arg):
     """Shortcut for comparing call objects"""
     return _Call(((arg,),))
-
-
-@pytest.fixture
-def backup_another_package(root):
-    old = os.getcwd()
-    backup = tempfile.mkdtemp()
-    backup_another_package = str(Path(backup, "backup-template"))
-    path_to_templates = root / "tests" / "assets" / "another_package"
-    shutil.copytree(str(path_to_templates), backup_another_package)
-
-    os.chdir(path_to_templates)
-
-    yield path_to_templates
-
-    os.chdir(old)
-
-    shutil.rmtree(str(path_to_templates))
-    shutil.copytree(backup_another_package, str(path_to_templates))
-    shutil.rmtree(backup)
 
 
 @pytest.fixture
@@ -119,7 +100,7 @@ def test_release_version_non_setup(move_to_another_package):
         "something.egg-info",
     ],
 )
-def test_ignore_special_folders(folder_name, backup_package_name):
+def test_ignore_special_folders(folder_name, tmp_package_name):
     Path("src", folder_name).mkdir()
 
     name, package = VersionerSetup().find_package()
@@ -153,7 +134,7 @@ def test_bump_up_version(monkeypatch, version, version_new, move_to, attr, versi
     assert versioner.bump_up_version() == version_new
 
 
-def test_commit_version_no_tag(backup_package_name, monkeypatch):
+def test_commit_version_no_tag(tmp_package_name, monkeypatch):
     v = VersionerSetup()
 
     mock = Mock()
@@ -174,7 +155,7 @@ def test_commit_version_no_tag(backup_package_name, monkeypatch):
     assert '__version__ = "0.2"' in (v.PACKAGE / "__init__.py").read_text()
 
 
-def test_commit_version_no_tag_non_setup(backup_another_package, monkeypatch):
+def test_commit_version_no_tag_non_setup(tmp_another_package, monkeypatch):
     v = VersionerNonSetup("app")
 
     mock = Mock()
@@ -195,7 +176,7 @@ def test_commit_version_no_tag_non_setup(backup_another_package, monkeypatch):
     assert '__version__ = "0.2"' in (v.PACKAGE / "_version.py").read_text()
 
 
-def test_commit_version_tag(backup_package_name, monkeypatch):
+def test_commit_version_tag(tmp_package_name, monkeypatch):
     v = VersionerSetup()
 
     mock = Mock()
@@ -217,7 +198,7 @@ def test_commit_version_tag(backup_package_name, monkeypatch):
     assert '__version__ = "0.2"' in (v.PACKAGE / "__init__.py").read_text()
 
 
-def test_commit_version_tag_non_setup(backup_another_package, monkeypatch):
+def test_commit_version_tag_non_setup(tmp_another_package, monkeypatch):
     v = VersionerNonSetup("app")
 
     mock = Mock()
@@ -239,7 +220,7 @@ def test_commit_version_tag_non_setup(backup_another_package, monkeypatch):
     assert '__version__ = "0.2"' in (v.PACKAGE / "_version.py").read_text()
 
 
-def test_update_changelog_release_md(backup_package_name):
+def test_update_changelog_release_md(tmp_package_name):
     v = VersionerSetup()
     v.update_changelog_release("0.1")
     today = datetime.now().strftime("%Y-%m-%d")
@@ -249,7 +230,7 @@ def test_update_changelog_release_md(backup_package_name):
     )
 
 
-def test_update_changelog_release_md_non_setup(backup_another_package):
+def test_update_changelog_release_md_non_setup(tmp_another_package):
     v = VersionerNonSetup("app")
     v.update_changelog_release("0.1")
     today = datetime.now().strftime("%Y-%m-%d")
@@ -259,7 +240,7 @@ def test_update_changelog_release_md_non_setup(backup_another_package):
     )
 
 
-def test_update_changelog_release_rst(backup_package_name):
+def test_update_changelog_release_rst(tmp_package_name):
     Path("CHANGELOG.md").unlink()
     Path("CHANGELOG.rst").write_text("CHANGELOG\n=========\n\n0.1dev\n------")
 
@@ -272,7 +253,7 @@ def test_update_changelog_release_rst(backup_package_name):
     )
 
 
-def test_update_changelog_release_rst_non_setup(backup_another_package):
+def test_update_changelog_release_rst_non_setup(tmp_another_package):
     Path("CHANGELOG.md").unlink()
     Path("CHANGELOG.rst").write_text("CHANGELOG\n=========\n\n0.1dev\n------")
 
@@ -285,7 +266,7 @@ def test_update_changelog_release_rst_non_setup(backup_another_package):
     )
 
 
-def test_add_changelog_new_dev_section_md(backup_package_name):
+def test_add_changelog_new_dev_section_md(tmp_package_name):
     v = VersionerSetup()
     v.add_changelog_new_dev_section("0.2dev")
     assert (
@@ -294,7 +275,7 @@ def test_add_changelog_new_dev_section_md(backup_package_name):
     )
 
 
-def test_add_changelog_new_dev_section_md_non_setup(backup_another_package):
+def test_add_changelog_new_dev_section_md_non_setup(tmp_another_package):
     v = VersionerNonSetup("app")
     v.add_changelog_new_dev_section("0.2dev")
     assert (
@@ -303,7 +284,7 @@ def test_add_changelog_new_dev_section_md_non_setup(backup_another_package):
     )
 
 
-def test_add_changelog_new_dev_section_rst(backup_package_name):
+def test_add_changelog_new_dev_section_rst(tmp_package_name):
     Path("CHANGELOG.md").unlink()
     Path("CHANGELOG.rst").write_text("CHANGELOG\n=========\n\n0.1dev\n------")
 
@@ -315,7 +296,7 @@ def test_add_changelog_new_dev_section_rst(backup_package_name):
     )
 
 
-def test_add_changelog_new_dev_section_rst_non_setup(backup_another_package):
+def test_add_changelog_new_dev_section_rst_non_setup(tmp_another_package):
     Path("CHANGELOG.md").unlink()
     Path("CHANGELOG.rst").write_text("CHANGELOG\n=========\n\n0.1dev\n------")
 
@@ -334,7 +315,7 @@ def test_add_changelog_new_dev_section_rst_non_setup(backup_another_package):
         ["0.1", "0.1.0", "0.1.1dev"],
     ],
 )
-def test_version(backup_package_name, monkeypatch, submitted, stored, dev):
+def test_version(tmp_package_name, monkeypatch, submitted, stored, dev):
     mock = Mock()
     mock_input = Mock()
     mock_input.side_effect = [submitted, "y"]
@@ -366,7 +347,7 @@ def test_version(backup_package_name, monkeypatch, submitted, stored, dev):
     )
 
 
-def test_version_no_push(backup_package_name, monkeypatch):
+def test_version_no_push(tmp_package_name, monkeypatch):
     submitted, stored, dev = "0.1", "0.1.0", "0.1.1dev"
     mock = Mock()
     mock_input = Mock()
@@ -397,7 +378,7 @@ def test_version_no_push(backup_package_name, monkeypatch):
     )
 
 
-def test_version_yes(backup_package_name, monkeypatch):
+def test_version_yes(tmp_package_name, monkeypatch):
     mock = Mock()
     monkeypatch.setattr(versioneer, "call", mock)
     monkeypatch.setattr(abstractversioner, "call", mock)
@@ -428,7 +409,7 @@ def test_version_yes(backup_package_name, monkeypatch):
     )
 
 
-def test_version_target_stable(backup_package_name, monkeypatch):
+def test_version_target_stable(tmp_package_name, monkeypatch):
     mock = Mock()
     monkeypatch.setattr(versioneer, "call", mock)
     monkeypatch.setattr(abstractversioner, "call", mock)
@@ -461,7 +442,7 @@ def test_version_target_stable(backup_package_name, monkeypatch):
         ["0.1", "0.1.0", "0.1.1dev"],
     ],
 )
-def test_version_non_setup(backup_another_package, monkeypatch, submitted, stored, dev):
+def test_version_non_setup(tmp_another_package, monkeypatch, submitted, stored, dev):
     mock = Mock()
     mock_input = Mock()
     mock_input.side_effect = [submitted, "y"]
@@ -501,7 +482,7 @@ def test_version_non_setup(backup_another_package, monkeypatch, submitted, store
         ["1.2.5rc1", "1.2.5rc1", "1.2.5dev"],
     ],
 )
-def test_version_pre_release(backup_package_name, monkeypatch, submitted, stored, dev):
+def test_version_pre_release(tmp_package_name, monkeypatch, submitted, stored, dev):
     mock = Mock()
     mock_input = Mock()
     mock_input.side_effect = [submitted, "y"]
@@ -534,6 +515,25 @@ def test_version_pre_release(backup_package_name, monkeypatch, submitted, stored
     )
 
 
+def test_version_error_if_extra_files(tmp_package_name, monkeypatch):
+    submitted, _, _ = "0.1", "0.1.0", "0.1.1dev"
+    mock = Mock()
+    mock_input = Mock()
+    mock_input.side_effect = [submitted, "y"]
+
+    monkeypatch.setattr(versioneer, "call", mock)
+    monkeypatch.setattr(abstractversioner, "call", mock)
+    monkeypatch.setattr(versioneer, "_input", mock_input)
+
+    Path("some-file.txt").touch()
+    Path("some-notebook.ipynb").touch()
+
+    with pytest.raises(click.ClickException) as excinfo:
+        versioneer.version()
+
+    assert "pending files to commit" in str(excinfo.value)
+
+
 @pytest.mark.parametrize(
     "selected, stored, dev",
     [
@@ -543,7 +543,7 @@ def test_version_pre_release(backup_package_name, monkeypatch, submitted, stored
     ],
 )
 def test_version_pre_release_non_setup(
-    backup_another_package, monkeypatch, selected, stored, dev
+    tmp_another_package, monkeypatch, selected, stored, dev
 ):
     mock = Mock()
     mock_input = Mock()
@@ -576,8 +576,10 @@ def test_version_pre_release_non_setup(
     )
 
 
-def test_version_with_no_changelog(backup_package_name, monkeypatch, capsys):
+def test_version_with_no_changelog(tmp_package_name, monkeypatch, capsys):
     Path("CHANGELOG.md").unlink()
+    subprocess.run(["git", "add", "--all"])
+    subprocess.run(["git", "commit", "-m", "commit"])
 
     mock = Mock()
     mock_input = Mock()
@@ -607,10 +609,10 @@ def test_version_with_no_changelog(backup_package_name, monkeypatch, capsys):
     ]
 
 
-def test_version_with_no_changelog_non_setup(
-    backup_another_package, monkeypatch, capsys
-):
+def test_version_with_no_changelog_non_setup(tmp_another_package, monkeypatch, capsys):
     Path("CHANGELOG.md").unlink()
+    subprocess.run(["git", "add", "--all"])
+    subprocess.run(["git", "commit", "-m", "delete-changelog"])
 
     mock = Mock()
     mock_input = Mock()
@@ -641,7 +643,7 @@ def test_version_with_no_changelog_non_setup(
 
 
 @pytest.mark.parametrize("production", [False, True])
-def test_upload(backup_package_name, monkeypatch, production):
+def test_upload(tmp_package_name, monkeypatch, production):
     mock = Mock()
     mock_input = Mock()
     mock_delete = Mock()
@@ -679,7 +681,7 @@ def test_upload(backup_package_name, monkeypatch, production):
     )
 
 
-def test_upload_yes(backup_package_name, monkeypatch):
+def test_upload_yes(tmp_package_name, monkeypatch):
     mock = Mock()
     mock_delete = Mock()
 
@@ -701,7 +703,7 @@ def test_upload_yes(backup_package_name, monkeypatch):
 
 
 @pytest.mark.parametrize("selected", ["y", "n", "y1.2"])
-def test_invalid_version_string(backup_package_name, monkeypatch, selected):
+def test_invalid_version_string(tmp_package_name, monkeypatch, selected):
     mock = Mock()
     mock_input = Mock()
     mock_input.side_effect = [selected, "y"]
@@ -716,9 +718,7 @@ def test_invalid_version_string(backup_package_name, monkeypatch, selected):
 
 
 @pytest.mark.parametrize("selected", ["y", "n", "y1.2"])
-def test_invalid_version_string_non_setup(
-    backup_another_package, monkeypatch, selected
-):
+def test_invalid_version_string_non_setup(tmp_another_package, monkeypatch, selected):
     mock = Mock()
     mock_input = Mock()
     mock_input.side_effect = [selected, "y"]
@@ -732,7 +732,7 @@ def test_invalid_version_string_non_setup(
     assert "(first character must be numeric)" in str(excinfo.value)
 
 
-def test_sorts_changelog_entries(backup_package_name, monkeypatch):
+def test_sorts_changelog_entries(tmp_package_name, monkeypatch):
     Path("CHANGELOG.md").write_text(
         """
 # CHANGELOG
@@ -745,6 +745,8 @@ def test_sorts_changelog_entries(backup_package_name, monkeypatch):
 * [Feature] feature 1
 """
     )
+    subprocess.run(["git", "add", "--all"])
+    subprocess.run(["git", "commit", "-m", "commit"])
 
     mock = Mock()
     mock_input = Mock()
@@ -774,7 +776,7 @@ def test_sorts_changelog_entries(backup_package_name, monkeypatch):
     )
 
 
-def test_checks_pending_deprecations(backup_package_name, monkeypatch):
+def test_checks_pending_deprecations(tmp_package_name, monkeypatch):
     mock = Mock()
     mock_input = Mock()
     mock_input.side_effect = ["0.1", "y"]
@@ -812,6 +814,9 @@ def do_stuff():
 '''
     )
 
+    subprocess.run(["git", "add", "--all"])
+    subprocess.run(["git", "commit", "-m", "commit"])
+
     with pytest.raises(ProjectValidationError) as excinfo:
         versioneer.version(tag=True)
 
@@ -819,7 +824,7 @@ def do_stuff():
     assert "This will be removed in version 0.3" in str(excinfo.value)
 
 
-def test_checks_changelog(backup_package_name, monkeypatch):
+def test_checks_changelog(tmp_package_name, monkeypatch):
     mock = Mock()
     mock_input = Mock()
     mock_input.side_effect = ["0.1", "y"]
@@ -857,6 +862,9 @@ def do_stuff():
 '''
     )
 
+    subprocess.run(["git", "add", "--all"])
+    subprocess.run(["git", "commit", "-m", "commit"])
+
     with pytest.raises(ProjectValidationError) as excinfo:
         versioneer.version(tag=True)
 
@@ -864,7 +872,7 @@ def do_stuff():
     assert "[Invalid CHANGELOG]" in str(excinfo.value)
 
 
-def test_picks_up_first_module_under_src(backup_package_name):
+def test_picks_up_first_module_under_src(tmp_package_name):
     Path("src", "z").mkdir()
 
     v = VersionerSetup()

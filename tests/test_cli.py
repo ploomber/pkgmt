@@ -36,7 +36,7 @@ extensions = ["md"]
         [["version", "--target", "stable"], False, True, True, "stable"],
     ],
 )
-def test_version(backup_package_name, monkeypatch, args, yes, push, tag, target):
+def test_version(tmp_package_name, monkeypatch, args, yes, push, tag, target):
     mock = Mock()
 
     monkeypatch.setattr(cli.versioneer, "version", mock)

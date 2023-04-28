@@ -1,6 +1,8 @@
 # CHANGELOG
 
-## 0.4.3dev
+## 0.5.0dev
+
+* [API Change] `pkgmt version` halts if there are uncommitted changes
 
 ## 0.4.2 (2023-04-28)
 

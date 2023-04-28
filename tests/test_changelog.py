@@ -207,7 +207,7 @@ def test_check_latest_changelog_entries_ignore_if_empty():
     ).check_latest_changelog_entries()
 
 
-def test_check_consistent_dev_version(backup_package_name):
+def test_check_consistent_dev_version(tmp_package_name):
     Path("src", "package_name", "__init__.py").write_text(
         """
 __version__ = "0.1.1dev"
@@ -238,7 +238,7 @@ __version__ = "0.1.1dev"
         ["0.1.1", "0.1.1 some stuff"],
     ],
 )
-def test_check_consistent_changelog_and_version(backup_package_name, init, subheading):
+def test_check_consistent_changelog_and_version(tmp_package_name, init, subheading):
     Path("src", "package_name", "__init__.py").write_text(
         f"""
 __version__ = "{init}"
@@ -275,7 +275,7 @@ __version__ = "{init}"
     ],
 )
 def test_check_consistent_changelog_and_version_ignores_date(
-    backup_package_name, init, subheading
+    tmp_package_name, init, subheading
 ):
     Path("src", "package_name", "__init__.py").write_text(
         f"""
@@ -299,7 +299,7 @@ __version__ = "{init}"
     changelog.CHANGELOG(text).check_consistent_changelog_and_version()
 
 
-def test_check(backup_package_name):
+def test_check(tmp_package_name):
     Path("src", "package_name", "__init__.py").write_text(
         """
 __version__ = "0.1.2dev"
