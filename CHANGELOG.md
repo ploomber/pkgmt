@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 0.4.1dev
+## 0.4.1 (2023-04-28)
 
 * [Fix] locking ipython to 8.12.0 on py3.8
 * [Fix] Fixing deprecations error
