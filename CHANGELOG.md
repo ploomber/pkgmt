@@ -2,7 +2,8 @@
 
 ## 0.4.1dev
 
-* [Fix] locking ipython version to 8.12.0 for CI
+* [Fix] locking ipython to 8.12.0 on py3.8
+* [Fix] Fixing deprecations error
 
 ## 0.4.0 (2023-04-25)
 
