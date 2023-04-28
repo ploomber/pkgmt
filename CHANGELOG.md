@@ -1,5 +1,7 @@
 # CHANGELOG
 
+## 0.5.1dev
+
 ## 0.5.0 (2023-04-28)
 
 * [API Change] `pkgmt version` halts if there are uncommitted changes
