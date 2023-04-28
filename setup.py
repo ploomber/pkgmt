@@ -36,6 +36,8 @@ REQUIRES = [
     "nbqa",
     "flake8",
     "jupytext",
+    # ensure we have a valid IPython version since
+    # black needs it
     "ipython<=8.12.0; python_version == '3.8'",
 ]
 
