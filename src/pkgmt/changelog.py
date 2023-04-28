@@ -66,7 +66,7 @@ def _replace_issue_number_with_links(url, text):
 
 
 def _replace_handles_with_links(text):
-    pattern = r"(?<!\[)@(\w+)(?!\]\(https:\/\/github\.com\/\w+\))"
+    pattern = r"(?<!\[)@([\w\-_]+)(?!\]\(https:\/\/github\.com\/\w+\))"
     repl = r"[\g<0>](https://github.com/\g<1>)"
     return re.sub(pattern, repl, text)
 

@@ -2,6 +2,8 @@
 
 ## 0.5.1dev
 
+* [Fix] Fix GitHub handle expansion when username contains `_` or `-`
+
 ## 0.5.0 (2023-04-28)
 
 * [API Change] `pkgmt version` halts if there are uncommitted changes

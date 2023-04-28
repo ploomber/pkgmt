@@ -50,6 +50,10 @@ def test_replace_issue_numbers_with_links(input, output):
             "by [@edublancas](https://github.com/edublancas)",
         ),
         (
+            "by @some_user-name",
+            "by [@some_user-name](https://github.com/some_user-name)",
+        ),
+        (
             "by [@edublancas](https://github.com/edublancas)",
             "by [@edublancas](https://github.com/edublancas)",
         ),
