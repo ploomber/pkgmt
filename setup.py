@@ -36,7 +36,7 @@ REQUIRES = [
     "nbqa",
     "flake8",
     "jupytext",
-    "ipython<=8.12.0",
+    "ipython<=8.12.0; python_version == '3.8'",
 ]
 
 
