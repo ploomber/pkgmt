@@ -42,25 +42,6 @@ def tmp_package_name(root, tmp_empty):
 
 
 @pytest.fixture
-def backup_another_package(root):
-    old = os.getcwd()
-    backup = tempfile.mkdtemp()
-    backup_another_package = str(Path(backup, "backup-template"))
-    path_to_templates = root / "tests" / "assets" / "another_package"
-    shutil.copytree(str(path_to_templates), backup_another_package)
-
-    os.chdir(path_to_templates)
-
-    yield path_to_templates
-
-    os.chdir(old)
-
-    shutil.rmtree(str(path_to_templates))
-    shutil.copytree(backup_another_package, str(path_to_templates))
-    shutil.rmtree(backup)
-
-
-@pytest.fixture
 def tmp_another_package(root, tmp_empty):
     old = os.getcwd()
     path_to_templates = root / "tests" / "assets" / "another_package"

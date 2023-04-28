@@ -155,7 +155,7 @@ def test_commit_version_no_tag(tmp_package_name, monkeypatch):
     assert '__version__ = "0.2"' in (v.PACKAGE / "__init__.py").read_text()
 
 
-def test_commit_version_no_tag_non_setup(backup_another_package, monkeypatch):
+def test_commit_version_no_tag_non_setup(tmp_another_package, monkeypatch):
     v = VersionerNonSetup("app")
 
     mock = Mock()
@@ -198,7 +198,7 @@ def test_commit_version_tag(tmp_package_name, monkeypatch):
     assert '__version__ = "0.2"' in (v.PACKAGE / "__init__.py").read_text()
 
 
-def test_commit_version_tag_non_setup(backup_another_package, monkeypatch):
+def test_commit_version_tag_non_setup(tmp_another_package, monkeypatch):
     v = VersionerNonSetup("app")
 
     mock = Mock()
@@ -230,7 +230,7 @@ def test_update_changelog_release_md(tmp_package_name):
     )
 
 
-def test_update_changelog_release_md_non_setup(backup_another_package):
+def test_update_changelog_release_md_non_setup(tmp_another_package):
     v = VersionerNonSetup("app")
     v.update_changelog_release("0.1")
     today = datetime.now().strftime("%Y-%m-%d")
@@ -253,7 +253,7 @@ def test_update_changelog_release_rst(tmp_package_name):
     )
 
 
-def test_update_changelog_release_rst_non_setup(backup_another_package):
+def test_update_changelog_release_rst_non_setup(tmp_another_package):
     Path("CHANGELOG.md").unlink()
     Path("CHANGELOG.rst").write_text("CHANGELOG\n=========\n\n0.1dev\n------")
 
@@ -275,7 +275,7 @@ def test_add_changelog_new_dev_section_md(tmp_package_name):
     )
 
 
-def test_add_changelog_new_dev_section_md_non_setup(backup_another_package):
+def test_add_changelog_new_dev_section_md_non_setup(tmp_another_package):
     v = VersionerNonSetup("app")
     v.add_changelog_new_dev_section("0.2dev")
     assert (
@@ -296,7 +296,7 @@ def test_add_changelog_new_dev_section_rst(tmp_package_name):
     )
 
 
-def test_add_changelog_new_dev_section_rst_non_setup(backup_another_package):
+def test_add_changelog_new_dev_section_rst_non_setup(tmp_another_package):
     Path("CHANGELOG.md").unlink()
     Path("CHANGELOG.rst").write_text("CHANGELOG\n=========\n\n0.1dev\n------")
 
