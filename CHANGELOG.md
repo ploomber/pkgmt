@@ -1,9 +1,10 @@
 # CHANGELOG
 
 ## 0.4.2dev
+* [Fix] note: No changes
 
 ## 0.4.1 (2023-04-28)
-
+* [Fix] note: Never deployed due to a CI error
 * [Fix] locking ipython to 8.12.0 on py3.8
 * [Fix] Fixing deprecations error
 

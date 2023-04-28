@@ -89,7 +89,7 @@ def find_deprecations(root_dir=None):
     for path in iglob(f"{root_dir}/**/*.py", recursive=True):
         try:
             bodies, version = _find_deprecations_in_text(Path(path).read_text())
-        except Exception as e:
+        except Exception:
             print(f"Issue reading file: {path}")
             raise
 
