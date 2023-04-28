@@ -120,6 +120,15 @@ def version(
     """
     _git_checkout_main_branch(pull=True)
 
+    pending = subprocess.check_output(["git", "status", "--short"])
+
+    if pending:
+        raise click.ClickException(
+            "Cannot run 'pkgmt version': you have pending files to commit. "
+            "Commit them or discard them and try again.\nDetected files:"
+            f"\n{pending.decode()}"
+        )
+
     if version_package:
         versioner = VersionerNonSetup(version_package, project_root=project_root)
     else:
