@@ -2,6 +2,8 @@
 
 ## 0.4.1dev
 
+* [Fix] locking ipython version for CI
+
 ## 0.4.0 (2023-04-25)
 
 * [API Change] `pkgmt version` checks out and pulls the main/master branch as the first step
