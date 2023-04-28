@@ -13,8 +13,6 @@ https://github.com/python-versioneer/python-versioneer
 and get rid of this.
 """
 import subprocess
-import tempfile
-import shutil
 import os
 from pathlib import Path
 from unittest.mock import Mock, _Call
@@ -518,7 +516,7 @@ def test_version_pre_release(tmp_package_name, monkeypatch, submitted, stored, d
 
 
 def test_version_error_if_extra_files(tmp_package_name, monkeypatch):
-    submitted, stored, dev = "0.1", "0.1.0", "0.1.1dev"
+    submitted, _, _ = "0.1", "0.1.0", "0.1.1dev"
     mock = Mock()
     mock_input = Mock()
     mock_input.side_effect = [submitted, "y"]
