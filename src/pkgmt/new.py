@@ -23,7 +23,7 @@ def package(name):
 
     root = Path(name)
 
-    for file in ("README.md", "setup.py", "tasks.py", "MANIFEST.in"):
+    for file in ("README.md", "setup.py", "tasks.py", "MANIFEST.in", "pyproject.toml"):
         render_inplace(root / file, name=name)
 
     os.rename(root / "src" / "name", root / "src" / name)
