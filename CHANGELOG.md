@@ -3,6 +3,11 @@
 ## 0.5.1dev
 
 * [Fix] Fix GitHub handle expansion when username contains `_` or `-`
+* [Fix] Fix harcoded path in `MANIFEST.in` in package template (#28)
+* [Feature] Add `tests/conftest.py` to package template (#7)
+* [Feature] Add `.github/pull_request_template.md` to package template (#13)
+* [Feature] Improvements to `.github/workflows/ci.yml` in package template (#6)
+* [Feature] Add `pyproject.toml` to package template (#10)
 
 ## 0.5.0 (2023-04-28)
 
