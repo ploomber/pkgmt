@@ -2,6 +2,7 @@
 
 ## 0.6.0dev
 
+* [Fix] `pkgmt setup` checks for `setup.py` file instead of `LICENSE`
 * [API Change] Support for `pkgmt new` when argument contains `_` or `-`
 
 ## 0.5.1 (2023-05-19)

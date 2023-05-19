@@ -20,7 +20,7 @@ class CommandError(SystemExit):
 
 
 def _check():
-    if not Path("LICENSE").exists():
+    if not Path("setup.py").exists():
         raise CommandError(
             "Run the command from the root folder (the directory "
             "with the README.md and setup.py files)"
