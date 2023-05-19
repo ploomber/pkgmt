@@ -1,13 +1,13 @@
 # CHANGELOG
 
-## 0.5.1dev
+## 0.5.1 (2023-05-19)
 
+* [Feature] Add `tests/conftest.py` to package template ([#7](https://github.com/ploomber/pkgmt/issues/7))
+* [Feature] Add `.github/pull_request_template.md` to package template ([#13](https://github.com/ploomber/pkgmt/issues/13))
+* [Feature] Improvements to `.github/workflows/ci.yml` in package template ([#6](https://github.com/ploomber/pkgmt/issues/6))
+* [Feature] Add `pyproject.toml` to package template ([#10](https://github.com/ploomber/pkgmt/issues/10))
 * [Fix] Fix GitHub handle expansion when username contains `_` or `-`
-* [Fix] Fix harcoded path in `MANIFEST.in` in package template (#28)
-* [Feature] Add `tests/conftest.py` to package template (#7)
-* [Feature] Add `.github/pull_request_template.md` to package template (#13)
-* [Feature] Improvements to `.github/workflows/ci.yml` in package template (#6)
-* [Feature] Add `pyproject.toml` to package template (#10)
+* [Fix] Fix harcoded path in `MANIFEST.in` in package template ([#28](https://github.com/ploomber/pkgmt/issues/28))
 
 ## 0.5.0 (2023-04-28)
 
