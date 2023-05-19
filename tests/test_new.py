@@ -12,18 +12,19 @@ def uninstall():
 
 
 def test_package(tmp_empty, uninstall):
-    new.package("somepkg")
+    new.package("some-cool_pkg")
 
-    subprocess.check_call(["pip", "install", "somepkg/"])
+    subprocess.check_call(["pip", "install", "some-cool-pkg/"])
 
-    pyproject = Path("somepkg", "pyproject.toml").read_text()
-    setup = Path("somepkg", "setup.py").read_text()
-    ci = Path("somepkg", ".github", "workflows", "ci.yml").read_text()
-    manifest = Path("somepkg", "MANIFEST.in").read_text()
+    pyproject = Path("some-cool-pkg", "pyproject.toml").read_text()
+    setup = Path("some-cool-pkg", "setup.py").read_text()
+    ci = Path("some-cool-pkg", ".github", "workflows", "ci.yml").read_text()
+    manifest = Path("some-cool-pkg", "MANIFEST.in").read_text()
 
-    assert 'github = "ploomber/somepkg"' in pyproject
-    assert 'package_name = "somepkg"' in pyproject
-    assert 'env_name = "somepkg"' in pyproject
-    assert 'name="somepkg"' in setup
-    assert 'python -c "import somepkg"' in ci
-    assert "graft src/somepkg/assets" in manifest
+    assert 'github = "ploomber/some-cool-pkg"' in pyproject
+    assert 'package_name = "some_cool_pkg"' in pyproject
+    assert 'env_name = "some-cool-pkg"' in pyproject
+    assert 'name="some-cool-pkg"' in setup
+    assert "src/some_cool_pkg/__init__.py" in setup
+    assert 'python -c "import some_cool_pkg"' in ci
+    assert "graft src/some_cool_pkg/assets" in manifest

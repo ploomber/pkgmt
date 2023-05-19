@@ -1,1 +1,1 @@
-# $name
+# $project_name

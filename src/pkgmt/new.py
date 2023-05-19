@@ -14,14 +14,17 @@ def render_inplace(path, **kwargs):
 
 def package(name):
     """Create a new package"""
+    project_name = name.replace("_", "-")
+    package_name = name.replace("-", "_")
+
     # .path doesn't work with directories
     with importlib.resources.path(assets, "__init__.py") as p:
         # so we trick it
         path = p.parent / "template"
 
-    shutil.copytree(path, name)
+    shutil.copytree(path, project_name)
 
-    root = Path(name)
+    root = Path(project_name)
 
     for file in (
         "README.md",
@@ -31,6 +34,10 @@ def package(name):
         "pyproject.toml",
         ".github/workflows/ci.yml",
     ):
-        render_inplace(root / file, name=name)
+        render_inplace(
+            root / file,
+            project_name=project_name,
+            package_name=package_name,
+        )
 
-    os.rename(root / "src" / "name", root / "src" / name)
+    os.rename(root / "src" / "package_name", root / "src" / package_name)

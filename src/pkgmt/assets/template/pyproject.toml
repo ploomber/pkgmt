@@ -9,12 +9,12 @@ flake8 = [
 
 [tool.pkgmt]
 # used to add links to issue numbers in CHANGELOG.md
-github = "ploomber/$name"
+github = "ploomber/$project_name"
 # used to check that the package is importable when running pkgmt setup
-package_name = "$name"
+package_name = "$package_name"
 # defines the conda environment name when using pkgmt setup, if missing,
 # package_name is used
-env_name = "$name"
+env_name = "$project_name"
 
 [tool.pkgmt.check_links]
 extensions = ["md", "rst", "py", "ipynb"]

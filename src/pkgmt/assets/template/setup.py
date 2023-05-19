@@ -8,7 +8,7 @@ from setuptools import setup
 
 _version_re = re.compile(r"__version__\s+=\s+(.*)")
 
-with open("src/$name/__init__.py", "rb") as f:
+with open("src/$package_name/__init__.py", "rb") as f:
     VERSION = str(
         ast.literal_eval(_version_re.search(f.read().decode("utf-8")).group(1))
     )
@@ -23,7 +23,7 @@ DEV = [
 ]
 
 setup(
-    name="$name",
+    name="$project_name",
     version=VERSION,
     description=None,
     license=None,
@@ -41,6 +41,6 @@ setup(
         "dev": DEV,
     },
     entry_points={
-        # 'console_scripts': ['$name=$name.cli:cli'],
+        # 'console_scripts': ['$project_name=$package_name.cli:cli'],
     },
 )

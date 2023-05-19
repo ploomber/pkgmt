@@ -2,6 +2,8 @@
 
 ## 0.5.2dev
 
+* [API Change] Support for `pkgmt new` when argument contains `_` or `-`
+
 ## 0.5.1 (2023-05-19)
 
 * [Feature] Add `tests/conftest.py` to package template ([#7](https://github.com/ploomber/pkgmt/issues/7))

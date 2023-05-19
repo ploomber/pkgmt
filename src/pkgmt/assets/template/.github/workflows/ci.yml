@@ -26,7 +26,7 @@ jobs:
         run: |
           pip install .
           # check we can import the package
-          python -c "import $name"
+          python -c "import $package_name"
 
           pip install ".[dev]"
 
