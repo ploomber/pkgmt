@@ -18,8 +18,10 @@ def test_package(tmp_empty, uninstall):
 
     pyproject = Path("somepkg", "pyproject.toml").read_text()
     setup = Path("somepkg", "setup.py").read_text()
+    ci = Path("somepkg", ".github", "workflows", "ci.yml").read_text()
 
     assert 'github = "ploomber/somepkg"' in pyproject
     assert 'package_name = "somepkg"' in pyproject
     assert 'env_name = "somepkg"' in pyproject
     assert 'name="somepkg"' in setup
+    assert 'python -c "import somepackage3"' in ci
