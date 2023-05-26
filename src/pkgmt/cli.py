@@ -11,6 +11,7 @@ from pkgmt import dev
 from pkgmt import formatting
 from pkgmt import modified
 
+
 @click.group()
 def cli():
     pass
@@ -175,6 +176,7 @@ def lint():
     if returncode:
         raise SystemExit("Error linting")
 
+
 @cli.command()
 @click.option(
     "-b",
@@ -195,7 +197,7 @@ def lint():
     default=False,
     help="Print debug info",
 )
-def ensure_modified(base_branch, exclude_path,debug):
+def ensure_modified(base_branch, exclude_path, debug):
     """Check if a branch has modified anything excluding some path/dir"""
     returncode = modified.check_modified(base_branch, exclude_path, debug=debug)
     print(returncode)
