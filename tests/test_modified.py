@@ -25,7 +25,7 @@ def setup():
     # Deletes the git branch
     cmd = """
     git checkout main;
-    git branch -D test_modified;
+    git branch -D test_modified_doc;
     """
     subprocess.run(cmd, shell=True)
 
