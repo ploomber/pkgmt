@@ -36,12 +36,12 @@ def setup():
     [
         [
             "main",
-            ["doc1"],
+            ["test_doc1"],
             1,
         ],
         [
             "main",
-            ["doc1","doc2"],
+            ["test_doc1","test_doc2"],
             0,
         ]
     ]
