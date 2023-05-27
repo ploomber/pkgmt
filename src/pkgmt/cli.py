@@ -129,7 +129,8 @@ def release(tag, production, yes):
     default=False,
     help="Install documentation dependencies",
 )
-def setup(doc):
+@click.option("--extras", "-e", multiple=True)
+def setup(doc, extras):
     """Setup development environment
 
     Create conda environment and install dependencies:
@@ -141,7 +142,7 @@ def setup(doc):
         $ pkgmt setup --doc
     """
     try:
-        dev.setup(Context(), doc=doc)
+        dev.setup(Context(), doc=doc, extras=extras)
     except UnexpectedExit as e:
         raise SystemExit(f"Error running: {e.result.command}") from e
 

@@ -33,11 +33,25 @@ def _check():
         )
 
 
+def _update_env(c, conda_hook, env_name, path_to_file):
+    c.run(
+        f"{conda_hook} "
+        f"&& conda activate {env_name} "
+        f"&& conda env update --file {path_to_file} --name {env_name}"
+    )
+
+
+def _extras2filename(extras):
+    return f"environment.{extras}.yml"
+
+
 @task()
-def setup(c, version=None, doc=False):
+def setup(c, version=None, doc=False, extras=None):
     """
     Setup dev environment, requires conda
     """
+    extras = extras or []
+
     _check()
 
     if not shutil.which("conda"):
@@ -79,6 +93,10 @@ def setup(c, version=None, doc=False):
             f"&& conda activate {env_name} "
             f"&& conda env update --file doc/environment.yml --name {env_name}"
         )
+
+    for e in extras:
+        # skip if extras file does not exist
+        _update_env(c, conda_hook, env_name, _extras2filename(e))
 
     r = c.run(
         f"{conda_hook} && conda activate {env_name} && "
