@@ -9,7 +9,6 @@ from pkgmt import links, config, test, changelog, hook as hook_, versioneer
 from pkgmt import new as new_
 from pkgmt import dev
 from pkgmt import formatting
-from pkgmt import modified
 
 
 @click.group()
@@ -175,29 +174,3 @@ def lint():
 
     if returncode:
         raise SystemExit("Error linting")
-
-
-@cli.command()
-@click.option(
-    "-b",
-    "--base-branch",
-    default="main",
-    help="Base branch to compare against",
-)
-@click.option(
-    "-ex",
-    "--exclude-path",
-    default=["doc"],
-    multiple=True,
-    help="Path to exclude from git diff. Can be used multiple times eg: -p p1 -p p2",
-)
-@click.option(
-    "--debug",
-    is_flag=True,
-    default=False,
-    help="Print debug info",
-)
-def ensure_modified(base_branch, exclude_path, debug):
-    """Check if a branch has modified anything excluding some path/dir"""
-    returncode = modified.check_modified(base_branch, exclude_path, debug=debug)
-    print(returncode)
