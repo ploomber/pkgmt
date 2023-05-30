@@ -57,3 +57,30 @@ def tmp_another_package(root, tmp_empty):
     yield tmp_empty
 
     os.chdir(old)
+
+
+@pytest.fixture
+def tmp_package_modi(root, tmp_empty):
+    old = os.getcwd()
+    path_to_templates = root / "tests" / "assets" / "package_name"
+    shutil.copytree(str(path_to_templates), "copy")
+    os.chdir("copy")
+
+    subprocess.run(["git", "init"])
+    subprocess.check_call(["git", "config", "commit.gpgsign", "false"])
+    subprocess.check_call(["git", "config", "user.email", "ci@ploomberio"])
+    subprocess.check_call(["git", "config", "user.name", "Ploomber"])
+    subprocess.run(["git", "add", "--all"])
+    subprocess.run(["git", "commit", "-m", "init-commit-message"])
+
+    subprocess.run(["git", "checkout", "-b", "test_modified_doc"])
+    subprocess.run(["mkdir", "-p", "test_doc1"])
+    subprocess.run(["touch", "test_doc1/test_modified.txt"])
+    subprocess.run(["mkdir", "-p", "test_doc2"])
+    subprocess.run(["touch", "test_doc2/test_modified.txt"])
+    subprocess.run(["git", "add", "."])
+    subprocess.run(["git", "commit", "-m", "test_modified"])
+
+    yield tmp_empty
+
+    os.chdir(old)
