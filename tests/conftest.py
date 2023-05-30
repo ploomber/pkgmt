@@ -70,6 +70,7 @@ def tmp_package_modi(root, tmp_empty):
     subprocess.check_call(["git", "config", "commit.gpgsign", "false"])
     subprocess.check_call(["git", "config", "user.email", "ci@ploomberio"])
     subprocess.check_call(["git", "config", "user.name", "Ploomber"])
+    subprocess.run(["git", "checkout", "-b", "main"])
     subprocess.run(["git", "add", "--all"])
     subprocess.run(["git", "commit", "-m", "init-commit-message"])
 
