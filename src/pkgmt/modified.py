@@ -1,4 +1,5 @@
 import subprocess
+import argparse
 
 
 def check_modified(base_branch, exclude_path, debug=False):
@@ -22,3 +23,25 @@ def check_modified(base_branch, exclude_path, debug=False):
             print(f"Return code: {err.returncode}")
             print(f"Output: {err.output}")
         return 1
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        description="Check if a branch has modified" "anything excluding some path/dir"
+    )
+    parser.add_argument(
+        "-b", "--base-branch", default="main", help="Base branch to compare against"
+    )
+    parser.add_argument(
+        "-ex",
+        "--exclude-path",
+        default=["doc"],
+        nargs="+",
+        help="Path to exclude from git diff."
+        "Can be used multiple times eg: -ex p1 -ex p2",
+    )
+    parser.add_argument("--debug", action="store_true", help="Print debug info")
+
+    args = parser.parse_args()
+    returncode = check_modified(args.base_branch, args.exclude_path, debug=args.debug)
+    print(returncode)
