@@ -46,6 +46,7 @@ def setup():
         ],
     ],
 )
-def test_check_modified(base_branch, exclude_path, returncode):
+def test_check_modified(tmp_package_name,base_branch, exclude_path, returncode):
+
     assert modified.check_modified(base_branch, exclude_path, debug=True) == returncode
     # subprocess.run(clean, shell=True)
