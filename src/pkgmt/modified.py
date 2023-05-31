@@ -45,4 +45,4 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     returncode = check_modified(args.base_branch, args.exclude_path, debug=args.debug)
-    sys.exit(returncode)
+    print(returncode)
