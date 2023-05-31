@@ -33,12 +33,12 @@ if __name__ == "__main__":
         "-b", "--base-branch", default="main", help="Base branch to compare against"
     )
     parser.add_argument(
-        "-ex",
+        "-e",
         "--exclude-path",
         default=["doc"],
         nargs="+",
         help="Path to exclude from git diff."
-        "Can be used multiple times eg: -ex p1 -ex p2",
+        "Can be used multiple times eg: -e p1 -e p2",
     )
     parser.add_argument("--debug", action="store_true", help="Print debug info")
 
