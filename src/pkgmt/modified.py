@@ -1,5 +1,6 @@
 import subprocess
 import argparse
+import sys
 
 
 def check_modified(base_branch, exclude_path, debug=False):
@@ -44,4 +45,4 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     returncode = check_modified(args.base_branch, args.exclude_path, debug=args.debug)
-    print(returncode)
+    sys.exit(returncode)
