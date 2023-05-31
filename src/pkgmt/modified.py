@@ -1,6 +1,5 @@
 import subprocess
 import argparse
-import sys
 
 
 def check_modified(base_branch, exclude_path, debug=False):
