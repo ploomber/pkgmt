@@ -27,7 +27,9 @@ def test_get_pr():
 #     ],
 # )
 # def test_get_repo_and_branch_for_pr(pr_number, expected_repo, expected_branch):
-#     repo, branch = github.get_repo_and_branch_for_pr("ploomber", "ploomber", pr_number)
+# repo, branch = github.get_repo_and_branch_for_pr("ploomber",
+#                                                   "ploomber", pr_number)
+
 
 #     assert repo == expected_repo
 #     assert branch == expected_branch
