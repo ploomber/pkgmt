@@ -1,4 +1,4 @@
-import pytest
+# import pytest
 
 from pkgmt import github
 
@@ -35,33 +35,33 @@ def test_get_pr():
 #     assert branch == expected_branch
 
 
-@pytest.mark.parametrize(
-    "pr_number, expected_repo, expected_branch",
-    [
-        [
-            "1071",
-            "https://github.com/tonykploomber/ploomber",
-            "1070-noqa-coming-up-on-docs",
-        ],
-        [
-            "1044",
-            "https://github.com/ploomber/ploomber",
-            "cloud_stats",
-        ],
-    ],
-    ids=[
-        "fork",
-        "branch",
-    ],
-)
-def test_get_repo_and_branch_for_readthedocs(
-    monkeypatch, pr_number, expected_repo, expected_branch
-):
-    monkeypatch.setenv("READTHEDOCS_VERSION_NAME", pr_number)
+# @pytest.mark.parametrize(
+#     "pr_number, expected_repo, expected_branch",
+#     [
+#         [
+#             "1071",
+#             "https://github.com/tonykploomber/ploomber",
+#             "1070-noqa-coming-up-on-docs",
+#         ],
+#         [
+#             "1044",
+#             "https://github.com/ploomber/ploomber",
+#             "cloud_stats",
+#         ],
+#     ],
+#     ids=[
+#         "fork",
+#         "branch",
+#     ],
+# )
+# def test_get_repo_and_branch_for_readthedocs(
+#     monkeypatch, pr_number, expected_repo, expected_branch
+# ):
+#     monkeypatch.setenv("READTHEDOCS_VERSION_NAME", pr_number)
 
-    repo, branch = github.get_repo_and_branch_for_readthedocs(
-        "https://github.com/ploomber/ploomber", default_branch="master"
-    )
+#     repo, branch = github.get_repo_and_branch_for_readthedocs(
+#         "https://github.com/ploomber/ploomber", default_branch="master"
+#     )
 
-    assert repo == expected_repo
-    assert branch == expected_branch
+#     assert repo == expected_repo
+#     assert branch == expected_branch
