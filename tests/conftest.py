@@ -85,3 +85,43 @@ def tmp_package_modi(root, tmp_empty):
     yield tmp_empty
 
     os.chdir(old)
+
+
+@pytest.fixture
+def tmp_package_modi_2(root, tmp_empty):
+    old = os.getcwd()
+    path_to_templates = root / "tests" / "assets" / "package_name"
+    shutil.copytree(str(path_to_templates), "copy")
+    os.chdir("copy")
+
+    subprocess.run(["git", "init"])
+    subprocess.check_call(["git", "config", "commit.gpgsign", "false"])
+    subprocess.check_call(["git", "config", "user.email", "ci@ploomberio"])
+    subprocess.check_call(["git", "config", "user.name", "Ploomber"])
+    subprocess.run(["git", "checkout", "-b", "main"])
+    subprocess.run(["git", "add", "--all"])
+    subprocess.run(["git", "commit", "-m", "init-commit-message"])
+
+    # main branch: create doc/file.txt, commit
+    subprocess.run(["mkdir", "-p", "doc"])
+    subprocess.run(["touch", "doc/file.txt"])
+    subprocess.run(["git", "add", "."])
+    subprocess.run(["git", "commit", "-m", "added doc/file.txt"])
+
+    # checkout to test branch, create doc/another.txt, commit
+    subprocess.run(["git", "checkout", "-b", "test_modified_doc"])
+    subprocess.run(["mkdir", "-p", "doc"])
+    subprocess.run(["touch", "doc/another.txt"])
+    subprocess.run(["git", "add", "."])
+    subprocess.run(["git", "commit", "-m", "add doc/another.txt"])
+
+    # checkout main again, create something/file.txt, commit
+    subprocess.run(["git", "checkout", "main"])
+    subprocess.run(["mkdir", "-p", "something"])
+    subprocess.run(["touch", "something/file.txt"])
+    subprocess.run(["git", "add", "."])
+    subprocess.run(["git", "commit", "-m", "added something/file.txt"])
+
+    yield tmp_empty
+
+    os.chdir(old)

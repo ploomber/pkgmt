@@ -19,3 +19,7 @@ from pkgmt import modified
 )
 def test_check_modified(tmp_package_modi, base_branch, exclude_path, returncode):
     assert modified.check_modified(base_branch, exclude_path, debug=True) == returncode
+
+
+def test_check_modified_2(tmp_package_modi_2):
+    assert modified.check_modified("main", ["doc"], debug=True) == 0
