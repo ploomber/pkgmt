@@ -75,10 +75,10 @@ def tmp_package_modi(root, tmp_empty):
     subprocess.run(["git", "commit", "-m", "init-commit-message"])
 
     subprocess.run(["git", "checkout", "-b", "test_modified_doc"])
-    Path("test_doc1").mkdir(parents=True, exist_ok=True)
-    Path("test_doc1/test_modified.txt").touch()
-    Path("test_doc2").mkdir(parents=True, exist_ok=True)
-    Path("test_doc2/test_modified.txt").touch()
+    Path.cwd().joinpath("test_doc1").mkdir(parents=True, exist_ok=True)
+    Path.cwd().joinpath("test_doc1","test_modified.txt").touch()
+    Path.cwd().joinpath("test_doc2").mkdir(parents=True, exist_ok=True)
+    Path.cwd().joinpath("test_doc2","test_modified.txt").touch()
     subprocess.run(["git", "add", "."])
     subprocess.run(["git", "commit", "-m", "test_modified"])
 
