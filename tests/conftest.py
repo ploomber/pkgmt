@@ -61,10 +61,10 @@ def tmp_another_package(root, tmp_empty):
 
 @pytest.fixture
 def tmp_package_modi(root, tmp_empty):
-    old = os.getcwd()
+    old = Path.cwd()
     path_to_templates = root / "tests" / "assets" / "package_name"
     shutil.copytree(str(path_to_templates), "copy")
-    os.chdir("copy")
+    Path.cwd().joinpath("copy")
 
     subprocess.run(["git", "init"])
     subprocess.check_call(["git", "config", "commit.gpgsign", "false"])
@@ -75,24 +75,24 @@ def tmp_package_modi(root, tmp_empty):
     subprocess.run(["git", "commit", "-m", "init-commit-message"])
 
     subprocess.run(["git", "checkout", "-b", "test_modified_doc"])
-    subprocess.run(["mkdir", "-p", "test_doc1"])
-    subprocess.run(["touch", "test_doc1/test_modified.txt"])
-    subprocess.run(["mkdir", "-p", "test_doc2"])
-    subprocess.run(["touch", "test_doc2/test_modified.txt"])
+    Path("test_doc1").mkdir(parents=True, exist_ok=True)
+    Path("test_doc1/test_modified.txt").touch()
+    Path("test_doc2").mkdir(parents=True, exist_ok=True)
+    Path("test_doc2/test_modified.txt").touch()
     subprocess.run(["git", "add", "."])
     subprocess.run(["git", "commit", "-m", "test_modified"])
 
     yield tmp_empty
 
-    os.chdir(old)
+    Path.cwd().joinpath(old)
 
 
 @pytest.fixture
 def tmp_package_modi_2(root, tmp_empty):
-    old = os.getcwd()
+    old = Path.cwd()
     path_to_templates = root / "tests" / "assets" / "package_name"
     shutil.copytree(str(path_to_templates), "copy")
-    os.chdir("copy")
+    Path.cwd().joinpath("copy")
 
     subprocess.run(["git", "init"])
     subprocess.check_call(["git", "config", "commit.gpgsign", "false"])
@@ -102,26 +102,23 @@ def tmp_package_modi_2(root, tmp_empty):
     subprocess.run(["git", "add", "--all"])
     subprocess.run(["git", "commit", "-m", "init-commit-message"])
 
-    # main branch: create doc/file.txt, commit
-    subprocess.run(["mkdir", "-p", "doc"])
-    subprocess.run(["touch", "doc/file.txt"])
+    Path.cwd().joinpath("doc").mkdir(parents=True, exist_ok=True)
+    Path.cwd().joinpath("doc", "file.txt").touch()
     subprocess.run(["git", "add", "."])
     subprocess.run(["git", "commit", "-m", "added doc/file.txt"])
 
-    # checkout to test branch, create doc/another.txt, commit
     subprocess.run(["git", "checkout", "-b", "test_modified_doc"])
-    subprocess.run(["mkdir", "-p", "doc"])
-    subprocess.run(["touch", "doc/another.txt"])
+    Path.cwd().joinpath("doc").mkdir(parents=True, exist_ok=True)
+    Path.cwd().joinpath("doc", "another.txt").touch()
     subprocess.run(["git", "add", "."])
     subprocess.run(["git", "commit", "-m", "add doc/another.txt"])
 
-    # checkout main again, create something/file.txt, commit
     subprocess.run(["git", "checkout", "main"])
-    subprocess.run(["mkdir", "-p", "something"])
-    subprocess.run(["touch", "something/file.txt"])
+    Path.cwd().joinpath("something").mkdir(parents=True, exist_ok=True)
+    Path.cwd().joinpath("something", "file.txt").touch()
     subprocess.run(["git", "add", "."])
     subprocess.run(["git", "commit", "-m", "added something/file.txt"])
 
     yield tmp_empty
 
-    os.chdir(old)
+    Path.cwd().joinpath(old)
