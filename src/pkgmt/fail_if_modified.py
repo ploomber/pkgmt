@@ -2,6 +2,7 @@ import subprocess
 import argparse
 import sys
 
+
 def check_modified(base_branch, exclude_path, debug=False):
     # https://stackoverflow.com/questions/4380945
     cmd = f"git diff --exit-code {base_branch}... -- ."
