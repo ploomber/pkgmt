@@ -67,8 +67,6 @@ def tmp_package_modi(root, tmp_empty):
     shutil.copytree(str(path_to_templates), "copy")
     os.chdir("copy")
 
-    print("os:list dir", os.listdir("."))
-
     subprocess.run(["git", "init"])
     subprocess.check_call(["git", "config", "commit.gpgsign", "false"])
     subprocess.check_call(["git", "config", "user.email", "ci@ploomberio"])

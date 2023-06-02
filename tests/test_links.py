@@ -160,11 +160,11 @@ def another_function():
     )
 
 
-# def test_find_links_in_files(sample_files):
-#     assert links._find_links_in_files(["py"]) == {
-#         "script.py": ["https://ploomber.io/first"],
-#         "some/nested/dir/another.py": ["https://ploomber.io/second"],
-#     }
+def test_find_links_in_files(sample_files):
+    assert links._find_links_in_files(["py"]) == {
+        "script.py": ["https://ploomber.io/first"],
+        "some/nested/dir/another.py": ["https://ploomber.io/second"],
+    }
 
 
 def test_find_links_in_files_ignores_nontracked_files(sample_files):
