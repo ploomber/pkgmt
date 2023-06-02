@@ -63,8 +63,10 @@ def tmp_another_package(root, tmp_empty):
 def tmp_package_modi(root, tmp_empty):
     old = Path.cwd()
     path_to_templates = root / "tests" / "assets" / "package_name"
+ 
     shutil.copytree(str(path_to_templates), "copy")
-    Path.cwd().joinpath("copy")
+    os.chdir("copy")
+   
 
     subprocess.run(["git", "init"])
     subprocess.check_call(["git", "config", "commit.gpgsign", "false"])
@@ -84,7 +86,7 @@ def tmp_package_modi(root, tmp_empty):
 
     yield tmp_empty
 
-    Path.cwd().joinpath(old)
+    os.chdir(old)
 
 
 @pytest.fixture
@@ -92,7 +94,7 @@ def tmp_package_modi_2(root, tmp_empty):
     old = Path.cwd()
     path_to_templates = root / "tests" / "assets" / "package_name"
     shutil.copytree(str(path_to_templates), "copy")
-    Path.cwd().joinpath("copy")
+    os.chdir("copy")
 
     subprocess.run(["git", "init"])
     subprocess.check_call(["git", "config", "commit.gpgsign", "false"])
@@ -121,4 +123,4 @@ def tmp_package_modi_2(root, tmp_empty):
 
     yield tmp_empty
 
-    Path.cwd().joinpath(old)
+    os.chdir(old)
