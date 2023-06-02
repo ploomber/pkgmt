@@ -63,10 +63,9 @@ def tmp_another_package(root, tmp_empty):
 def tmp_package_modi(root, tmp_empty):
     old = Path.cwd()
     path_to_templates = root / "tests" / "assets" / "package_name"
- 
+
     shutil.copytree(str(path_to_templates), "copy")
     os.chdir("copy")
-   
 
     subprocess.run(["git", "init"])
     subprocess.check_call(["git", "config", "commit.gpgsign", "false"])
