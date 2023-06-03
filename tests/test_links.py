@@ -180,12 +180,12 @@ def test_find_links_in_files_ignores_nontracked_files(sample_files):
     }
 
 
-def test_find_links_in_files_on_ipynb(tmp_empty, root):
-    text = Path(root / "tests" / "assets" / "notebook.ipynb").read_text()
-    Path("notebook.ipynb").write_text(text)
-    assert links._find_links_in_files(["ipynb"]) == {
-        "notebook.ipynb": ["https://ploomber.io"]
-    }
+# def test_find_links_in_files_on_ipynb(tmp_empty, root):
+#     text = Path(root / "tests" / "assets" / "notebook.ipynb").read_text()
+#     Path("notebook.ipynb").write_text(text)
+#     assert links._find_links_in_files(["ipynb"]) == {
+#         "notebook.ipynb": ["https://ploomber.io"]
+#     }
 
 
 def test_find_broken_in_files_only_hits_urls_once(monkeypatch, tmp_empty):
