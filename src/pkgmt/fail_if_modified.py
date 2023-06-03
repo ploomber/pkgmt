@@ -8,7 +8,7 @@ def check_modified(base_branch, exclude_path, debug=False):
     cmd = f"git diff --exit-code {base_branch}... -- ."
 
     for path in exclude_path:
-        cmd += f" :^{path}"
+        cmd += f" ':^{path}'"
 
     if debug:
         print(f"cmd: {cmd}")
