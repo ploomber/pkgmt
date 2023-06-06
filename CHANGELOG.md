@@ -4,6 +4,7 @@
 
 * [Fix] `pkgmt setup` checks for `setup.py` file instead of `LICENSE`
 * [API Change] Support for `pkgmt new` when argument contains `_` or `-`
+* [Feature] Adds `python -m pkgmt.fail_if_modified` to test if certain paths in the repository have been modified
 
 ## 0.5.1 (2023-05-19)
 
