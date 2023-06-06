@@ -1,5 +1,7 @@
 # CHANGELOG
 
+## 0.6.1dev
+
 ## 0.6.0 (2023-06-05)
 
 * [API Change] Support for `pkgmt new` when argument contains `_` or `-`
