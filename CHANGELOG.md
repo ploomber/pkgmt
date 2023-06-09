@@ -1,11 +1,12 @@
 # CHANGELOG
 
 ## 0.6.1dev
+* [Feature] Adds `python -m pkgmt.fail_if_not_modified` to test if certain paths in the repository have been modified
 
 ## 0.6.0 (2023-06-05)
 
 * [API Change] Support for `pkgmt new` when argument contains `_` or `-`
-* [Feature] Adds `python -m pkgmt.fail_if_modified` to test if certain paths in the repository have been modified
+* [Feature] Adds `python -m pkgmt.fail_if_modified` to test if certain paths in the repository have not been modified
 * [Fix] `pkgmt setup` checks for `setup.py` file instead of `LICENSE`
 
 ## 0.5.1 (2023-05-19)
