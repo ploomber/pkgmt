@@ -1,6 +1,7 @@
 # CHANGELOG
 
-## 0.6.1dev
+## 0.6.1 (2023-06-09)
+
 * [Feature] Adds `python -m pkgmt.fail_if_not_modified` to test if certain paths in the repository have been modified
 
 ## 0.6.0 (2023-06-05)
