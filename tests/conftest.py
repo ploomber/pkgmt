@@ -119,6 +119,7 @@ def tmp_package_modi_2(root, tmp_empty):
     Path.cwd().joinpath("something", "file.txt").touch()
     subprocess.run(["git", "add", "."])
     subprocess.run(["git", "commit", "-m", "added something/file.txt"])
+    subprocess.run(["git", "checkout", "test_modified_doc"])
 
     yield tmp_empty
 
