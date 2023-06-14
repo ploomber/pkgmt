@@ -77,7 +77,8 @@ def _lint(files=None):
 
     if nbqa and jupytext:
         runner.run(
-            ["nbqa", "flake8", "."], fix="Install nbqa jupytext and run: pkgmt format"
+            ["nbqa", "flake8"] + files,
+            fix="Install nbqa jupytext and run: pkgmt format",
         )
 
     return runner.check()
