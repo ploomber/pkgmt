@@ -49,7 +49,7 @@ def test_version(tmp_package_name, monkeypatch, args, yes, push, tag, target):
     )
 
 
-def test_lint_error(tmp_empty):
+def test_lint_pyproj(tmp_empty):
     Path("file.py").write_text(
         """
 def stuff():
@@ -64,3 +64,33 @@ def stuff():
     result = runner.invoke(cli.cli, ["lint"])
     assert result.exit_code == 1
     assert "Could not find project root" in result.output
+
+
+def test_lint_error(tmp_empty):
+    Path("pyproject.toml").touch()
+    Path("tmp_folder1").mkdir()
+    Path("tmp_folder2").mkdir()
+    Path("tmp_folder1", "file.py").write_text(
+        """
+def stuff():
+    pass
+
+
+
+"""
+    )
+    Path("tmp_folder2", "file.py").write_text("a = 1\n")
+
+    runner = CliRunner()
+    result_1 = runner.invoke(cli.cli, ["lint", "tmp_folder1"])
+    result_2 = runner.invoke(cli.cli, ["lint", "tmp_folder2"])
+    result_3 = runner.invoke(cli.cli, ["lint"])
+
+    assert result_1.exit_code == 1
+    assert result_2.exit_code == 0
+    assert result_3.exit_code == 1
+
+    assert "The following command failed: black --check" in result_1.output
+    assert "The following command failed: flake8" in result_1.output
+    assert "The following command failed: black --check" in result_3.output
+    assert "The following command failed: flake8" in result_3.output

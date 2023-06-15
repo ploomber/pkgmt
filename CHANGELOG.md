@@ -2,6 +2,8 @@
 
 ## 0.6.2dev
 
+* [Feature] Added file path to `pkgmt lint` (#56)
+
 ## 0.6.1 (2023-06-09)
 
 * [Feature] Adds `python -m pkgmt.fail_if_not_modified` to test if certain paths in the repository have been modified
