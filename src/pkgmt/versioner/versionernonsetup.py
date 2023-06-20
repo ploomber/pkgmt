@@ -9,7 +9,7 @@ class VersionerNonSetup(AbstractVersioner):
         super().__init__(project_root)
 
     def find_package(self):
-        for path, dirs, files in os.walk(self.project_root):
+        for path, dirs, _ in os.walk(self.project_root):
             if self.version_package in dirs:
                 PACKAGE = Path(path, self.version_package)
 
