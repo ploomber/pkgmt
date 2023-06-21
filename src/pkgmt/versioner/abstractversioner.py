@@ -188,8 +188,11 @@ class AbstractVersioner(abc.ABC):
 
     @abc.abstractmethod
     def find_package(self):
+        """Must return the package name and the path to the package root"""
         pass
 
     @abc.abstractmethod
     def version_file(self):
+        """Must return a path to the version file, relative to the package root (as
+        returned by find_package)"""
         pass
