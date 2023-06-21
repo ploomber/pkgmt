@@ -59,10 +59,14 @@ class Runner:
             return 0
 
 
-def _lint():
+def _lint(files=None):
+    if len(files) == 0:
+        files = ["."]
+    else:
+        files = list(files)
     runner = Runner(find_root())
-    runner.run(["flake8"], fix="Run: pkgmt format")
-    runner.run(["black", "--check", "."], fix="Run: pkgmt format")
+    runner.run(["flake8"] + files, fix="Run: pkgmt format")
+    runner.run(["black", "--check"] + files, fix="Run: pkgmt format")
 
     if not nbqa:
         print(
@@ -78,7 +82,8 @@ def _lint():
 
     if nbqa and jupytext:
         runner.run(
-            ["nbqa", "flake8", "."], fix="Install nbqa jupytext and run: pkgmt format"
+            ["nbqa", "flake8"] + files,
+            fix="Install nbqa jupytext and run: pkgmt format",
         )
 
     return runner.check()
