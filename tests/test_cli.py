@@ -63,4 +63,7 @@ def stuff():
     runner = CliRunner()
     result = runner.invoke(cli.cli, ["lint"])
     assert result.exit_code == 1
-    assert "Could not find project root" in result.output
+    assert (
+        "Could not find project root"
+        "Please add a pyproject.toml file in the root folder"
+    ) in result.output
