@@ -61,9 +61,11 @@ def stuff():
     )
 
     runner = CliRunner()
+
     result = runner.invoke(cli.cli, ["lint"])
     assert result.exit_code == 1
-    assert ("Could not find project root") in result.output
+    assert "Could not find project root" in result.output
+    assert "pyproject.toml is missing in the root folder" in result.output
 
 
 def test_lint_error(tmp_empty):
