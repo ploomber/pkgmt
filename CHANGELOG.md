@@ -3,6 +3,7 @@
 ## 0.6.2dev
 
 * [Feature] Added file path to `pkgmt lint` (#56)
+* [Feature] Clearer error when missing `pyproject.toml`
 
 ## 0.6.1 (2023-06-09)
 
