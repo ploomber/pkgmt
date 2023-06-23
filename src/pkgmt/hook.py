@@ -22,7 +22,12 @@ def find_root():
 
     while not (current / "pyproject.toml").exists():
         if current == current.parent:
-            sys.exit("Could not find project root.")
+            sys.exit(
+                (
+                    "Could not find project root."
+                    "Please add a pyproject.toml file in the root folder."
+                )
+            )
 
         current = current.parent
 

@@ -61,9 +61,11 @@ def stuff():
     )
 
     runner = CliRunner()
+
     result = runner.invoke(cli.cli, ["lint"])
     assert result.exit_code == 1
     assert "Could not find project root" in result.output
+    assert "Please add a pyproject.toml file in the root folder." in result.output
 
 
 def test_lint_error(tmp_empty):
@@ -94,3 +96,22 @@ def stuff():
     assert "The following command failed: flake8" in result_1.output
     assert "The following command failed: black --check" in result_3.output
     assert "The following command failed: flake8" in result_3.output
+
+
+def test_format_error(tmp_empty):
+    Path("pyproject.toml").touch()
+    Path("tmp_folder1").mkdir()
+    Path("tmp_folder1", "file.py").write_text(
+        """
+def stuff():
+    pass
+
+
+
+"""
+    )
+
+    runner = CliRunner()
+    result_1 = runner.invoke(cli.cli, ["format"])
+
+    assert "Finished formatting with black!" in result_1.output
