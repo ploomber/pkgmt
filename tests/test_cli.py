@@ -96,3 +96,22 @@ def stuff():
     assert "The following command failed: flake8" in result_1.output
     assert "The following command failed: black --check" in result_3.output
     assert "The following command failed: flake8" in result_3.output
+
+
+def test_format_error(tmp_empty):
+    Path("pyproject.toml").touch()
+    Path("tmp_folder1").mkdir()
+    Path("tmp_folder1", "file.py").write_text(
+        """
+def stuff():
+    pass
+
+
+
+"""
+    )
+
+    runner = CliRunner()
+    result_1 = runner.invoke(cli.cli, ["format"])
+
+    assert "***black returned errors.***" in result_1.output
