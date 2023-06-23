@@ -110,8 +110,12 @@ def stuff():
 
 """
     )
+    Path("tmp_folder2").mkdir()
+    Path("tmp_folder2", "file.py").write_text("a = 1\n")
 
     runner = CliRunner()
     result_1 = runner.invoke(cli.cli, ["format"])
+    result_2 = runner.invoke(cli.cli, ["format"])
 
-    assert "***black returned errors.***" in result_1.output
+    assert "Finished formatting with black!" in result_1.output
+    assert "***black returned errors.***" in result_2.output
