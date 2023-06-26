@@ -1,5 +1,4 @@
 import toml
-import yaml
 import pytest
 
 from pkgmt import config
@@ -22,21 +21,12 @@ def test_load_toml(toml_cfg):
     assert loaded == toml_cfg
 
 
-def test_load_yaml(tmp_empty):
-    cfg_ = {"github": "edublancas/pkgmt"}
-    cfg = {"pkgmt": cfg_}
-
-    with open("config.yaml", "w") as f:
-        yaml.dump(cfg, f)
-
-    loaded = config.load()
-
-    assert loaded == cfg_
-
-
 def test_missing_file(tmp_empty):
-    with pytest.raises(FileNotFoundError):
+    with pytest.raises(FileNotFoundError) as excinfo:
         config.load()
+    assert "Could not load configuration file: expected a pyproject.toml file" in str(
+        excinfo.value
+    )
 
 
 def test_key_error(toml_cfg):

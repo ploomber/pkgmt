@@ -1,0 +1,3 @@
+[tool.pkgmt]
+github = "edublancas/pkgmt"
+version = {version_file = "/app/_version.py"}
