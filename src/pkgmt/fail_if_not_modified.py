@@ -32,7 +32,7 @@ if __name__ == "__main__":
         nargs="+",
         help="Path to include in git diff. "
         "Will fail if anyone of the path is not modified."
-        "Can be used multiple times eg: -i p1 -i p2",
+        "Can be used multiple times eg: -i p1 p2",
     )
     parser.add_argument("--debug", action="store_true", help="Print debug info")
 
