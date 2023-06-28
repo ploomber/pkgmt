@@ -12,6 +12,7 @@ try:
     import nbqa
 except ModuleNotFoundError:
     nbqa = None
+from shlex import quote
 
 
 def find_root():
@@ -31,11 +32,16 @@ def find_root():
     return str(current)
 
 
-def format():
+def format(exclude):
     current = find_root()
 
-    print("Running: black .")
-    res = subprocess.run(["black", "."], cwd=current)
+    exclude_str = "|".join(exclude)
+    if len(exclude) != 1:
+        exclude_str = f"/{exclude_str}/"
+
+    cmd = ["black", ".", f"--extend-exclude={exclude_str}"]
+    print("Running command:", " ".join(map(quote, cmd)))
+    res = subprocess.run(cmd, cwd=current)
 
     error = False
 
@@ -55,8 +61,9 @@ def format():
         )
 
     if nbqa and jupytext:
-        print("Running: nbqa black .")
-        res_nb = subprocess.run(["nbqa", "black", "."], cwd=current)
+        cmd = ["nbqa", "black", ".", f"--extend-exclude={exclude_str}"]
+        print("Running command:", " ".join(map(quote, cmd)))
+        res_nb = subprocess.run(cmd, cwd=current)
 
         if res_nb.returncode:
             error = True

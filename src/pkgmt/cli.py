@@ -162,9 +162,16 @@ def doc(clean):
 
 
 @cli.command()
-def format():
+@click.option(
+    "-e",
+    "--exclude",
+    multiple=True,
+    default=[],
+    help="Exclude packages from the build",
+)
+def format(exclude):
     """Run black on .py files and notebooks (.ipynb, .md)"""
-    formatting.format()
+    formatting.format(exclude)
 
 
 @cli.command()
