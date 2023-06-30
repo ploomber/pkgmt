@@ -1,10 +1,10 @@
 # CHANGELOG
 
-## 0.6.2dev
+## 0.6.2 (2023-06-30)
 
-* [Feature] Added file path to `pkgmt lint` (#56)
+* [Feature] Added file path to `pkgmt lint` ([#56](https://github.com/ploomber/pkgmt/issues/56))
 * [Feature] Clearer error when missing `pyproject.toml`
-* [Feature] Added `--exclude` option to pkgmt `lint` and pkgmt `format` (#55)
+* [Feature] Added `--exclude` option to pkgmt `lint` and pkgmt `format` ([#55](https://github.com/ploomber/pkgmt/issues/55))
 
 ## 0.6.1 (2023-06-09)
 
