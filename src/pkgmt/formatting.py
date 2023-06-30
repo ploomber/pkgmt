@@ -1,6 +1,7 @@
 from pathlib import Path
 import sys
 import subprocess
+import click
 
 try:
     import jupytext
@@ -12,6 +13,7 @@ try:
     import nbqa
 except ModuleNotFoundError:
     nbqa = None
+from shlex import quote
 
 
 def find_root():
@@ -31,11 +33,14 @@ def find_root():
     return str(current)
 
 
-def format():
+def format(exclude):
     current = find_root()
 
-    print("Running: black .")
-    res = subprocess.run(["black", "."], cwd=current)
+    exclude_str = "|".join(exclude)
+
+    cmd = ["black", ".", "--extend-exclude", exclude_str]
+    click.echo("Running command:" + " ".join(map(quote, cmd)))
+    res = subprocess.run(cmd, cwd=current)
 
     error = False
 
@@ -43,26 +48,27 @@ def format():
         error = True
 
     if not nbqa:
-        print(
+        click.echo(
             "nbqa is missing, black won't run on notebooks. "
             "Fix it with: pip install nbqa"
         )
 
     if not jupytext:
-        print(
+        click.echo(
             "jupytext is missing, black won't run on notebooks. "
             "Fix it with: pip install jupytext"
         )
 
     if nbqa and jupytext:
-        print("Running: nbqa black .")
-        res_nb = subprocess.run(["nbqa", "black", "."], cwd=current)
+        cmd = ["nbqa", "black", ".", "--extend-exclude", exclude_str]
+        click.echo("Running command:" + " ".join(map(quote, cmd)))
+        res_nb = subprocess.run(cmd, cwd=current)
 
         if res_nb.returncode:
             error = True
 
     if error:
-        print()
+        click.echo()
         sys.exit("***black returned errors.***")
 
-    print("Finished formatting with black!")
+    click.echo("Finished formatting with black!")

@@ -38,8 +38,7 @@ if __name__ == "__main__":
         "--exclude-path",
         default=["doc"],
         nargs="+",
-        help="Path to exclude from git diff."
-        "Can be used multiple times eg: -e p1 p2",
+        help="Path to exclude from git diff." "Can be used multiple times eg: -e p1 p2",
     )
     parser.add_argument("--debug", action="store_true", help="Print debug info")
 

@@ -162,16 +162,31 @@ def doc(clean):
 
 
 @cli.command()
-def format():
+@click.option(
+    "-e",
+    "--exclude",
+    multiple=True,
+    default=[],
+    help="Exclude multiple files or dir from the build. Can also pass regex."
+    "Eg: -e tmp -e tmp/a.py -e tmp|src",
+)
+def format(exclude):
     """Run black on .py files and notebooks (.ipynb, .md)"""
-    formatting.format()
+    formatting.format(exclude)
 
 
 @cli.command()
 @click.argument("files", nargs=-1)
-def lint(files):
+@click.option(
+    "-e",
+    "--exclude",
+    multiple=True,
+    default=[],
+    help="Exclude multiple files or dir from the build" "Eg: -e tmp -e tmp/a.py",
+)
+def lint(files, exclude):
     """Lint .py files and notebooks (.ipynb, .md) with flake8"""
-    returncode = hook_._lint(files=files)
+    returncode = hook_._lint(files=files, exclude=exclude)
 
     if returncode:
         raise SystemExit("Error linting")

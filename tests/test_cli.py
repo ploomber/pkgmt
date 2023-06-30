@@ -68,50 +68,59 @@ def stuff():
     assert "Please add a pyproject.toml file in the root folder." in result.output
 
 
-def test_lint_error(tmp_empty):
+@pytest.mark.parametrize(
+    "command,exit_code",
+    [
+        [
+            "lint tmp_folder1",
+            1,
+        ],
+        ["lint tmp_folder2", 0],
+        ["lint", 1],
+        ["lint . -e tmp_folder1", 0],
+        ["lint . -e tmp_folder1 -e tmp_folder2", 0],
+        ["lint . -e tmp_folder2", 1],
+    ],
+)
+def test_lint_error(command, exit_code, tmp_empty):
     Path("pyproject.toml").touch()
     Path("tmp_folder1").mkdir()
     Path("tmp_folder2").mkdir()
-    Path("tmp_folder1", "file.py").write_text(
-        """
-def stuff():
-    pass
-
-
-
-"""
-    )
+    Path("tmp_folder1", "file.py").write_text("def stuff():\n\tpass\n\n\n")
     Path("tmp_folder2", "file.py").write_text("a = 1\n")
 
     runner = CliRunner()
-    result_1 = runner.invoke(cli.cli, ["lint", "tmp_folder1"])
-    result_2 = runner.invoke(cli.cli, ["lint", "tmp_folder2"])
-    result_3 = runner.invoke(cli.cli, ["lint"])
+    result = runner.invoke(cli.cli, command.split())
 
-    assert result_1.exit_code == 1
-    assert result_2.exit_code == 0
-    assert result_3.exit_code == 1
+    assert result.exit_code == exit_code
 
-    assert "The following command failed: black --check" in result_1.output
-    assert "The following command failed: flake8" in result_1.output
-    assert "The following command failed: black --check" in result_3.output
-    assert "The following command failed: flake8" in result_3.output
+    if exit_code == 1:
+        assert "The following command failed: black --check" in result.output
+        assert "The following command failed: flake8" in result.output
 
 
-def test_format_error(tmp_empty):
+@pytest.mark.parametrize(
+    "command,a,b",
+    [
+        ["format", "def stuff():\n    pass\n", "a = 1\n"],
+        ["format -e tmp_folder1", "def stuff():\n\tpass\n\n\n", "a = 1\n"],
+        [
+            "format -e tmp_folder1 -e tmp_folder2",
+            "def stuff():\n\tpass\n\n\n",
+            "a = 1\n\n",
+        ],
+    ],
+)
+def test_format_error(command, a, b, tmp_empty, capsys):
     Path("pyproject.toml").touch()
     Path("tmp_folder1").mkdir()
-    Path("tmp_folder1", "file.py").write_text(
-        """
-def stuff():
-    pass
-
-
-
-"""
-    )
+    Path("tmp_folder2").mkdir()
+    Path("tmp_folder1", "file.py").write_text("def stuff():\n\tpass\n\n\n")
+    Path("tmp_folder2", "file.py").write_text("a = 1\n\n")
 
     runner = CliRunner()
-    result_1 = runner.invoke(cli.cli, ["format"])
+    result = runner.invoke(cli.cli, command.split(" "))
 
-    assert "Finished formatting with black!" in result_1.output
+    assert "Finished formatting with black!" in result.output
+    assert Path("tmp_folder1", "file.py").read_text() == a
+    assert Path("tmp_folder2", "file.py").read_text() == b
