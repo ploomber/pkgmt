@@ -4,6 +4,7 @@
 
 * [Feature] Added file path to `pkgmt lint` (#56)
 * [Feature] Clearer error when missing `pyproject.toml`
+* [Feature] Added `--exclude` option to pkgmt `lint` and pkgmt `format` (#55)
 
 ## 0.6.1 (2023-06-09)
 
