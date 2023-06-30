@@ -87,15 +87,25 @@ def stuff():
     result_1 = runner.invoke(cli.cli, ["lint", "tmp_folder1"])
     result_2 = runner.invoke(cli.cli, ["lint", "tmp_folder2"])
     result_3 = runner.invoke(cli.cli, ["lint"])
+    result_4 = runner.invoke(cli.cli, ["lint", ".", "-e", "tmp_folder1"])
+    result_5 = runner.invoke(
+        cli.cli, ["lint", ".", "-e", "tmp_folder1", "-e", "tmp_folder2"]
+    )
+    result_6 = runner.invoke(cli.cli, ["lint", ".", "-e", "tmp_folder2"])
 
     assert result_1.exit_code == 1
     assert result_2.exit_code == 0
     assert result_3.exit_code == 1
+    assert result_4.exit_code == 0
+    assert result_5.exit_code == 0
+    assert result_6.exit_code == 1
 
     assert "The following command failed: black --check" in result_1.output
     assert "The following command failed: flake8" in result_1.output
     assert "The following command failed: black --check" in result_3.output
     assert "The following command failed: flake8" in result_3.output
+    assert "The following command failed: black --check" in result_6.output
+    assert "The following command failed: flake8" in result_6.output
 
 
 def test_format_error(tmp_empty):
