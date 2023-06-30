@@ -42,7 +42,7 @@ class Runner:
     def run(self, cmd, fix):
         cmd_ = " ".join(cmd)
         header = "=" * 20
-        print(f"{header} Running: {cmd_} {header}")
+        click.echo(f"{header} Running: {cmd_} {header}")
         res = subprocess.run(cmd, cwd=self._cwd)
 
         if res.returncode:
@@ -51,11 +51,11 @@ class Runner:
     def check(self):
         if self._errors:
             for cmd, fix in self._errors:
-                print(f"The following command failed: {cmd}\\nTo fix it: {fix}")
+                click.echo(f"The following command failed: {cmd}\\nTo fix it: {fix}")
 
             return 1
         else:
-            print("All checks passed!")
+            click.echo("All checks passed!")
             return 0
 
 
@@ -75,13 +75,13 @@ def _lint(files=None, exclude=None):
     runner.run(cmd_black, fix="Run: pkgmt format")
 
     if not nbqa:
-        print(
+        click.echo(
             "nbqa is missing, flake8 won't run on notebooks. "
             "Fix it with: pip install nbqa"
         )
 
     if not jupytext:
-        print(
+        click.echo(
             "jupytext is missing, flake8 won't run on notebooks. "
             "Fix it with: pip install jupytext"
         )
