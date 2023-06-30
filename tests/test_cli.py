@@ -78,7 +78,8 @@ def stuff():
         ["lint tmp_folder2", 0],
         ["lint", 1],
         ["lint . -e tmp_folder1", 0],
-        ["lint . -e tmp_folder1 -e tmp_folder2", 0]["lint . -e tmp_folder2", 1],
+        ["lint . -e tmp_folder1 -e tmp_folder2", 0],
+        ["lint . -e tmp_folder2", 1],
     ],
 )
 def test_lint_error(command, exit_code, tmp_empty):
