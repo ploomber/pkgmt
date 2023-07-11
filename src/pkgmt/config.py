@@ -1,7 +1,6 @@
 from collections.abc import Mapping
 
 import toml
-import yaml
 from pathlib import Path
 
 
@@ -31,13 +30,7 @@ def load():
     if Path("pyproject.toml").exists():
         with open("pyproject.toml") as f:
             return Config(toml.load(f)["tool"]["pkgmt"], "pyproject.toml")
-    elif Path("config.yaml").exists():
-        with open("config.yaml", "r") as stream:
-            try:
-                return Config(yaml.safe_load(stream)["pkgmt"], "config.yaml")
-            except yaml.YAMLError as exc:
-                print("Error loading config.yaml file : {}".format(exc))
     else:
         raise FileNotFoundError(
-            "Could not load config: expected pyproject.toml or config.yaml"
+            "Could not load configuration file: expected a pyproject.toml file"
         )

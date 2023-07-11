@@ -21,10 +21,15 @@ from datetime import datetime
 import click
 import pytest
 
-from pkgmt.versioner.versionersetup import VersionerSetup
-from pkgmt.versioneer import VersionerNonSetup
+from pkgmt.versioner.versioner import Versioner
 from pkgmt import versioneer
-from pkgmt.versioner import abstractversioner
+from pkgmt.versioner.util import (
+    find_package_in_src,
+    find_package_of_version_file,
+    find_package_and_version_file,
+    validate_version_file,
+)
+from pkgmt.versioner import versioner
 from pkgmt.exceptions import ProjectValidationError
 
 
@@ -52,24 +57,33 @@ def move_to_another_package(root):
     os.chdir(old)
 
 
+@pytest.fixture
+def move_to_package_no_src(root):
+    old = os.getcwd()
+    p = root / "tests" / "assets" / "package_no_src"
+    os.chdir(p)
+    yield
+    os.chdir(old)
+
+
 def test_locate_package_and_readme(move_to_package_name):
-    v = VersionerSetup()
+    v = Versioner()
     assert v.PACKAGE == Path("src", "package_name")
     assert v.path_to_changelog == Path("CHANGELOG.md")
 
 
 def test_locate_package_and_readme_non_setup(move_to_another_package):
-    v = VersionerNonSetup("app")
+    v = Versioner()
     assert v.PACKAGE == Path("app")
     assert v.path_to_changelog == Path("CHANGELOG.md")
 
 
 def test_current_version(move_to_package_name):
-    assert VersionerSetup().current_version() == "0.1dev"
+    assert Versioner().current_version() == "0.1dev"
 
 
 def test_current_version_non_setup(move_to_another_package):
-    assert VersionerNonSetup("app").current_version() == "0.1dev"
+    assert Versioner().current_version() == "0.1dev"
 
 
 @pytest.mark.parametrize(
@@ -85,12 +99,12 @@ def test_current_version_non_setup(move_to_another_package):
 def test_release_version(
     monkeypatch, move_to_package_name, version_current, version_release
 ):
-    monkeypatch.setattr(VersionerSetup, "current_version", lambda self: version_current)
-    assert VersionerSetup().release_version() == version_release
+    monkeypatch.setattr(Versioner, "current_version", lambda self: version_current)
+    assert Versioner().release_version() == version_release
 
 
 def test_release_version_non_setup(move_to_another_package):
-    assert VersionerNonSetup("app").release_version() == "0.1.0"
+    assert Versioner().release_version() == "0.1.0"
 
 
 @pytest.mark.parametrize(
@@ -103,8 +117,7 @@ def test_release_version_non_setup(move_to_another_package):
 def test_ignore_special_folders(folder_name, tmp_package_name):
     Path("src", folder_name).mkdir()
 
-    name, package = VersionerSetup().find_package()
-
+    name, package = find_package_in_src()
     assert name == "package_name"
     assert package == Path("src", "package_name")
 
@@ -125,8 +138,16 @@ def test_ignore_special_folders(folder_name, tmp_package_name):
 @pytest.mark.parametrize(
     "move_to, attr, versioner",
     [
-        [move_to_package_name, VersionerSetup, VersionerSetup()],
-        [move_to_another_package, VersionerNonSetup, VersionerNonSetup("app")],
+        [
+            move_to_package_name,
+            Versioner,
+            Versioner(),
+        ],
+        [
+            move_to_another_package,
+            Versioner,
+            Versioner(),
+        ],
     ],
 )
 def test_bump_up_version(monkeypatch, version, version_new, move_to, attr, versioner):
@@ -135,11 +156,11 @@ def test_bump_up_version(monkeypatch, version, version_new, move_to, attr, versi
 
 
 def test_commit_version_no_tag(tmp_package_name, monkeypatch):
-    v = VersionerSetup()
+    v = Versioner()
 
     mock = Mock()
     monkeypatch.setattr(versioneer, "call", mock)
-    monkeypatch.setattr(abstractversioner, "call", mock)
+    monkeypatch.setattr(versioner, "call", mock)
 
     v.commit_version(
         "0.2", msg_template="{package_name} release {new_version}", tag=False
@@ -156,11 +177,11 @@ def test_commit_version_no_tag(tmp_package_name, monkeypatch):
 
 
 def test_commit_version_no_tag_non_setup(tmp_another_package, monkeypatch):
-    v = VersionerNonSetup("app")
+    v = Versioner()
 
     mock = Mock()
     monkeypatch.setattr(versioneer, "call", mock)
-    monkeypatch.setattr(abstractversioner, "call", mock)
+    monkeypatch.setattr(versioner, "call", mock)
 
     v.commit_version(
         "0.2", msg_template="{package_name} release {new_version}", tag=False
@@ -177,11 +198,11 @@ def test_commit_version_no_tag_non_setup(tmp_another_package, monkeypatch):
 
 
 def test_commit_version_tag(tmp_package_name, monkeypatch):
-    v = VersionerSetup()
+    v = Versioner()
 
     mock = Mock()
     monkeypatch.setattr(versioneer, "call", mock)
-    monkeypatch.setattr(abstractversioner, "call", mock)
+    monkeypatch.setattr(versioner, "call", mock)
 
     v.commit_version(
         "0.2", msg_template="{package_name} release {new_version}", tag=True
@@ -199,11 +220,11 @@ def test_commit_version_tag(tmp_package_name, monkeypatch):
 
 
 def test_commit_version_tag_non_setup(tmp_another_package, monkeypatch):
-    v = VersionerNonSetup("app")
+    v = Versioner()
 
     mock = Mock()
     monkeypatch.setattr(versioneer, "call", mock)
-    monkeypatch.setattr(abstractversioner, "call", mock)
+    monkeypatch.setattr(versioner, "call", mock)
 
     v.commit_version(
         "0.2", msg_template="{package_name} release {new_version}", tag=True
@@ -221,7 +242,7 @@ def test_commit_version_tag_non_setup(tmp_another_package, monkeypatch):
 
 
 def test_update_changelog_release_md(tmp_package_name):
-    v = VersionerSetup()
+    v = Versioner()
     v.update_changelog_release("0.1")
     today = datetime.now().strftime("%Y-%m-%d")
     assert (
@@ -231,12 +252,12 @@ def test_update_changelog_release_md(tmp_package_name):
 
 
 def test_update_changelog_release_md_non_setup(tmp_another_package):
-    v = VersionerNonSetup("app")
+    v = Versioner()
     v.update_changelog_release("0.1")
     today = datetime.now().strftime("%Y-%m-%d")
     assert (
         v.path_to_changelog.read_text()
-        == f"# CHANGELOG\n\n## 0.1 ({today})\n\n* Fixes #1"
+        == f"# CHANGELOG\n\n## 0.1 ({today})\n\n* [Fix] Fixes #1"
     )
 
 
@@ -244,7 +265,7 @@ def test_update_changelog_release_rst(tmp_package_name):
     Path("CHANGELOG.md").unlink()
     Path("CHANGELOG.rst").write_text("CHANGELOG\n=========\n\n0.1dev\n------")
 
-    v = VersionerSetup()
+    v = Versioner()
     v.update_changelog_release("0.1")
     today = datetime.now().strftime("%Y-%m-%d")
     assert (
@@ -257,7 +278,7 @@ def test_update_changelog_release_rst_non_setup(tmp_another_package):
     Path("CHANGELOG.md").unlink()
     Path("CHANGELOG.rst").write_text("CHANGELOG\n=========\n\n0.1dev\n------")
 
-    v = VersionerNonSetup("app")
+    v = Versioner()
     v.update_changelog_release("0.1")
     today = datetime.now().strftime("%Y-%m-%d")
     assert (
@@ -267,7 +288,7 @@ def test_update_changelog_release_rst_non_setup(tmp_another_package):
 
 
 def test_add_changelog_new_dev_section_md(tmp_package_name):
-    v = VersionerSetup()
+    v = Versioner()
     v.add_changelog_new_dev_section("0.2dev")
     assert (
         v.path_to_changelog.read_text()
@@ -276,11 +297,11 @@ def test_add_changelog_new_dev_section_md(tmp_package_name):
 
 
 def test_add_changelog_new_dev_section_md_non_setup(tmp_another_package):
-    v = VersionerNonSetup("app")
+    v = Versioner()
     v.add_changelog_new_dev_section("0.2dev")
     assert (
         v.path_to_changelog.read_text()
-        == "# CHANGELOG\n\n## 0.2dev\n\n## 0.1dev\n\n* Fixes #1"
+        == "# CHANGELOG\n\n## 0.2dev\n\n## 0.1dev\n\n* [Fix] Fixes #1"
     )
 
 
@@ -288,7 +309,7 @@ def test_add_changelog_new_dev_section_rst(tmp_package_name):
     Path("CHANGELOG.md").unlink()
     Path("CHANGELOG.rst").write_text("CHANGELOG\n=========\n\n0.1dev\n------")
 
-    v = VersionerSetup()
+    v = Versioner()
     v.add_changelog_new_dev_section("0.2dev")
     assert (
         v.path_to_changelog.read_text()
@@ -300,7 +321,7 @@ def test_add_changelog_new_dev_section_rst_non_setup(tmp_another_package):
     Path("CHANGELOG.md").unlink()
     Path("CHANGELOG.rst").write_text("CHANGELOG\n=========\n\n0.1dev\n------")
 
-    v = VersionerNonSetup("app")
+    v = Versioner()
     v.add_changelog_new_dev_section("0.2dev")
     assert (
         v.path_to_changelog.read_text()
@@ -321,7 +342,7 @@ def test_version(tmp_package_name, monkeypatch, submitted, stored, dev):
     mock_input.side_effect = [submitted, "y"]
 
     monkeypatch.setattr(versioneer, "call", mock)
-    monkeypatch.setattr(abstractversioner, "call", mock)
+    monkeypatch.setattr(versioner, "call", mock)
     monkeypatch.setattr(versioneer, "_input", mock_input)
 
     versioneer.version(tag=True)
@@ -354,7 +375,7 @@ def test_version_no_push(tmp_package_name, monkeypatch):
     mock_input.side_effect = [submitted, "y"]
 
     monkeypatch.setattr(versioneer, "call", mock)
-    monkeypatch.setattr(abstractversioner, "call", mock)
+    monkeypatch.setattr(versioner, "call", mock)
     monkeypatch.setattr(versioneer, "_input", mock_input)
 
     versioneer.version(push=False)
@@ -381,7 +402,7 @@ def test_version_no_push(tmp_package_name, monkeypatch):
 def test_version_yes(tmp_package_name, monkeypatch):
     mock = Mock()
     monkeypatch.setattr(versioneer, "call", mock)
-    monkeypatch.setattr(abstractversioner, "call", mock)
+    monkeypatch.setattr(versioner, "call", mock)
 
     stored = "0.1.0"
     dev = "0.1.1dev"
@@ -412,7 +433,7 @@ def test_version_yes(tmp_package_name, monkeypatch):
 def test_version_target_stable(tmp_package_name, monkeypatch):
     mock = Mock()
     monkeypatch.setattr(versioneer, "call", mock)
-    monkeypatch.setattr(abstractversioner, "call", mock)
+    monkeypatch.setattr(versioner, "call", mock)
 
     stored = "0.1.0"
 
@@ -448,10 +469,10 @@ def test_version_non_setup(tmp_another_package, monkeypatch, submitted, stored, 
     mock_input.side_effect = [submitted, "y"]
 
     monkeypatch.setattr(versioneer, "call", mock)
-    monkeypatch.setattr(abstractversioner, "call", mock)
+    monkeypatch.setattr(versioner, "call", mock)
     monkeypatch.setattr(versioneer, "_input", mock_input)
 
-    versioneer.version(tag=True, version_package="app")
+    versioneer.version(tag=True)
 
     assert mock.call_args_list == [
         _call(["git", "checkout", "main"]),
@@ -470,7 +491,7 @@ def test_version_non_setup(tmp_another_package, monkeypatch, submitted, stored, 
     today = datetime.now().strftime("%Y-%m-%d")
     assert Path("CHANGELOG.md").read_text() == (
         f"# CHANGELOG\n\n## {dev}\n\n## {stored} ({today})\n\n"
-        "* Fixes [#1](https://github.com/edublancas/pkgmt/issues/1)"
+        "* [Fix] Fixes [#1](https://github.com/edublancas/pkgmt/issues/1)\n"
     )
 
 
@@ -490,7 +511,7 @@ def test_version_pre_release(tmp_package_name, monkeypatch, submitted, stored, d
     monkeypatch.setattr(versioneer, "call", mock)
     monkeypatch.setattr(versioneer, "_input", mock_input)
 
-    monkeypatch.setattr(abstractversioner, "call", mock)
+    monkeypatch.setattr(versioner, "call", mock)
 
     versioneer.version(tag=True)
 
@@ -522,7 +543,7 @@ def test_version_error_if_extra_files(tmp_package_name, monkeypatch):
     mock_input.side_effect = [submitted, "y"]
 
     monkeypatch.setattr(versioneer, "call", mock)
-    monkeypatch.setattr(abstractversioner, "call", mock)
+    monkeypatch.setattr(versioner, "call", mock)
     monkeypatch.setattr(versioneer, "_input", mock_input)
 
     Path("some-file.txt").touch()
@@ -550,10 +571,10 @@ def test_version_pre_release_non_setup(
     mock_input.side_effect = [selected, "y"]
 
     monkeypatch.setattr(versioneer, "call", mock)
-    monkeypatch.setattr(abstractversioner, "call", mock)
+    monkeypatch.setattr(versioner, "call", mock)
     monkeypatch.setattr(versioneer, "_input", mock_input)
 
-    versioneer.version(tag=True, version_package="app")
+    versioneer.version(tag=True)
 
     assert mock.call_args_list == [
         _call(["git", "checkout", "main"]),
@@ -572,7 +593,7 @@ def test_version_pre_release_non_setup(
     # changelog must not change
     assert Path("CHANGELOG.md").read_text() == (
         "# CHANGELOG\n\n## 0.1dev\n\n"
-        "* Fixes [#1](https://github.com/edublancas/pkgmt/issues/1)"
+        "* [Fix] Fixes [#1](https://github.com/edublancas/pkgmt/issues/1)\n"
     )
 
 
@@ -586,7 +607,7 @@ def test_version_with_no_changelog(tmp_package_name, monkeypatch, capsys):
     mock_input.side_effect = ["", "y"]
 
     monkeypatch.setattr(versioneer, "call", mock)
-    monkeypatch.setattr(abstractversioner, "call", mock)
+    monkeypatch.setattr(versioner, "call", mock)
     monkeypatch.setattr(versioneer, "_input", mock_input)
 
     versioneer.version(tag=True)
@@ -619,10 +640,10 @@ def test_version_with_no_changelog_non_setup(tmp_another_package, monkeypatch, c
     mock_input.side_effect = ["", "y"]
 
     monkeypatch.setattr(versioneer, "call", mock)
-    monkeypatch.setattr(abstractversioner, "call", mock)
+    monkeypatch.setattr(versioner, "call", mock)
     monkeypatch.setattr(versioneer, "_input", mock_input)
 
-    versioneer.version(tag=True, version_package="app")
+    versioneer.version(tag=True)
 
     captured = capsys.readouterr()
     assert "No CHANGELOG.{rst,md} found, skipping changelog editing..." in captured.out
@@ -727,7 +748,7 @@ def test_invalid_version_string_non_setup(tmp_another_package, monkeypatch, sele
     monkeypatch.setattr(versioneer, "_input", mock_input)
 
     with pytest.raises(ValueError) as excinfo:
-        versioneer.version(tag=True, version_package="app")
+        versioneer.version(tag=True)
 
     assert "(first character must be numeric)" in str(excinfo.value)
 
@@ -753,7 +774,7 @@ def test_sorts_changelog_entries(tmp_package_name, monkeypatch):
     mock_input.side_effect = ["0.1", "y"]
 
     monkeypatch.setattr(versioneer, "call", mock)
-    monkeypatch.setattr(abstractversioner, "call", mock)
+    monkeypatch.setattr(versioner, "call", mock)
     monkeypatch.setattr(versioneer, "_input", mock_input)
 
     versioneer.version(tag=True)
@@ -782,7 +803,7 @@ def test_checks_pending_deprecations(tmp_package_name, monkeypatch):
     mock_input.side_effect = ["0.1", "y"]
 
     monkeypatch.setattr(versioneer, "call", mock)
-    monkeypatch.setattr(abstractversioner, "call", mock)
+    monkeypatch.setattr(versioner, "call", mock)
     monkeypatch.setattr(versioneer, "_input", mock_input)
 
     Path("CHANGELOG.md").write_text(
@@ -830,7 +851,7 @@ def test_checks_changelog(tmp_package_name, monkeypatch):
     mock_input.side_effect = ["0.1", "y"]
 
     monkeypatch.setattr(versioneer, "call", mock)
-    monkeypatch.setattr(abstractversioner, "call", mock)
+    monkeypatch.setattr(versioner, "call", mock)
     monkeypatch.setattr(versioneer, "_input", mock_input)
 
     Path("CHANGELOG.md").write_text(
@@ -875,7 +896,7 @@ def do_stuff():
 def test_picks_up_first_module_under_src(tmp_package_name):
     Path("src", "z").mkdir()
 
-    v = VersionerSetup()
+    v = Versioner()
 
     assert v.package_name == "package_name"
 
@@ -906,3 +927,76 @@ def test_validate_version_string_error(version, expected_error):
 )
 def test_validate_version_string(version, expected):
     assert versioneer.validate_version_string(version) == expected
+
+
+def test_find_package_in_src(move_to_package_name):
+    package_name, PACKAGE = find_package_in_src()
+    assert PACKAGE == Path("src", "package_name")
+    assert package_name == "package_name"
+
+
+def test_find_package_missing_src(move_to_package_no_src):
+    with pytest.raises(NotADirectoryError) as excinfo:
+        find_package_in_src()
+    assert "Expected a directory at 'src' but it doesn't exist" in str(excinfo.value)
+
+
+@pytest.mark.parametrize(
+    "version_file_path",
+    [
+        "/app/_version.py",
+        "app/_version.py",
+        "another_app/app/_version.py",
+        "/another_app/app/_version.py",
+    ],
+)
+def test_find_package_of_version_file(move_to_another_package, version_file_path):
+    package_name, PACKAGE, version_file_name = find_package_of_version_file(
+        version_file_path
+    )
+    assert PACKAGE == Path("app")
+    assert package_name == "app"
+    assert version_file_name == "_version.py"
+
+
+def test_version_file_missing(move_to_another_package):
+    with pytest.raises(click.ClickException) as excinfo:
+        find_package_of_version_file("/app/_missing.py")
+    assert "Cannot find version file /app/_missing.py in subdirectory : app" in str(
+        excinfo.value
+    )
+
+
+def test_version_file_invalid_value(move_to_another_package):
+    with pytest.raises(click.ClickException) as excinfo:
+        find_package_of_version_file(123)
+    assert "Please provide a valid path for the version file" in str(excinfo.value)
+
+
+@pytest.mark.parametrize("version_file_path", ["", {}])
+def test_version_file_empty(version_file_path):
+    with pytest.raises(click.ClickException) as excinfo:
+        validate_version_file(version_file_path)
+    assert "Empty version file path in pyproject.toml." in str(excinfo.value)
+
+
+def test_version_file_path_non_existent(move_to_another_package):
+    with pytest.raises(click.ClickException) as excinfo:
+        find_package_of_version_file("/invalid/__init__.py")
+    assert "Version file path does not exist : /invalid/__init__.py" in str(
+        excinfo.value
+    )
+
+
+def test_find_package_and_version_file_setup(move_to_package_name):
+    package_name, PACKAGE, version_file_name = find_package_and_version_file()
+    assert PACKAGE == Path("src", "package_name")
+    assert package_name == "package_name"
+    assert version_file_name == "__init__.py"
+
+
+def test_find_package_and_version_file_non_setup(move_to_another_package):
+    package_name, PACKAGE, version_file_name = find_package_and_version_file()
+    assert PACKAGE == Path("app")
+    assert package_name == "app"
+    assert version_file_name == "_version.py"

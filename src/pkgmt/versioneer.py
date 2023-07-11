@@ -8,8 +8,7 @@ from pathlib import Path
 import click
 
 from pkgmt.changelog import expand_github_from_changelog, CHANGELOG
-from pkgmt.versioner.versionernonsetup import VersionerNonSetup
-from pkgmt.versioner.versionersetup import VersionerSetup
+from pkgmt.versioner.versioner import Versioner
 from pkgmt.versioner.util import complete_version_string, is_pre_release
 from pkgmt.deprecation import Deprecations
 
@@ -74,9 +73,16 @@ def validate_version_string(version):
 
 
 def version(
-    project_root=".", tag=True, version_package=None, yes=False, push=True, target=None
+    project_root=".",
+    tag=True,
+    yes=False,
+    push=True,
+    target=None,
 ):
     """
+
+    Function to update latest stable version in version
+    file to new development version.
 
     Parameters
     ----------
@@ -94,30 +100,8 @@ def version(
         stable version and a new dev version. If stable, it assumes the repo is in a
         dev version and creates a stable version (skipping bumping to a new dev
         version)
-
-
-    Notes
-    -----
-    Create a new version (projects with setup.py) :
-    1. version_package will be None
-    2. Set new stable version in package_name/__init__.py
-    3. Update header in CHANGELOG file, and ask to review CHANGELOG
-    4. Create commit for new version, create git tag, and push
-    5. Set new development version in package_name/__init__.py, and CHANGELOG
-    6. Commit new development version and push
-
-    Create a new version (projects without setup.py) :
-    1. These projects should contain two essential files:
-       config.yaml in root directory which should contain the repo
-       name
-       _version.py file containing __version__ in the required directory
-    2. version_package will be the directory containing _version.py file
-    3. Set new stable version in package_name/_version.py
-    4. Update header in CHANGELOG file, and ask to review CHANGELOG
-    5. Create commit for new version, create git tag, and push
-    6. Set new development version in package_name/_version.py, and CHANGELOG
-    7. Commit new development version and push
     """
+
     _git_checkout_main_branch(pull=True)
 
     pending = subprocess.check_output(["git", "status", "--short"])
@@ -129,20 +113,17 @@ def version(
             f"\n{pending.decode()}"
         )
 
-    if version_package:
-        versioner = VersionerNonSetup(version_package, project_root=project_root)
-    else:
-        versioner = VersionerSetup(project_root=project_root)
+    versioner = Versioner(project_root)
 
     changelog_md_exists = (
         versioner.path_to_changelog and versioner.path_to_changelog.suffix == ".md"
     )
 
-    # TODO: make it compatible with VersionerNonSetup
-    if not version_package and changelog_md_exists:
+    if changelog_md_exists:
         # check changelog
         CHANGELOG.from_path(
-            path=versioner.path_to_changelog, project_root=project_root
+            path=versioner.path_to_changelog,
+            project_root=project_root,
         ).check()
 
         # look for deprecations
@@ -177,13 +158,12 @@ def version(
     if changelog_md_exists:
         expand_github_from_changelog(path=versioner.path_to_changelog)
 
-        # TODO: make it compatible with VersionerNonSetup
-        if not version_package:
-            # sort changelog entries
-            changelod_sorted = CHANGELOG.from_path(
-                path=versioner.path_to_changelog, project_root=project_root
-            ).sort_last_section()
-            Path(versioner.path_to_changelog).write_text(changelod_sorted)
+        # sort changelog entries
+        changelog_sorted = CHANGELOG.from_path(
+            path=versioner.path_to_changelog,
+            project_root=project_root,
+        ).sort_last_section()
+        Path(versioner.path_to_changelog).write_text(changelog_sorted)
 
     else:
         print("Skipping CHANGELOG processing (only supported in .md files)")
@@ -244,7 +224,7 @@ def upload(tag, production, yes=False):
     print("Checking out tag {}".format(tag))
     call(["git", "checkout", tag])
 
-    versioner = VersionerSetup()
+    versioner = Versioner()
     current = versioner.current_version()
 
     if not yes:

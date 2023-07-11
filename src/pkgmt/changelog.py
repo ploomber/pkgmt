@@ -19,8 +19,8 @@ except ModuleNotFoundError:
     InlineParser = object
 
 from pkgmt import config
-from pkgmt.versioner.versionersetup import VersionerSetup
 from pkgmt.versioner import util
+from pkgmt.versioner.versioner import Versioner
 from pkgmt._format import pretty_iterator
 from pkgmt.exceptions import ProjectValidationError
 
@@ -189,7 +189,7 @@ class CHANGELOG:
         )
         self.tree = markdown(text)
 
-        versioner = VersionerSetup(project_root=project_root)
+        versioner = Versioner(project_root=project_root)
         self.current = versioner.current_version()
 
     @classmethod
