@@ -1,5 +1,7 @@
 # CHANGELOG
 
+## 0.7.1dev
+
 ## 0.7.0 (2023-07-11)
 
 * [API Change] Support for projects containing `version` key in `pyproject.toml`. ([#58](https://github.com/ploomber/pkgmt/issues/58))
