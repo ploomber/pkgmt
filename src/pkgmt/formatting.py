@@ -2,6 +2,7 @@ from pathlib import Path
 import sys
 import subprocess
 import click
+import toml
 
 try:
     import jupytext
@@ -36,7 +37,24 @@ def find_root():
 def format(exclude):
     current = find_root()
 
+    if Path("pyproject.toml").exists():
+        with open("pyproject.toml") as f:
+            data = toml.load(f)
+
+        if "tool" in data and "black" in data["tool"]:
+            exclude_pyproj = data["tool"]["black"].get("extend-exclude", "")
+        else:
+            exclude_pyproj = ""
+    else:
+        exclude_pyproj = ""
+
     exclude_str = "|".join(exclude)
+
+    if exclude_pyproj:
+        if exclude_str:
+            exclude_str += "|" + exclude_pyproj
+        else:
+            exclude_str = exclude_pyproj
 
     cmd = ["black", ".", "--extend-exclude", exclude_str]
     click.echo("Running command:" + " ".join(map(quote, cmd)))

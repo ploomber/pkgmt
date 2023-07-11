@@ -49,7 +49,7 @@ def test_version(tmp_package_name, monkeypatch, args, yes, push, tag, target):
     )
 
 
-def test_lint_pyproj(tmp_empty):
+def test_pyproj(tmp_empty):
     Path("file.py").write_text(
         """
 def stuff():
@@ -124,3 +124,53 @@ def test_format_error(command, a, b, tmp_empty, capsys):
     assert "Finished formatting with black!" in result.output
     assert Path("tmp_folder1", "file.py").read_text() == a
     assert Path("tmp_folder2", "file.py").read_text() == b
+
+
+@pytest.mark.parametrize(
+    "pyproject,output",
+    [
+        ["", "a = 1\n"],
+        ['[tool.black]\nextend-exclude = "tmp_folder2"', "a = 1\n\n"],
+    ],
+)
+def test_format_black_pyproj(pyproject, output, tmp_empty):
+    Path("pyproject.toml").write_text(pyproject)
+    Path("tmp_folder1").mkdir()
+    Path("tmp_folder2").mkdir()
+    Path("tmp_folder1", "file.py").write_text("def stuff():\n\tpass\n\n\n")
+    Path("tmp_folder2", "file.py").write_text("a = 1\n\n")
+
+    runner = CliRunner()
+    result = runner.invoke(cli.cli, ["format", "-e", "tmp_folder1"])
+
+    assert "Finished formatting with black!" in result.output
+    assert Path("tmp_folder1", "file.py").read_text() == "def stuff():\n\tpass\n\n\n"
+    assert Path("tmp_folder2", "file.py").read_text() == output
+
+
+@pytest.mark.parametrize(
+    "pyproject,output",
+    [
+        [
+            "",
+            "The following command failed: black --check . "
+            "--extend-exclude tmp_folder1",
+        ],
+        ['[tool.black]\nextend-exclude = "tmp_folder2"', ""],
+    ],
+)
+def test_lint_black_pyproj(pyproject, output, tmp_empty):
+    Path("pyproject.toml").write_text(pyproject)
+    Path("tmp_folder1").mkdir()
+    Path("tmp_folder2").mkdir()
+    Path("tmp_folder1", "file.py").write_text("def stuff():\n\tpass\n\n\n")
+    Path("tmp_folder2", "file.py").write_text("a = 1\n\n")
+
+    runner = CliRunner()
+    result = runner.invoke(cli.cli, ["lint", "-e", "tmp_folder1"])
+
+    assert (
+        "The following command failed: flake8 . --extend-exclude tmp_folder1"
+        in result.output
+    )
+    assert output in result.output
