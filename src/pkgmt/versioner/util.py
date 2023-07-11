@@ -109,10 +109,12 @@ def find_package_of_version_file(version_file_path, project_root="."):
     for path, dirs, _ in os.walk(project_root):
         if version_package in dirs:
             PACKAGE = Path(path, version_package)
+            if not Path(path, version_package, version_file_name).exists():
+                raise click.ClickException(
+                    f"Cannot find version file : {version_file_path}, cwd: {os.getcwd()}"
+                )
 
     package_name = version_package
-    if not Path(package_name, version_file_name).exists():
-        raise click.ClickException(f"Cannot find version file : {version_file_path}, cwd: {os.getcwd()}")
     return package_name, PACKAGE, version_file_name
 
 
