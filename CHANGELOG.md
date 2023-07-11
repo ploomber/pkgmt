@@ -1,14 +1,14 @@
 # CHANGELOG
 
-## 0.6.3dev
+## 0.7.0dev
+
+* [API Change] Support for projects containing `version` key in `pyproject.toml`. (#58)
 
 ## 0.6.2 (2023-06-30)
 
 * [Feature] Added file path to `pkgmt lint` ([#56](https://github.com/ploomber/pkgmt/issues/56))
 * [Feature] Clearer error when missing `pyproject.toml`
 * [Feature] Added `--exclude` option to pkgmt `lint` and pkgmt `format` ([#55](https://github.com/ploomber/pkgmt/issues/55))
-* [API Change] Support for projects containing `version` key in `pyproject.toml`. (#58)
-
 
 ## 0.6.1 (2023-06-09)
 
