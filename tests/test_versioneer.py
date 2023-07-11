@@ -962,10 +962,12 @@ def test_find_package_of_version_file(move_to_another_package, version_file_path
 def test_version_file_missing(move_to_another_package):
     with pytest.raises(click.ClickException) as excinfo:
         find_package_of_version_file("/app/_missing.py")
-    assert "Cannot find version file : /app/_missing.py" in str(excinfo.value)
+    assert "Cannot find version file /app/_missing.py in subdirectory : app" in str(
+        excinfo.value
+    )
 
 
-def test_version_file_invalid(move_to_another_package):
+def test_version_file_invalid_value(move_to_another_package):
     with pytest.raises(click.ClickException) as excinfo:
         find_package_of_version_file(123)
     assert "Please provide a valid path for the version file" in str(excinfo.value)
@@ -976,6 +978,14 @@ def test_version_file_empty(version_file_path):
     with pytest.raises(click.ClickException) as excinfo:
         validate_version_file(version_file_path)
     assert "Empty version file path in pyproject.toml." in str(excinfo.value)
+
+
+def test_version_file_path_non_existent(move_to_another_package):
+    with pytest.raises(click.ClickException) as excinfo:
+        find_package_of_version_file("/invalid/__init__.py")
+    assert "Version file path does not exist : /invalid/__init__.py" in str(
+        excinfo.value
+    )
 
 
 def test_find_package_and_version_file_setup(move_to_package_name):
