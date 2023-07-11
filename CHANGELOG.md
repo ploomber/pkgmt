@@ -2,6 +2,7 @@
 
 ## 0.7.0dev
 
+* [Fix] Fix bug when running git hook
 * [API Change] Support for projects containing `version` key in `pyproject.toml`. (#58)
 
 ## 0.6.2 (2023-06-30)
