@@ -1,6 +1,7 @@
 # CHANGELOG
 
 ## 0.6.3dev
+* [Fix] Fixed `black` `--extend-exclude` override in `pyproject.toml`([#66](https://github.com/ploomber/pkgmt/issues/66))
 
 ## 0.6.2 (2023-06-30)
 

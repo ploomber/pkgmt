@@ -135,16 +135,13 @@ def test_format_error(command, a, b, tmp_empty, capsys):
 )
 def test_format_black_pyproj(pyproject, output, tmp_empty):
     Path("pyproject.toml").write_text(pyproject)
-    Path("tmp_folder1").mkdir()
     Path("tmp_folder2").mkdir()
-    Path("tmp_folder1", "file.py").write_text("def stuff():\n\tpass\n\n\n")
     Path("tmp_folder2", "file.py").write_text("a = 1\n\n")
 
     runner = CliRunner()
-    result = runner.invoke(cli.cli, ["format", "-e", "tmp_folder1"])
+    result = runner.invoke(cli.cli, ["format"])
 
     assert "Finished formatting with black!" in result.output
-    assert Path("tmp_folder1", "file.py").read_text() == "def stuff():\n\tpass\n\n\n"
     assert Path("tmp_folder2", "file.py").read_text() == output
 
 
@@ -153,24 +150,17 @@ def test_format_black_pyproj(pyproject, output, tmp_empty):
     [
         [
             "",
-            "The following command failed: black --check . "
-            "--extend-exclude tmp_folder1",
+            "following command failed: black --check",
         ],
         ['[tool.black]\nextend-exclude = "tmp_folder2"', ""],
     ],
 )
 def test_lint_black_pyproj(pyproject, output, tmp_empty):
     Path("pyproject.toml").write_text(pyproject)
-    Path("tmp_folder1").mkdir()
     Path("tmp_folder2").mkdir()
-    Path("tmp_folder1", "file.py").write_text("def stuff():\n\tpass\n\n\n")
     Path("tmp_folder2", "file.py").write_text("a = 1\n\n")
 
     runner = CliRunner()
-    result = runner.invoke(cli.cli, ["lint", "-e", "tmp_folder1"])
+    result = runner.invoke(cli.cli, ["lint"])
 
-    assert (
-        "The following command failed: flake8 . --extend-exclude tmp_folder1"
-        in result.output
-    )
     assert output in result.output

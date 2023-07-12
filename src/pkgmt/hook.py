@@ -4,7 +4,6 @@ import click
 import shutil
 import sys
 import subprocess
-import toml
 
 try:
     import jupytext
@@ -66,28 +65,17 @@ def _lint(files=None, exclude=None):
     else:
         files = list(files)
 
-    if Path("pyproject.toml").exists():
-        with open("pyproject.toml") as f:
-            data = toml.load(f)
-
-        if "tool" in data and "black" in data["tool"]:
-            exclude_pyproj = data["tool"]["black"].get("extend-exclude", "")
-        else:
-            exclude_pyproj = ""
-    else:
-        exclude_pyproj = ""
-
     exclude_str_flake8 = ",".join(exclude)
     exclude_str_black = "|".join(exclude)
 
-    if exclude_pyproj:
-        if exclude_str_black:
-            exclude_str_black += "|" + exclude_pyproj
-        else:
-            exclude_str_black = exclude_pyproj
-
-    cmd_black = ["black", "--check"] + files + ["--extend-exclude", exclude_str_black]
-    cmd_flake8 = ["flake8"] + files + ["--extend-exclude", exclude_str_flake8]
+    if exclude_str_flake8 and exclude_str_black:
+        cmd_black = (
+            ["black", "--check"] + files + ["--extend-exclude", exclude_str_black]
+        )
+        cmd_flake8 = ["flake8"] + files + ["--extend-exclude", exclude_str_flake8]
+    else:
+        cmd_black = ["black", "--check"] + files
+        cmd_flake8 = ["flake8"] + files
     runner = Runner(find_root())
     runner.run(cmd_flake8, fix="Run: pkgmt format")
     runner.run(cmd_black, fix="Run: pkgmt format")
