@@ -6,6 +6,7 @@
 
 * [API Change] Support for projects containing `version` key in `pyproject.toml`. ([#58](https://github.com/ploomber/pkgmt/issues/58))
 * [Fix] Fix bug when running git hook
+* [Fix] Proper error message when version file is empty, or version string not found. Display version file location when inconsistent version in changelog (#64)
 
 ## 0.6.2 (2023-06-30)
 

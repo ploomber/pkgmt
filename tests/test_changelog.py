@@ -1,5 +1,4 @@
 from pathlib import Path
-
 import pytest
 
 from pkgmt import changelog
@@ -206,15 +205,57 @@ __version__ = "0.1.1dev"
 
 
 @pytest.mark.parametrize(
-    "init, subheading",
+    "init, subheading, tmp_package, version_file, error_path",
     [
-        ["0.1dev", "0.1.1dev"],
-        ["0.1", "0.1.1"],
-        ["0.1.1", "0.1.1 some stuff"],
+        [
+            "0.1dev",
+            "0.1.1dev",
+            "tmp_package_name",
+            Path("src", "package_name", "__init__.py"),
+            "src/package_name/__init__.py",
+        ],
+        [
+            "0.1",
+            "0.1.1",
+            "tmp_package_name",
+            Path("src", "package_name", "__init__.py"),
+            "src/package_name/__init__.py",
+        ],
+        [
+            "0.1.1",
+            "0.1.1 some stuff",
+            "tmp_package_name",
+            Path("src", "package_name", "__init__.py"),
+            "src/package_name/__init__.py",
+        ],
+        [
+            "0.1dev",
+            "0.1.1dev",
+            "tmp_another_package",
+            Path("app", "_version.py"),
+            "app/_version.py",
+        ],
+        [
+            "0.1",
+            "0.1.1",
+            "tmp_another_package",
+            Path("app", "_version.py"),
+            "app/_version.py",
+        ],
+        [
+            "0.1.1",
+            "0.1.1 some stuff",
+            "tmp_another_package",
+            Path("app", "_version.py"),
+            "app/_version.py",
+        ],
     ],
 )
-def test_check_consistent_changelog_and_version(tmp_package_name, init, subheading):
-    Path("src", "package_name", "__init__.py").write_text(
+def test_check_consistent_changelog_and_version(
+    tmp_package, init, subheading, version_file, error_path, request
+):
+    tmp_package = request.getfixturevalue(tmp_package)
+    version_file.write_text(
         f"""
 __version__ = "{init}"
 """
@@ -236,6 +277,7 @@ __version__ = "{init}"
         changelog.CHANGELOG(text).check_consistent_changelog_and_version()
 
     assert "[Inconsistent version]" in str(excinfo.value)
+    assert f"version in {error_path} is" in str(excinfo.value)
     assert init in str(excinfo.value)
     assert subheading in str(excinfo.value)
 
@@ -274,8 +316,24 @@ __version__ = "{init}"
     changelog.CHANGELOG(text).check_consistent_changelog_and_version()
 
 
-def test_check(tmp_package_name):
-    Path("src", "package_name", "__init__.py").write_text(
+@pytest.mark.parametrize(
+    "tmp_package, version_file, error_path",
+    [
+        [
+            "tmp_package_name",
+            Path("src", "package_name", "__init__.py"),
+            "src/package_name/__init__.py",
+        ],
+        [
+            "tmp_another_package",
+            Path("app", "_version.py"),
+            "app/_version.py",
+        ],
+    ],
+)
+def test_check(tmp_package, error_path, version_file, request):
+    tmp_package = request.getfixturevalue(tmp_package)
+    version_file.write_text(
         """
 __version__ = "0.1.2dev"
 """
@@ -301,6 +359,7 @@ __version__ = "0.1.2dev"
     assert "[Unexpected version]" in str(excinfo.value)
     assert "[Invalid CHANGELOG]" in str(excinfo.value)
     assert "[Inconsistent version]" in str(excinfo.value)
+    assert f"version in {error_path} is" in str(excinfo.value)
 
 
 @pytest.mark.parametrize(
