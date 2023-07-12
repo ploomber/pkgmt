@@ -1,7 +1,16 @@
 # CHANGELOG
 
-## 0.6.3dev
+
+## 0.7.1dev
+
 * [Fix] Fixed `black` `--extend-exclude` override in `pyproject.toml`([#66](https://github.com/ploomber/pkgmt/issues/66))
+
+
+## 0.7.0 (2023-07-11)
+
+* [API Change] Support for projects containing `version` key in `pyproject.toml`. ([#58](https://github.com/ploomber/pkgmt/issues/58))
+* [Fix] Fix bug when running git hook
+
 
 ## 0.6.2 (2023-06-30)
 

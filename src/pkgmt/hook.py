@@ -60,6 +60,9 @@ class Runner:
 
 
 def _lint(files=None, exclude=None):
+    files = files or []
+    exclude = exclude or []
+
     if len(files) == 0:
         files = ["."]
     else:
