@@ -21,6 +21,7 @@ from datetime import datetime
 import click
 import pytest
 
+from pkgmt.config import Config
 from pkgmt.versioner.versioner import Versioner
 from pkgmt import versioneer
 from pkgmt.versioner.util import (
@@ -1118,3 +1119,234 @@ def test_version_key_missing_value(
         f"Could not find __version__ value in {error_path}. "
         "Please add in the format __version__ = '0.1dev'" in str(excinfo.value)
     )
+
+
+@pytest.mark.parametrize(
+    "config, error",
+    [
+        [
+            Config(
+                {"github": "repository/package", "invalid_key": "some_value"},
+                "pyproject.toml",
+            ),
+            "Invalid key 'invalid_key' in pyproject.toml file. "
+            "Valid keys are : github, version, package_name",
+        ],
+        [
+            Config(
+                {
+                    "github": "repository/package",
+                    "version": {
+                        "version_file": "app/__init__.py",
+                        "invalid_key": "some_value",
+                    },
+                },
+                "pyproject.toml",
+            ),
+            "Invalid version key 'invalid_key' in pyproject.toml file. "
+            "Valid keys are : version_file, tag, push",
+        ],
+    ],
+)
+def test_validate_config(config, error):
+    with pytest.raises(click.ClickException) as excinfo:
+        versioneer.validate_config(config)
+    assert error in str(excinfo.value)
+
+
+@pytest.mark.parametrize(
+    "config, expected_tag, expected_push",
+    [
+        [
+            Config(
+                {
+                    "github": "repository/package",
+                    "version": {
+                        "version_file": "app/__init__.py",
+                        "push": False,
+                    },
+                },
+                "pyproject.toml",
+            ),
+            None,
+            False,
+        ],
+        [
+            Config(
+                {
+                    "github": "repository/package",
+                    "version": {
+                        "version_file": "app/__init__.py",
+                        "tag": False,
+                    },
+                },
+                "pyproject.toml",
+            ),
+            False,
+            None,
+        ],
+        [
+            Config(
+                {
+                    "github": "repository/package",
+                    "version": {
+                        "version_file": "app/__init__.py",
+                        "tag": False,
+                        "push": False,
+                    },
+                },
+                "pyproject.toml",
+            ),
+            False,
+            False,
+        ],
+        [
+            Config(
+                {
+                    "github": "repository/package",
+                    "version": {
+                        "version_file": "app/__init__.py",
+                        "tag": True,
+                        "push": False,
+                    },
+                },
+                "pyproject.toml",
+            ),
+            True,
+            False,
+        ],
+        [
+            Config(
+                {
+                    "github": "repository/package",
+                    "version": {"version_file": "app/__init__.py"},
+                },
+                "pyproject.toml",
+            ),
+            None,
+            None,
+        ],
+    ],
+)
+def test_read_version_config(config, expected_tag, expected_push):
+    tag, push = versioneer.read_version_config(config)
+    assert push == expected_push
+    assert tag == expected_tag
+
+
+@pytest.mark.parametrize(
+    "config, error",
+    [
+        [
+            Config(
+                {
+                    "github": "repository/package",
+                    "version": {
+                        "version_file": "app/__init__.py",
+                        "tag": "True",
+                        "push": None,
+                    },
+                },
+                "pyproject.toml",
+            ),
+            "Type of 'tag' key in pyproject.toml is invalid. "
+            "It should be lowercase boolean : true / false",
+        ],
+        [
+            Config(
+                {
+                    "github": "repository/package",
+                    "version": {"version_file": "app/__init__.py", "tag": 1},
+                },
+                "pyproject.toml",
+            ),
+            "Type of 'tag' key in pyproject.toml is invalid. "
+            "It should be lowercase boolean : true / false",
+        ],
+        [
+            Config(
+                {
+                    "github": "repository/package",
+                    "version": {"version_file": "app/__init__.py", "push": "false"},
+                },
+                "pyproject.toml",
+            ),
+            "Type of 'push' key in pyproject.toml is invalid. "
+            "It should be lowercase boolean : true / false",
+        ],
+    ],
+)
+def test_read_version_config_invalid(config, error):
+    with pytest.raises(click.ClickException) as excinfo:
+        versioneer.read_version_config(config)
+    assert error in str(excinfo.value)
+
+
+@pytest.mark.parametrize(
+    "tmp_package, package_name",
+    [["tmp_package_name", "package_name"], ["tmp_another_package", "app"]],
+)
+def test_version_no_push_from_config(tmp_package, package_name, monkeypatch, request):
+    tmp_package = request.getfixturevalue(tmp_package)
+    submitted, stored, dev = "0.1", "0.1.0", "0.1.1dev"
+    mock = Mock()
+    mock_input = Mock()
+    mock_input.side_effect = [submitted, "y"]
+    config_mock = Mock()
+    config_mock.return_value = (None, False)
+
+    monkeypatch.setattr(versioneer, "call", mock)
+    monkeypatch.setattr(versioner, "call", mock)
+    monkeypatch.setattr(versioneer, "_input", mock_input)
+    monkeypatch.setattr(versioneer, "read_version_config", config_mock)
+
+    versioneer.version()
+
+    assert mock.call_args_list == [
+        _call(["git", "checkout", "main"]),
+        _call(["git", "pull"]),
+        _call(["git", "add", "--all"]),
+        _call(["git", "status"]),
+        _call(["git", "commit", "-m", f"{package_name} release {stored}"]),
+        _call(["git", "tag", "-a", stored, "-m", f"{package_name} release {stored}"]),
+        _call(["git", "add", "--all"]),
+        _call(["git", "status"]),
+        _call(["git", "commit", "-m", f"Bumps up {package_name} to version {dev}"]),
+    ]
+
+    today = datetime.now().strftime("%Y-%m-%d")
+    assert Path("CHANGELOG.md").read_text() == (
+        f"# CHANGELOG\n\n## {dev}\n\n## {stored} ({today})\n\n"
+        "* [Fix] Fixes [#1](https://github.com/edublancas/pkgmt/issues/1)\n"
+    )
+
+
+@pytest.mark.parametrize(
+    "tmp_package, package_name, version_file",
+    [
+        ["tmp_package_name", "package_name", "__init__.py"],
+        ["tmp_another_package", "app", "_version.py"],
+    ],
+)
+def test_commit_version_no_tag_from_config(
+    tmp_package, package_name, version_file, monkeypatch, request
+):
+    tmp_package = request.getfixturevalue(tmp_package)
+    v = Versioner()
+
+    mock = Mock()
+    monkeypatch.setattr(versioneer, "call", mock)
+    monkeypatch.setattr(versioner, "call", mock)
+
+    v.commit_version(
+        "0.2", msg_template="{package_name} release {new_version}", tag=False
+    )
+
+    assert mock.call_args_list == [
+        _call(["git", "add", "--all"]),
+        _call(["git", "status"]),
+        _call(["git", "commit", "-m", f"{package_name} release 0.2"]),
+        _call(["git", "push", "--no-verify"]),
+    ]
+
+    assert '__version__ = "0.2"' in (v.PACKAGE / version_file).read_text()

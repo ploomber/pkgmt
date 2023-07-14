@@ -69,6 +69,15 @@ github = "project/repository"
 version = {version_file = 'app_two/__init__.py'}
 ```
 
+#### Version in pyproject.toml
+
+The `version` key in the `pyproject.toml` file can be used to specify the following:
+
+* `version_file` : path of the file in which the `__version__` string is specified.
+* `tag`: Specifies whether to tag the commit with the stable version. Available options: `true` / `false`.
+* `push` : Specifies whether to push the changes to the remote repository. Available options: `true` / `false`.
+
+Note that `tag` and `push` are optional. If passed, the options override the default value of `True`.
 
 ### New version
 

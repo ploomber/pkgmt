@@ -28,8 +28,15 @@ class Config(Mapping):
 
 def load():
     if Path("pyproject.toml").exists():
-        with open("pyproject.toml") as f:
-            return Config(toml.load(f)["tool"]["pkgmt"], "pyproject.toml")
+        try:
+            with open("pyproject.toml") as f:
+                return Config(toml.load(f)["tool"]["pkgmt"], "pyproject.toml")
+        except toml.decoder.TomlDecodeError as e:
+            raise ValueError(
+                f"Invalid pyproject.toml file: {e}."
+                "If using a boolean "
+                "value ensure it's in lowercase, e.g., key = true"
+            )
     else:
         raise FileNotFoundError(
             "Could not load configuration file: expected a pyproject.toml file"
