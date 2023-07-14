@@ -71,8 +71,14 @@ def _lint(files=None, exclude=None):
     exclude_str_flake8 = ",".join(exclude)
     exclude_str_black = "|".join(exclude)
 
-    cmd_black = ["black", "--check"] + files + ["--extend-exclude", exclude_str_black]
-    cmd_flake8 = ["flake8"] + files + ["--extend-exclude", exclude_str_flake8]
+    if exclude_str_flake8 and exclude_str_black:
+        cmd_black = (
+            ["black", "--check"] + files + ["--extend-exclude", exclude_str_black]
+        )
+        cmd_flake8 = ["flake8"] + files + ["--extend-exclude", exclude_str_flake8]
+    else:
+        cmd_black = ["black", "--check"] + files
+        cmd_flake8 = ["flake8"] + files
     runner = Runner(find_root())
     runner.run(cmd_flake8, fix="Run: pkgmt format")
     runner.run(cmd_black, fix="Run: pkgmt format")
@@ -90,7 +96,11 @@ def _lint(files=None, exclude=None):
         )
 
     if nbqa and jupytext:
-        cmd = ["nbqa", "flake8"] + files + ["--extend-exclude", exclude_str_flake8]
+        if exclude_str_flake8 and exclude_str_black:
+            cmd = ["nbqa", "flake8"] + files + ["--extend-exclude", exclude_str_flake8]
+        else:
+            cmd = ["nbqa", "flake8"] + files
+
         runner.run(
             cmd,
             fix="Install nbqa jupytext and run: pkgmt format",

@@ -38,7 +38,10 @@ def format(exclude):
 
     exclude_str = "|".join(exclude)
 
-    cmd = ["black", ".", "--extend-exclude", exclude_str]
+    if exclude_str:
+        cmd = ["black", ".", "--extend-exclude", exclude_str]
+    else:
+        cmd = ["black", "."]
     click.echo("Running command:" + " ".join(map(quote, cmd)))
     res = subprocess.run(cmd, cwd=current)
 
@@ -60,7 +63,14 @@ def format(exclude):
         )
 
     if nbqa and jupytext:
-        cmd = ["nbqa", "black", ".", "--extend-exclude", exclude_str]
+        if exclude_str:
+            cmd = ["nbqa", "black", ".", "--extend-exclude", exclude_str]
+        else:
+            cmd = [
+                "nbqa",
+                "black",
+                ".",
+            ]
         click.echo("Running command:" + " ".join(map(quote, cmd)))
         res_nb = subprocess.run(cmd, cwd=current)
 
