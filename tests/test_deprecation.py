@@ -117,7 +117,7 @@ def more_stuff():
     Notes
     -----
     .. deprecated:: 0.5.6
-        Removed in 0.7.0
+        Removed in 0.6.0
     """
     pass
 '''
@@ -156,7 +156,7 @@ def stuff():
             "Removed in 0.6\n", "0.6", "some/nested/dir/functions.py"
         ),
         deprecation.DeprecationItem(
-            "Removed in 0.7.0\n", "0.7.0", "some/nested/dir/functions.py"
+            "Removed in 0.6.0\n", "0.6.0", "some/nested/dir/functions.py"
         ),
         deprecation.DeprecationItem(
             "Removed in 0.8\n", "0.8", "some/nested/functions.py"

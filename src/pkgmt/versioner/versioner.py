@@ -1,12 +1,11 @@
 import re
-import abc
 import ast
 import datetime
 import subprocess
 
 from pathlib import Path
 
-from pkgmt.versioner.util import complete_version_string
+from pkgmt.versioner.util import complete_version_string, find_package_and_version_file
 
 
 def replace_in_file(path_to_file, original, replacement):
@@ -36,17 +35,21 @@ def make_header(content, path, add_date=False):
         raise ValueError("Unsupported format, must be .rst or .md")
 
 
-class AbstractVersioner(abc.ABC):
+class Versioner:
     def __init__(self, project_root="."):
         self.project_root = project_root or "."
-        self.package_name, self.PACKAGE = self.find_package()
+        package_name, PACKAGE, version_file_name = find_package_and_version_file(
+            self.project_root
+        )
+        self.package_name = package_name
+        self.PACKAGE = PACKAGE
         if Path(self.project_root, "CHANGELOG.rst").exists():
             self.path_to_changelog = Path(self.project_root, "CHANGELOG.rst")
         elif Path(self.project_root, "CHANGELOG.md").exists():
             self.path_to_changelog = Path(self.project_root, "CHANGELOG.md")
         else:
             self.path_to_changelog = None
-        self.version_file = self.version_file()
+        self.version_file = version_file_name
 
     def current_version(self):
         """Returns the current version in version file"""
@@ -185,14 +188,3 @@ class AbstractVersioner(abc.ABC):
             replace_in_file(self.path_to_changelog, start_current, start_new)
         else:
             print("No CHANGELOG.{rst,md} found, skipping changelog editing...")
-
-    @abc.abstractmethod
-    def find_package(self):
-        """Must return the package name and the path to the package root"""
-        pass
-
-    @abc.abstractmethod
-    def version_file(self):
-        """Must return a path to the version file, relative to the package root (as
-        returned by find_package)"""
-        pass
