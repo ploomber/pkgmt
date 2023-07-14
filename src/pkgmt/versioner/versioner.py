@@ -5,6 +5,8 @@ import subprocess
 
 from pathlib import Path
 
+import click
+
 from pkgmt.versioner.util import complete_version_string, find_package_and_version_file
 
 
@@ -51,14 +53,32 @@ class Versioner:
             self.path_to_changelog = None
         self.version_file = version_file_name
 
+    def get_version_file_path(self):
+        """Returns the version file path from project root"""
+        return str(self.PACKAGE / self.version_file)
+
     def current_version(self):
         """Returns the current version in version file"""
         _version_re = re.compile(r"__version__\s+=\s+(.*)")
 
         with open(self.PACKAGE / self.version_file, "rb") as f:
-            VERSION = str(
-                ast.literal_eval(_version_re.search(f.read().decode("utf-8")).group(1))
-            )
+            try:
+                VERSION = str(
+                    ast.literal_eval(
+                        _version_re.search(f.read().decode("utf-8")).group(1)
+                    )
+                )
+            except AttributeError:
+                raise click.ClickException(
+                    f"Please add version string in "
+                    f"{self.get_version_file_path()}, e.g., __version__ = '0.1dev'"
+                )
+            except SyntaxError:
+                raise click.ClickException(
+                    f"Could not find __version__ value in "
+                    f"{self.get_version_file_path()}. Please add in the format"
+                    f" __version__ = '0.1dev'"
+                )
 
         return VERSION
 

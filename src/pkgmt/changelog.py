@@ -190,6 +190,7 @@ class CHANGELOG:
         self.tree = markdown(text)
 
         versioner = Versioner(project_root=project_root)
+        self.version_file = versioner.get_version_file_path()
         self.current = versioner.current_version()
 
     @classmethod
@@ -290,7 +291,7 @@ class CHANGELOG:
             raise ProjectValidationError(
                 "[Inconsistent version] Version in  top section in "
                 f"CHANGELOG is {subheading!r}, "
-                f"but version in __init__.py is {self.current!r}, "
+                f"but version in {self.version_file} is {self.current!r}, "
                 "fix them so they match"
             )
 
