@@ -93,7 +93,11 @@ def _lint(files=None, exclude=None):
         )
 
     if nbqa and jupytext:
-        cmd = ["nbqa", "flake8"] + files + ["--extend-exclude", exclude_str_flake8]
+        if exclude_str_flake8 and exclude_str_black:
+            cmd = ["nbqa", "flake8"] + files + ["--extend-exclude", exclude_str_flake8]
+        else:
+            cmd = ["nbqa", "flake8"] + files
+
         runner.run(
             cmd,
             fix="Install nbqa jupytext and run: pkgmt format",

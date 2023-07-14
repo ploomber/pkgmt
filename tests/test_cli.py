@@ -127,40 +127,55 @@ def test_format_error(command, a, b, tmp_empty, capsys):
 
 
 @pytest.mark.parametrize(
-    "pyproject,output",
+    "pyproject,command,output",
     [
-        ["", "a = 1\n"],
-        ['[tool.black]\nextend-exclude = "tmp_folder2"', "a = 1\n\n"],
+        ["", ["format"], "a = 1\n"],
+        ['[tool.black]\nextend-exclude = "tmp_folder2"', ["format"], "a = 1\n\n"],
+        [
+            '[tool.black]\nextend-exclude = "tmp_folder2"',
+            ["format", "-e", "tmp_folder1"],
+            "a = 1\n",
+        ],
     ],
 )
-def test_format_black_pyproj(pyproject, output, tmp_empty):
+def test_format_black_pyproj(pyproject, command, output, tmp_empty):
     Path("pyproject.toml").write_text(pyproject)
     Path("tmp_folder2").mkdir()
+    Path("tmp_folder1").mkdir()
+    Path("tmp_folder1", "file.py").write_text("def stuff():\n\tpass\n\n\n")
     Path("tmp_folder2", "file.py").write_text("a = 1\n\n")
 
     runner = CliRunner()
-    result = runner.invoke(cli.cli, ["format"])
+    result = runner.invoke(cli.cli, command)
 
     assert "Finished formatting with black!" in result.output
     assert Path("tmp_folder2", "file.py").read_text() == output
 
 
 @pytest.mark.parametrize(
-    "pyproject,output",
+    "pyproject,command,output",
     [
         [
             "",
+            ["lint"],
             "following command failed: black --check",
         ],
-        ['[tool.black]\nextend-exclude = "tmp_folder2"', ""],
+        ['[tool.black]\nextend-exclude = "tmp_folder2"', ["lint"], ""],
+        [
+            '[tool.black]\nextend-exclude = "tmp_folder2"',
+            ["lint", "-e", "tmp_folder1"],
+            "following command failed: black --check",
+        ],
     ],
 )
-def test_lint_black_pyproj(pyproject, output, tmp_empty):
+def test_lint_black_pyproj(pyproject, command, output, tmp_empty):
     Path("pyproject.toml").write_text(pyproject)
     Path("tmp_folder2").mkdir()
+    Path("tmp_folder1").mkdir()
+    Path("tmp_folder1", "file.py").write_text("a=1\n")
     Path("tmp_folder2", "file.py").write_text("a = 1\n\n")
 
     runner = CliRunner()
-    result = runner.invoke(cli.cli, ["lint"])
+    result = runner.invoke(cli.cli, command)
 
     assert output in result.output
