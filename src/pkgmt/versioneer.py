@@ -123,9 +123,9 @@ def read_version_config(cfg):
             "Type of 'push' key in pyproject.toml is invalid. "
             "It should be lowercase boolean : true / false"
         )
-    if tag:
+    if tag is not None:
         print(f"Reading tag = {tag} from pyproject.toml")
-    if push:
+    if push is not None:
         print(f"Reading push = {push} from pyproject.toml")
     return tag, push
 
