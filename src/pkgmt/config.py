@@ -33,7 +33,7 @@ def load():
                 return Config(toml.load(f)["tool"]["pkgmt"], "pyproject.toml")
         except toml.decoder.TomlDecodeError as e:
             raise ValueError(
-                f"Invalid pyproject.toml file: {e}."
+                f"Invalid pyproject.toml file: {str(e)}."
                 "If using a boolean "
                 "value ensure it's in lowercase, e.g., key = true"
             )
