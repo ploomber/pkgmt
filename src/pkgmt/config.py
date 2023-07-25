@@ -43,7 +43,7 @@ class PyprojectConfig:
                     f"Invalid pyproject.toml file: {str(e)}."
                     "If using a boolean "
                     "value ensure it's in lowercase, e.g., key = true"
-                )
+                ) from e
         else:
             raise FileNotFoundError(
                 "Could not load configuration file: expected a pyproject.toml file"
