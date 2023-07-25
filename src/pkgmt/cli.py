@@ -9,6 +9,7 @@ from pkgmt import links, config, test, changelog, hook as hook_, versioneer
 from pkgmt import new as new_
 from pkgmt import dev
 from pkgmt import formatting
+from pkgmt.config import load
 
 
 @click.group()
@@ -95,11 +96,32 @@ def hook(uninstall, run):
     default=False,
     help="Do not ask for confirmation",
 )
-@click.option("--push/--no-push", default=True)
-@click.option("--tag/--no-tag", default=True)
+@click.option("--push/--no-push", default=None)
+@click.option("--tag/--no-tag", default=None)
 @click.option("--target", default=None)
 def version(yes, push, tag, target):
     """Create a new package version"""
+    cfg = load()
+    cfg_tag, cfg_push = config.read_version_configurations(cfg)
+
+    if tag is not None:
+        if cfg_tag is not None and tag != cfg_tag:
+            print(
+                f"Value of 'tag' from CLI : {tag}. "
+                f"This will override tag={cfg_tag} as configured in pyproject.toml"
+            )
+    else:
+        tag = cfg_tag if cfg_tag is not None else True
+
+    if push is not None:
+        if cfg_push is not None and push != cfg_push:
+            print(
+                f"Value of 'push' from CLI : {push}. "
+                f"This will override push={cfg_push} as configured in pyproject.toml"
+            )
+    else:
+        push = cfg_push if cfg_push is not None else True
+
     versioneer.version(project_root=".", tag=tag, yes=yes, push=push, target=target)
 
 

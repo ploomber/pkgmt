@@ -1150,7 +1150,7 @@ def test_version_key_missing_value(
 )
 def test_validate_config(config, error):
     with pytest.raises(click.ClickException) as excinfo:
-        versioneer.validate_config(config)
+        config.validate_config(config)
     assert error in str(excinfo.value)
 
 

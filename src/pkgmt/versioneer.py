@@ -7,15 +7,10 @@ import subprocess
 from pathlib import Path
 import click
 
-from pkgmt.config import load
 from pkgmt.changelog import expand_github_from_changelog, CHANGELOG
 from pkgmt.versioner.versioner import Versioner
 from pkgmt.versioner.util import complete_version_string, is_pre_release
 from pkgmt.deprecation import Deprecations
-
-
-VALID_KEYS = ["github", "version", "package_name"]
-VALID_VERSION_KEYS = ["version_file", "tag", "push"]
 
 
 def replace_in_file(path_to_file, original, replacement):
@@ -77,59 +72,6 @@ def validate_version_string(version):
     return complete_version_string(version)
 
 
-def validate_config(cfg):
-    """
-    Function to validate top level and version keys in
-    config file.
-    """
-    keys = list(cfg.keys())
-    for key in keys:
-        if key not in VALID_KEYS:
-            raise click.ClickException(
-                f"Invalid key '{key}' in"
-                f" pyproject.toml file. Valid keys are : "
-                f"{', '.join(VALID_KEYS)}"
-            )
-
-        if cfg.get("version", {}):
-            version_keys = list(cfg.get("version").keys())
-            for key in version_keys:
-                if key not in VALID_VERSION_KEYS:
-                    raise click.ClickException(
-                        f"Invalid version key '{key}' in"
-                        f" pyproject.toml file. Valid keys are : "
-                        f"{', '.join(VALID_VERSION_KEYS)}"
-                    )
-
-
-def read_version_config(cfg):
-    """
-    Function to return tag and push from
-    pyproject.toml if provided by user.
-    Example file:
-    [tool.pkgmt]
-    github = "repository/package"
-    version = {version_file = "/app/_version.py", tag=True, push=False}
-    """
-    tag = cfg.get("version", {}).get("tag", None)
-    push = cfg.get("version", {}).get("push", None)
-    if tag is not None and not isinstance(tag, bool):
-        raise click.ClickException(
-            "Type of 'tag' key in pyproject.toml is invalid. "
-            "It should be lowercase boolean : true / false"
-        )
-    if push is not None and not isinstance(push, bool):
-        raise click.ClickException(
-            "Type of 'push' key in pyproject.toml is invalid. "
-            "It should be lowercase boolean : true / false"
-        )
-    if tag is not None:
-        print(f"Reading tag = {tag} from pyproject.toml")
-    if push is not None:
-        print(f"Reading push = {push} from pyproject.toml")
-    return tag, push
-
-
 def version(
     project_root=".",
     tag=True,
@@ -170,14 +112,6 @@ def version(
             "Commit them or discard them and try again.\nDetected files:"
             f"\n{pending.decode()}"
         )
-
-    cfg = load()
-
-    validate_config(cfg)
-
-    cfg_tag, cfg_push = read_version_config(cfg)
-    tag = cfg_tag if cfg_tag is not None else tag
-    push = cfg_push if cfg_push is not None else push
 
     versioner = Versioner(project_root)
 
