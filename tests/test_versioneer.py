@@ -32,7 +32,7 @@ from pkgmt.versioner.util import (
     validate_version_file,
 )
 from pkgmt.versioner import versioner
-from pkgmt.exceptions import ProjectValidationError
+from pkgmt.exceptions import ProjectValidationError, InvalidConfiguration
 
 
 # FIXME: use unittest.mock.call instead of unittest.mock._Call
@@ -1123,163 +1123,97 @@ def test_version_key_missing_value(
 
 
 @pytest.mark.parametrize(
-    "cfg, error",
+    "pyproject, error",
     [
         [
-            config.Config(
-                {"github": "repository/package", "invalid_key": "some_value"},
-                "pyproject.toml",
-            ),
+            '[tool.pkgmt]\ngithub = "repository/package"\n'
+            'invalid_key = "some_value"',
             "Invalid key 'invalid_key' in pyproject.toml file. "
             "Valid keys are : github, version, package_name",
         ],
         [
-            config.Config(
-                {
-                    "github": "repository/package",
-                    "version": {
-                        "version_file": "app/__init__.py",
-                        "invalid_key": "some_value",
-                    },
-                },
-                "pyproject.toml",
-            ),
+            '[tool.pkgmt]\ngithub = "repository/package"\n\n[tool.pkgmt.version]\n'
+            'invalid_key = "some_value"',
             "Invalid version key 'invalid_key' in pyproject.toml file. "
             "Valid keys are : version_file, tag, push",
         ],
     ],
 )
-def test_validate_config(cfg, error):
-    with pytest.raises(click.ClickException) as excinfo:
-        config.validate_config(cfg)
+def test_validate_config(pyproject, error, tmp_another_package):
+    Path("pyproject.toml").unlink()
+    Path("pyproject.toml").write_text(pyproject)
+    with pytest.raises(InvalidConfiguration) as excinfo:
+        config.PyprojectConfig().validate_config()
     assert error in str(excinfo.value)
 
 
 @pytest.mark.parametrize(
-    "cfg, expected_tag, expected_push",
+    "pyproject, expected_tag, expected_push",
     [
         [
-            config.Config(
-                {
-                    "github": "repository/package",
-                    "version": {
-                        "version_file": "app/__init__.py",
-                        "push": False,
-                    },
-                },
-                "pyproject.toml",
-            ),
+            '[tool.pkgmt]\ngithub = "repository/package"\n\n[tool.pkgmt.version]\n'
+            'version_file = "/app/__init__.py"\npush = false',
             None,
             False,
         ],
         [
-            config.Config(
-                {
-                    "github": "repository/package",
-                    "version": {
-                        "version_file": "app/__init__.py",
-                        "tag": False,
-                    },
-                },
-                "pyproject.toml",
-            ),
+            '[tool.pkgmt]\ngithub = "repository/package"\n\n[tool.pkgmt.version]\n'
+            'version_file = "/app/__init__.py"\ntag = false',
             False,
             None,
         ],
         [
-            config.Config(
-                {
-                    "github": "repository/package",
-                    "version": {
-                        "version_file": "app/__init__.py",
-                        "tag": False,
-                        "push": False,
-                    },
-                },
-                "pyproject.toml",
-            ),
+            '[tool.pkgmt]\ngithub = "repository/package"\n\n[tool.pkgmt.version]\n'
+            'version_file = "/app/__init__.py"\npush = false\ntag = false',
             False,
             False,
         ],
         [
-            config.Config(
-                {
-                    "github": "repository/package",
-                    "version": {
-                        "version_file": "app/__init__.py",
-                        "tag": True,
-                        "push": False,
-                    },
-                },
-                "pyproject.toml",
-            ),
+            '[tool.pkgmt]\ngithub = "repository/package"\n\n[tool.pkgmt.version]\n'
+            'version_file = "/app/__init__.py"\npush = false\ntag = true',
             True,
             False,
         ],
         [
-            config.Config(
-                {
-                    "github": "repository/package",
-                    "version": {"version_file": "app/__init__.py"},
-                },
-                "pyproject.toml",
-            ),
+            '[tool.pkgmt]\ngithub = "repository/package"\n\n[tool.pkgmt.version]\n'
+            'version_file = "/app/__init__.py"',
             None,
             None,
         ],
     ],
 )
-def test_read_version_configurations(cfg, expected_tag, expected_push):
-    tag, push = config.read_version_configurations(cfg)
+def test_read_version_configurations(
+    pyproject, tmp_another_package, expected_tag, expected_push
+):
+    Path("pyproject.toml").unlink()
+    Path("pyproject.toml").write_text(pyproject)
+    tag, push = config.PyprojectConfig().get_version_configurations()
     assert push == expected_push
     assert tag == expected_tag
 
 
 @pytest.mark.parametrize(
-    "cfg, error",
+    "pyproject, error",
     [
         [
-            config.Config(
-                {
-                    "github": "repository/package",
-                    "version": {
-                        "version_file": "app/__init__.py",
-                        "tag": "True",
-                        "push": None,
-                    },
-                },
-                "pyproject.toml",
-            ),
+            '[tool.pkgmt]\ngithub = "repository/package"\n\n[tool.pkgmt.version]\n'
+            'version_file = "/app/__init__.py"\npush = false\ntag = 1',
             "Type of 'tag' key in pyproject.toml is invalid. "
             "It should be lowercase boolean : true / false",
         ],
         [
-            config.Config(
-                {
-                    "github": "repository/package",
-                    "version": {"version_file": "app/__init__.py", "tag": 1},
-                },
-                "pyproject.toml",
-            ),
-            "Type of 'tag' key in pyproject.toml is invalid. "
-            "It should be lowercase boolean : true / false",
-        ],
-        [
-            config.Config(
-                {
-                    "github": "repository/package",
-                    "version": {"version_file": "app/__init__.py", "push": "false"},
-                },
-                "pyproject.toml",
-            ),
+            '[tool.pkgmt]\ngithub = "repository/package"\n\n[tool.pkgmt.version]\n'
+            'version_file = "/app/__init__.py"\npush = "false"\ntag = false',
             "Type of 'push' key in pyproject.toml is invalid. "
             "It should be lowercase boolean : true / false",
         ],
     ],
 )
-def test_read_version_config_invalid(cfg, error):
-    with pytest.raises(click.ClickException) as excinfo:
-        config.read_version_configurations(cfg)
+def test_read_version_config_invalid(pyproject, error, tmp_another_package):
+    Path("pyproject.toml").unlink()
+    Path("pyproject.toml").write_text(pyproject)
+    with pytest.raises(InvalidConfiguration) as excinfo:
+        config.PyprojectConfig().get_version_configurations()
     assert error in str(excinfo.value)
 
 

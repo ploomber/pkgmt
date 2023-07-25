@@ -7,7 +7,7 @@ import shutil
 from pathlib import Path
 
 from invoke import task
-from pkgmt.config import load
+from pkgmt.config import PyprojectConfig
 
 community = "https://ploomber.io/community"
 
@@ -43,7 +43,7 @@ def setup(c, version=None, doc=False):
     if not shutil.which("conda"):
         raise CommandError("conda not installed. Install it an try again.")
 
-    cfg = load()
+    cfg = PyprojectConfig().get_config()
 
     env_prefix = cfg.get("env_name", cfg["package_name"])
     pkg_name = cfg["package_name"]

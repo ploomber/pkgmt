@@ -9,7 +9,6 @@ from pkgmt import links, config, test, changelog, hook as hook_, versioneer
 from pkgmt import new as new_
 from pkgmt import dev
 from pkgmt import formatting
-from pkgmt.config import load
 
 
 @click.group()
@@ -28,7 +27,7 @@ def check_links(only_404):
     """Check for broken links"""
     broken_http_codes = None if not only_404 else [404]
 
-    cfg = config.load()["check_links"]
+    cfg = config.PyprojectConfig().get_config()["check_links"]
     out = links.find_broken_in_files(
         cfg["extensions"],
         cfg.get("ignore_substrings"),
@@ -101,8 +100,8 @@ def hook(uninstall, run):
 @click.option("--target", default=None)
 def version(yes, push, tag, target):
     """Create a new package version"""
-    cfg = load()
-    cfg_tag, cfg_push = config.read_version_configurations(cfg)
+
+    cfg_tag, cfg_push = config.PyprojectConfig().get_version_configurations()
 
     if tag is not None:
         if cfg_tag is not None and tag != cfg_tag:
