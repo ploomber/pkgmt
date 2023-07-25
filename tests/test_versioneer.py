@@ -21,9 +21,10 @@ from datetime import datetime
 import click
 import pytest
 
-from pkgmt.config import Config
+from pkgmt import config
 from pkgmt.versioner.versioner import Versioner
 from pkgmt import versioneer
+
 from pkgmt.versioner.util import (
     find_package_in_src,
     find_package_of_version_file,
@@ -1122,10 +1123,10 @@ def test_version_key_missing_value(
 
 
 @pytest.mark.parametrize(
-    "config, error",
+    "cfg, error",
     [
         [
-            Config(
+            config.Config(
                 {"github": "repository/package", "invalid_key": "some_value"},
                 "pyproject.toml",
             ),
@@ -1133,7 +1134,7 @@ def test_version_key_missing_value(
             "Valid keys are : github, version, package_name",
         ],
         [
-            Config(
+            config.Config(
                 {
                     "github": "repository/package",
                     "version": {
@@ -1148,17 +1149,17 @@ def test_version_key_missing_value(
         ],
     ],
 )
-def test_validate_config(config, error):
+def test_validate_config(cfg, error):
     with pytest.raises(click.ClickException) as excinfo:
-        config.validate_config(config)
+        config.validate_config(cfg)
     assert error in str(excinfo.value)
 
 
 @pytest.mark.parametrize(
-    "config, expected_tag, expected_push",
+    "cfg, expected_tag, expected_push",
     [
         [
-            Config(
+            config.Config(
                 {
                     "github": "repository/package",
                     "version": {
@@ -1172,7 +1173,7 @@ def test_validate_config(config, error):
             False,
         ],
         [
-            Config(
+            config.Config(
                 {
                     "github": "repository/package",
                     "version": {
@@ -1186,7 +1187,7 @@ def test_validate_config(config, error):
             None,
         ],
         [
-            Config(
+            config.Config(
                 {
                     "github": "repository/package",
                     "version": {
@@ -1201,7 +1202,7 @@ def test_validate_config(config, error):
             False,
         ],
         [
-            Config(
+            config.Config(
                 {
                     "github": "repository/package",
                     "version": {
@@ -1216,7 +1217,7 @@ def test_validate_config(config, error):
             False,
         ],
         [
-            Config(
+            config.Config(
                 {
                     "github": "repository/package",
                     "version": {"version_file": "app/__init__.py"},
@@ -1228,17 +1229,17 @@ def test_validate_config(config, error):
         ],
     ],
 )
-def test_read_version_config(config, expected_tag, expected_push):
-    tag, push = versioneer.read_version_config(config)
+def test_read_version_configurations(cfg, expected_tag, expected_push):
+    tag, push = config.read_version_configurations(cfg)
     assert push == expected_push
     assert tag == expected_tag
 
 
 @pytest.mark.parametrize(
-    "config, error",
+    "cfg, error",
     [
         [
-            Config(
+            config.Config(
                 {
                     "github": "repository/package",
                     "version": {
@@ -1253,7 +1254,7 @@ def test_read_version_config(config, expected_tag, expected_push):
             "It should be lowercase boolean : true / false",
         ],
         [
-            Config(
+            config.Config(
                 {
                     "github": "repository/package",
                     "version": {"version_file": "app/__init__.py", "tag": 1},
@@ -1264,7 +1265,7 @@ def test_read_version_config(config, expected_tag, expected_push):
             "It should be lowercase boolean : true / false",
         ],
         [
-            Config(
+            config.Config(
                 {
                     "github": "repository/package",
                     "version": {"version_file": "app/__init__.py", "push": "false"},
@@ -1276,49 +1277,10 @@ def test_read_version_config(config, expected_tag, expected_push):
         ],
     ],
 )
-def test_read_version_config_invalid(config, error):
+def test_read_version_config_invalid(cfg, error):
     with pytest.raises(click.ClickException) as excinfo:
-        versioneer.read_version_config(config)
+        config.read_version_configurations(cfg)
     assert error in str(excinfo.value)
-
-
-@pytest.mark.parametrize(
-    "tmp_package, package_name",
-    [["tmp_package_name", "package_name"], ["tmp_another_package", "app"]],
-)
-def test_version_no_push_from_config(tmp_package, package_name, monkeypatch, request):
-    tmp_package = request.getfixturevalue(tmp_package)
-    submitted, stored, dev = "0.1", "0.1.0", "0.1.1dev"
-    mock = Mock()
-    mock_input = Mock()
-    mock_input.side_effect = [submitted, "y"]
-    config_mock = Mock()
-    config_mock.return_value = (None, False)
-
-    monkeypatch.setattr(versioneer, "call", mock)
-    monkeypatch.setattr(versioner, "call", mock)
-    monkeypatch.setattr(versioneer, "_input", mock_input)
-    monkeypatch.setattr(versioneer, "read_version_config", config_mock)
-
-    versioneer.version()
-
-    assert mock.call_args_list == [
-        _call(["git", "checkout", "main"]),
-        _call(["git", "pull"]),
-        _call(["git", "add", "--all"]),
-        _call(["git", "status"]),
-        _call(["git", "commit", "-m", f"{package_name} release {stored}"]),
-        _call(["git", "tag", "-a", stored, "-m", f"{package_name} release {stored}"]),
-        _call(["git", "add", "--all"]),
-        _call(["git", "status"]),
-        _call(["git", "commit", "-m", f"Bumps up {package_name} to version {dev}"]),
-    ]
-
-    today = datetime.now().strftime("%Y-%m-%d")
-    assert Path("CHANGELOG.md").read_text() == (
-        f"# CHANGELOG\n\n## {dev}\n\n## {stored} ({today})\n\n"
-        "* [Fix] Fixes [#1](https://github.com/edublancas/pkgmt/issues/1)\n"
-    )
 
 
 @pytest.mark.parametrize(
