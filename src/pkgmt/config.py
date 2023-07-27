@@ -142,14 +142,20 @@ class Config(Mapping):
                     data = Config._resolve_version_configuration(
                         data, kwargs.get("cli_args")
                     )
-                    return cls(data, "pyproject.toml")
+                    return cls(data, file)
             except toml.decoder.TomlDecodeError as e:
                 raise InvalidConfiguration(
-                    f"Invalid pyproject.toml file: {str(e)}."
+                    f"Invalid {file} file: {str(e)}."
                     "If using a boolean "
                     "value ensure it's in lowercase, e.g., key = true"
                 ) from e
+            except KeyError as e:
+                raise InvalidConfiguration(
+                    f"Missing key : {str(e)}.\n{file} "
+                    f"should contain 'tool.pkgmt' key."
+                ) from e
+
         else:
             raise FileNotFoundError(
-                "Could not load configuration file: expected a pyproject.toml file"
+                f"Could not load configuration file: expected a {file} file"
             )
