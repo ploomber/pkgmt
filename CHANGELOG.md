@@ -1,5 +1,7 @@
 # CHANGELOG
 
+## 0.7.3dev
+
 ## 0.7.2 (2023-07-27)
 
 * [Feature] Added `push` and `tag` versioner configuration keys to `pyproject.toml` ([#63](https://github.com/ploomber/pkgmt/issues/63))
