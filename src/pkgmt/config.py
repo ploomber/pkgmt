@@ -80,20 +80,8 @@ class Config(Mapping):
         if invalid_keys:
             raise InvalidConfiguration(
                 f"Invalid values for keys: "
-                f"{', '.join(invalid_keys)}. Expected booleans."
+                f"{', '.join(invalid_keys)}. Expected boolean."
             )
-
-    @staticmethod
-    def _resolve_cli_config_settings(setting_name, cli_setting, cfg_setting):
-        if cli_setting is not None:
-            if cfg_setting is not None and cli_setting != cfg_setting:
-                click.echo(
-                    f"Value of '{setting_name}' from CLI : {cli_setting}. "
-                    f"This will override push={cfg_setting} "
-                    f"as configured in pyproject.toml"
-                )
-            return cli_setting
-        return cfg_setting if cfg_setting is not None else True
 
     @staticmethod
     def _generate_overriding_error(key, cli_value, cfg_value):

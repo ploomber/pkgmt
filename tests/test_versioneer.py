@@ -1159,14 +1159,14 @@ def test_version_key_missing_value(
         [
             '[tool.pkgmt]\ngithub = "repository/package"\n'
             'invalid_key = "some_value"',
-            "Invalid key 'invalid_key' in pyproject.toml file. "
-            "Valid keys are : github, version, package_name",
+            "Invalid keys in pyproject.toml file: invalid_key. "
+            "Valid keys are: github, version, package_name, check_links",
         ],
         [
             '[tool.pkgmt]\ngithub = "repository/package"\n\n[tool.pkgmt.version]\n'
             'invalid_key = "some_value"',
-            "Invalid version key 'invalid_key' in pyproject.toml file. "
-            "Valid keys are : version_file, tag, push",
+            "Invalid version keys in pyproject.toml file: invalid_key. "
+            "Valid version keys are: version_file, tag, push",
         ],
     ],
 )
@@ -1174,7 +1174,7 @@ def test_validate_config(pyproject, error, tmp_another_package):
     Path("pyproject.toml").unlink()
     Path("pyproject.toml").write_text(pyproject)
     with pytest.raises(InvalidConfiguration) as excinfo:
-        config.PyprojectConfig().validate_config()
+        config.Config.from_file("pyproject.toml")
     assert error in str(excinfo.value)
 
 
@@ -1184,14 +1184,14 @@ def test_validate_config(pyproject, error, tmp_another_package):
         [
             '[tool.pkgmt]\ngithub = "repository/package"\n\n[tool.pkgmt.version]\n'
             'version_file = "/app/__init__.py"\npush = false',
-            None,
+            True,
             False,
         ],
         [
             '[tool.pkgmt]\ngithub = "repository/package"\n\n[tool.pkgmt.version]\n'
             'version_file = "/app/__init__.py"\ntag = false',
             False,
-            None,
+            True,
         ],
         [
             '[tool.pkgmt]\ngithub = "repository/package"\n\n[tool.pkgmt.version]\n'
@@ -1208,19 +1208,19 @@ def test_validate_config(pyproject, error, tmp_another_package):
         [
             '[tool.pkgmt]\ngithub = "repository/package"\n\n[tool.pkgmt.version]\n'
             'version_file = "/app/__init__.py"',
-            None,
-            None,
+            True,
+            True,
         ],
     ],
 )
-def test_read_version_configurations(
+def test_resolved_version_configurations(
     pyproject, tmp_another_package, expected_tag, expected_push
 ):
     Path("pyproject.toml").unlink()
     Path("pyproject.toml").write_text(pyproject)
-    tag, push = config.PyprojectConfig().get_version_configurations()
-    assert push == expected_push
-    assert tag == expected_tag
+    cfg = config.Config.from_file("pyproject.toml")
+    assert cfg["version"]["push"] == expected_push
+    assert cfg["version"]["tag"] == expected_tag
 
 
 @pytest.mark.parametrize(
@@ -1229,20 +1229,18 @@ def test_read_version_configurations(
         [
             '[tool.pkgmt]\ngithub = "repository/package"\n\n[tool.pkgmt.version]\n'
             'version_file = "/app/__init__.py"\npush = false\ntag = 1',
-            "Type of 'tag' key in pyproject.toml is invalid. "
-            "It should be lowercase boolean : true / false",
+            "Invalid values for keys: tag. Expected boolean.",
         ],
         [
             '[tool.pkgmt]\ngithub = "repository/package"\n\n[tool.pkgmt.version]\n'
             'version_file = "/app/__init__.py"\npush = "false"\ntag = false',
-            "Type of 'push' key in pyproject.toml is invalid. "
-            "It should be lowercase boolean : true / false",
+            "Invalid values for keys: push. Expected boolean.",
         ],
     ],
 )
-def test_read_version_config_invalid(pyproject, error, tmp_another_package):
+def test_version_config_invalid(pyproject, error, tmp_another_package):
     Path("pyproject.toml").unlink()
     Path("pyproject.toml").write_text(pyproject)
     with pytest.raises(InvalidConfiguration) as excinfo:
-        config.PyprojectConfig().get_version_configurations()
+        config.Config.from_file("pyproject.toml")
     assert error in str(excinfo.value)
