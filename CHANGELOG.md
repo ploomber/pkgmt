@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 0.7.3dev
+## 0.7.3 (2023-07-27)
 
 * [Fix] Fix bug that caused `pkgmt check` to fail when `pyproject.toml` had an `env_name` key
 
