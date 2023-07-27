@@ -7,3 +7,9 @@ class ProjectValidationError(ClickException):
     """
 
     pass
+
+
+class InvalidConfiguration(ClickException):
+    """
+    Raised when invalid pyproject.toml file
+    """

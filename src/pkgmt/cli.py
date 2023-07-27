@@ -27,7 +27,7 @@ def check_links(only_404):
     """Check for broken links"""
     broken_http_codes = None if not only_404 else [404]
 
-    cfg = config.load()["check_links"]
+    cfg = config.Config.from_file("pyproject.toml")["check_links"]
     out = links.find_broken_in_files(
         cfg["extensions"],
         cfg.get("ignore_substrings"),
@@ -95,12 +95,21 @@ def hook(uninstall, run):
     default=False,
     help="Do not ask for confirmation",
 )
-@click.option("--push/--no-push", default=True)
-@click.option("--tag/--no-tag", default=True)
+@click.option("--push/--no-push", default=None)
+@click.option("--tag/--no-tag", default=None)
 @click.option("--target", default=None)
 def version(yes, push, tag, target):
     """Create a new package version"""
-    versioneer.version(project_root=".", tag=tag, yes=yes, push=push, target=target)
+
+    cfg = config.Config.from_file("pyproject.toml", cli_args=dict(push=push, tag=tag))
+
+    versioneer.version(
+        project_root=".",
+        tag=cfg["version"]["tag"],
+        yes=yes,
+        push=cfg["version"]["push"],
+        target=target,
+    )
 
 
 @cli.command()

@@ -73,7 +73,7 @@ def _replace_handles_with_links(text):
 
 def _expand_github_from_text(text):
     """Convert strings with the #{number} format into their"""
-    cfg = config.load()
+    cfg = config.Config.from_file("pyproject.toml")
     url = f'https://github.com/{cfg["github"]}/issues/'
     return _replace_handles_with_links(_replace_issue_number_with_links(url, text))
 

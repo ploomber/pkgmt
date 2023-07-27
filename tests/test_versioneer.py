@@ -21,8 +21,10 @@ from datetime import datetime
 import click
 import pytest
 
+from pkgmt import config
 from pkgmt.versioner.versioner import Versioner
 from pkgmt import versioneer
+
 from pkgmt.versioner.util import (
     find_package_in_src,
     find_package_of_version_file,
@@ -30,7 +32,7 @@ from pkgmt.versioner.util import (
     validate_version_file,
 )
 from pkgmt.versioner import versioner
-from pkgmt.exceptions import ProjectValidationError
+from pkgmt.exceptions import ProjectValidationError, InvalidConfiguration
 
 
 # FIXME: use unittest.mock.call instead of unittest.mock._Call
@@ -64,6 +66,37 @@ def move_to_package_no_src(root):
     os.chdir(p)
     yield
     os.chdir(old)
+
+
+@pytest.mark.parametrize(
+    "tmp_package, package_name, version_file",
+    [
+        ["tmp_package_name", "package_name", "__init__.py"],
+        ["tmp_another_package", "app", "_version.py"],
+    ],
+)
+def test_commit_version_no_tag_from_config(
+    tmp_package, package_name, version_file, monkeypatch, request
+):
+    tmp_package = request.getfixturevalue(tmp_package)
+    v = Versioner()
+
+    mock = Mock()
+    monkeypatch.setattr(versioneer, "call", mock)
+    monkeypatch.setattr(versioner, "call", mock)
+
+    v.commit_version(
+        "0.2", msg_template="{package_name} release {new_version}", tag=False
+    )
+
+    assert mock.call_args_list == [
+        _call(["git", "add", "--all"]),
+        _call(["git", "status"]),
+        _call(["git", "commit", "-m", f"{package_name} release 0.2"]),
+        _call(["git", "push", "--no-verify"]),
+    ]
+
+    assert '__version__ = "0.2"' in (v.PACKAGE / version_file).read_text()
 
 
 def test_locate_package_and_readme(move_to_package_name):
@@ -1118,3 +1151,96 @@ def test_version_key_missing_value(
         f"Could not find __version__ value in {error_path}. "
         "Please add in the format __version__ = '0.1dev'" in str(excinfo.value)
     )
+
+
+@pytest.mark.parametrize(
+    "pyproject, error",
+    [
+        [
+            '[tool.pkgmt]\ngithub = "repository/package"\n'
+            'invalid_key = "some_value"',
+            "Invalid keys in pyproject.toml file: invalid_key. "
+            "Valid keys are: github, version, package_name, check_links",
+        ],
+        [
+            '[tool.pkgmt]\ngithub = "repository/package"\n\n[tool.pkgmt.version]\n'
+            'invalid_key = "some_value"',
+            "Invalid version keys in pyproject.toml file: invalid_key. "
+            "Valid version keys are: version_file, tag, push",
+        ],
+    ],
+)
+def test_validate_config(pyproject, error, tmp_another_package):
+    Path("pyproject.toml").unlink()
+    Path("pyproject.toml").write_text(pyproject)
+    with pytest.raises(InvalidConfiguration) as excinfo:
+        config.Config.from_file("pyproject.toml")
+    assert error in str(excinfo.value)
+
+
+@pytest.mark.parametrize(
+    "pyproject, expected_tag, expected_push",
+    [
+        [
+            '[tool.pkgmt]\ngithub = "repository/package"\n\n[tool.pkgmt.version]\n'
+            'version_file = "/app/__init__.py"\npush = false',
+            True,
+            False,
+        ],
+        [
+            '[tool.pkgmt]\ngithub = "repository/package"\n\n[tool.pkgmt.version]\n'
+            'version_file = "/app/__init__.py"\ntag = false',
+            False,
+            True,
+        ],
+        [
+            '[tool.pkgmt]\ngithub = "repository/package"\n\n[tool.pkgmt.version]\n'
+            'version_file = "/app/__init__.py"\npush = false\ntag = false',
+            False,
+            False,
+        ],
+        [
+            '[tool.pkgmt]\ngithub = "repository/package"\n\n[tool.pkgmt.version]\n'
+            'version_file = "/app/__init__.py"\npush = false\ntag = true',
+            True,
+            False,
+        ],
+        [
+            '[tool.pkgmt]\ngithub = "repository/package"\n\n[tool.pkgmt.version]\n'
+            'version_file = "/app/__init__.py"',
+            True,
+            True,
+        ],
+    ],
+)
+def test_resolved_version_configurations(
+    pyproject, tmp_another_package, expected_tag, expected_push
+):
+    Path("pyproject.toml").unlink()
+    Path("pyproject.toml").write_text(pyproject)
+    cfg = config.Config.from_file("pyproject.toml")
+    assert cfg["version"]["push"] == expected_push
+    assert cfg["version"]["tag"] == expected_tag
+
+
+@pytest.mark.parametrize(
+    "pyproject, error",
+    [
+        [
+            '[tool.pkgmt]\ngithub = "repository/package"\n\n[tool.pkgmt.version]\n'
+            'version_file = "/app/__init__.py"\npush = false\ntag = 1',
+            "Invalid values for keys: tag. Expected boolean.",
+        ],
+        [
+            '[tool.pkgmt]\ngithub = "repository/package"\n\n[tool.pkgmt.version]\n'
+            'version_file = "/app/__init__.py"\npush = "false"\ntag = false',
+            "Invalid values for keys: push. Expected boolean.",
+        ],
+    ],
+)
+def test_version_config_invalid(pyproject, error, tmp_another_package):
+    Path("pyproject.toml").unlink()
+    Path("pyproject.toml").write_text(pyproject)
+    with pytest.raises(InvalidConfiguration) as excinfo:
+        config.Config.from_file("pyproject.toml")
+    assert error in str(excinfo.value)
