@@ -31,7 +31,7 @@ class Config(Mapping):
         return f"{type(self).__name__}({self._data!r})"
 
     @staticmethod
-    def _validate_config(data):
+    def _validate_config(data, file):
         """
         Function to validate top level and version keys in
         config file.
@@ -43,7 +43,7 @@ class Config(Mapping):
         ]
         if invalid_top_level_keys:
             raise InvalidConfiguration(
-                f"Invalid keys in pyproject.toml file: "
+                f"Invalid keys in {file} file: "
                 f"{', '.join(invalid_top_level_keys)}. "
                 f"Valid keys are: {', '.join(VALID_KEYS)}"
             )
@@ -56,13 +56,24 @@ class Config(Mapping):
         ]
         if invalid_version_keys:
             raise InvalidConfiguration(
-                f"Invalid version keys in pyproject.toml "
+                f"Invalid version keys in {file} "
                 f"file: {', '.join(invalid_version_keys)}. "
                 f"Valid version keys are: {', '.join(VALID_VERSION_KEYS)}"
             )
 
     @staticmethod
     def _validate_boolean_key(keys, values):
+        """
+        Function to verify that value of each corresponding key
+        in keys list is boolean
+
+        Parameters
+        ----------
+        keys: str/list
+              names of keys
+        values: str/list
+              value of respective key
+        """
         if not isinstance(keys, list):
             keys = [keys]
         if not isinstance(values, list):
@@ -84,21 +95,25 @@ class Config(Mapping):
             )
 
     @staticmethod
-    def _generate_overriding_error(key, cli_value, cfg_value):
+    def _generate_overriding_error(key, cli_value, cfg_value, file):
         return (
             f"Value of '{key}' from CLI: {cli_value}. This will override "
-            f"{key}={cfg_value} as configured in pyproject.toml"
+            f"{key}={cfg_value} as configured in {file}"
         )
 
     @staticmethod
-    def _resolve_version_configuration(data, cli_args):
+    def _resolve_version_configuration(data, cli_args, file):
         """
-        Function to return tag and push from
-        pyproject.toml if provided by user.
-        Example file:
+        Function to resolve tag and push values from CLI and config file.
+        CLI arguments take preference over values configured in config file.
+
+        Example pyproject.toml file:
         [tool.pkgmt]
         github = "repository/package"
         version = {version_file = "/app/_version.py", tag=True, push=False}
+
+        If values of tag or push is None from both CLI and config file, it is
+        set to default value True.
         """
 
         if cli_args is None:
@@ -118,9 +133,13 @@ class Config(Mapping):
 
         conflicts = []
         if cfg_tag is not None and tag != cfg_tag:
-            conflicts.append(Config._generate_overriding_error("tag", tag, cfg_tag))
+            conflicts.append(
+                Config._generate_overriding_error("tag", tag, cfg_tag, file)
+            )
         if cfg_push is not None and push != cfg_push:
-            conflicts.append(Config._generate_overriding_error("push", push, cfg_push))
+            conflicts.append(
+                Config._generate_overriding_error("push", push, cfg_push, file)
+            )
 
         if conflicts:
             click.echo("\n".join(conflicts))
@@ -134,13 +153,17 @@ class Config(Mapping):
 
     @classmethod
     def from_file(cls, file, **kwargs):
+        """
+        Function to generate Config object from config file.
+        Config file should contain key tool.pkgmt
+        """
         if Path(file).exists():
             try:
                 with open(file) as f:
                     data = toml.load(f)["tool"]["pkgmt"]
-                    Config._validate_config(data)
+                    Config._validate_config(data, file)
                     data = Config._resolve_version_configuration(
-                        data, kwargs.get("cli_args")
+                        data, kwargs.get("cli_args"), file
                     )
                     return cls(data, file)
             except toml.decoder.TomlDecodeError as e:
