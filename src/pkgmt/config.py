@@ -157,28 +157,31 @@ class Config(Mapping):
         Function to generate Config object from config file.
         Config file should contain key tool.pkgmt
         """
-        if Path(file).exists():
+        config_file_path = Path(file)
+        if not config_file_path.exists():
+            raise FileNotFoundError(
+                f"Could not load configuration file: expected a {file} file"
+            )
+
+        with open(file) as f:
             try:
-                with open(file) as f:
-                    data = toml.load(f)["tool"]["pkgmt"]
-                    Config._validate_config(data, file)
-                    data = Config._resolve_version_configuration(
-                        data, kwargs.get("cli_args"), file
-                    )
-                    return cls(data, file)
+                data = toml.load(f)
             except toml.decoder.TomlDecodeError as e:
                 raise InvalidConfiguration(
                     f"Invalid {file} file: {str(e)}."
                     "If using a boolean "
                     "value ensure it's in lowercase, e.g., key = true"
                 ) from e
+            try:
+                data = data["tool"]["pkgmt"]
             except KeyError as e:
                 raise InvalidConfiguration(
                     f"Missing key : {str(e)}.\n{file} "
                     f"should contain 'tool.pkgmt' key."
                 ) from e
 
-        else:
-            raise FileNotFoundError(
-                f"Could not load configuration file: expected a {file} file"
+            Config._validate_config(data, file)
+            data = Config._resolve_version_configuration(
+                data, kwargs.get("cli_args"), file
             )
+            return cls(data, file)

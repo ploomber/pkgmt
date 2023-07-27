@@ -43,7 +43,7 @@ def setup(c, version=None, doc=False):
     if not shutil.which("conda"):
         raise CommandError("conda not installed. Install it an try again.")
 
-    cfg = Config().from_file("pyproject.toml")
+    cfg = Config.from_file("pyproject.toml")
 
     env_prefix = cfg.get("env_name", cfg["package_name"])
     pkg_name = cfg["package_name"]
