@@ -16,10 +16,36 @@ def toml_cfg(tmp_empty):
     yield cfg_
 
 
-def test_load_toml(toml_cfg):
+@pytest.mark.parametrize(
+    "data",
+    [
+        {
+            "tool": {
+                "pkgmt": {
+                    "github": "edublancas/pkgmt",
+                    "version": {"tag": True, "push": True},
+                }
+            }
+        },
+        {
+            "tool": {
+                "pkgmt": {
+                    "github": "edublancas/pkgmt",
+                    "version": {"tag": True, "push": True},
+                    "env_name": "jupysql",
+                    "package_name": "sql",
+                }
+            }
+        },
+    ],
+)
+def test_load_toml(data, tmp_empty):
+    with open("pyproject.toml", "w") as f:
+        toml.dump(data, f)
+
     loaded = config.Config.from_file("pyproject.toml")
 
-    assert loaded == toml_cfg
+    assert loaded == data["tool"]["pkgmt"]
 
 
 def test_missing_file(tmp_empty):

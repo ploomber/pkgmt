@@ -5,7 +5,7 @@ import click
 from pathlib import Path
 from pkgmt.exceptions import InvalidConfiguration
 
-VALID_KEYS = ["github", "version", "package_name", "check_links"]
+VALID_KEYS = ["github", "version", "package_name", "check_links", "env_name"]
 VALID_VERSION_KEYS = ["version_file", "tag", "push"]
 
 
