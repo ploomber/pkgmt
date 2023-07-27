@@ -2,11 +2,11 @@
 
 ## 0.7.2dev
 
+* [Feature] Added `push` and `tag` versioner configuration keys to `pyproject.toml` (#63)
 ## 0.7.1 (2023-07-14)
 
 * [Fix] Fixed `black` `--extend-exclude` override in `pyproject.toml`([#66](https://github.com/ploomber/pkgmt/issues/66))
 * [Fix] Validation of keys in `pyproject.toml` (#65)
-* [Feature] Added `push` and `tag` versioner configuration keys (#63)
 
 ## 0.7.0 (2023-07-11)
 
