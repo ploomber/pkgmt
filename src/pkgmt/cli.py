@@ -27,7 +27,7 @@ def check_links(only_404):
     """Check for broken links"""
     broken_http_codes = None if not only_404 else [404]
 
-    cfg = config.PyprojectConfig().get_config()["check_links"]
+    cfg = config.Config.from_file("pyproject.toml")["check_links"]
     out = links.find_broken_in_files(
         cfg["extensions"],
         cfg.get("ignore_substrings"),
@@ -101,27 +101,15 @@ def hook(uninstall, run):
 def version(yes, push, tag, target):
     """Create a new package version"""
 
-    cfg_tag, cfg_push = config.PyprojectConfig().get_version_configurations()
+    cfg = config.Config.from_file("pyproject.toml", cli_args=dict(push=push, tag=tag))
 
-    if tag is not None:
-        if cfg_tag is not None and tag != cfg_tag:
-            print(
-                f"Value of 'tag' from CLI : {tag}. "
-                f"This will override tag={cfg_tag} as configured in pyproject.toml"
-            )
-    else:
-        tag = cfg_tag if cfg_tag is not None else True
-
-    if push is not None:
-        if cfg_push is not None and push != cfg_push:
-            print(
-                f"Value of 'push' from CLI : {push}. "
-                f"This will override push={cfg_push} as configured in pyproject.toml"
-            )
-    else:
-        push = cfg_push if cfg_push is not None else True
-
-    versioneer.version(project_root=".", tag=tag, yes=yes, push=push, target=target)
+    versioneer.version(
+        project_root=".",
+        tag=cfg["version"]["tag"],
+        yes=yes,
+        push=cfg["version"]["push"],
+        target=target,
+    )
 
 
 @cli.command()

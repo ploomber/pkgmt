@@ -7,6 +7,89 @@ import pytest
 from pkgmt import cli
 
 
+@pytest.mark.parametrize(
+    "args, push, tag, pyproject, message",
+    [
+        [
+            ["version"],
+            True,
+            False,
+            '[tool.pkgmt]\ngithub = "edublancas/pkgmt"\n\n[tool.pkgmt.version]\n'
+            'version_file = "/app/_version.py"\ntag = false',
+            "",
+        ],
+        [
+            ["version"],
+            False,
+            True,
+            '[tool.pkgmt]\ngithub = "edublancas/pkgmt"\n\n[tool.pkgmt.version]\n'
+            'version_file = "/app/_version.py"\npush = false',
+            "",
+        ],
+        [
+            ["version"],
+            False,
+            False,
+            '[tool.pkgmt]\ngithub = "edublancas/pkgmt"\n\n[tool.pkgmt.version]\n'
+            'version_file = "/app/_version.py"\npush = false\ntag = false',
+            "",
+        ],
+        [
+            ["version", "--push"],
+            True,
+            False,
+            '[tool.pkgmt]\ngithub = "edublancas/pkgmt"\n\n[tool.pkgmt.version]\n'
+            'version_file = "/app/_version.py"\npush = false\ntag = false',
+            "Value of 'push' from CLI: True. This will override push=False "
+            "as configured in pyproject.toml",
+        ],
+        [
+            ["version", "--no-push"],
+            False,
+            False,
+            '[tool.pkgmt]\ngithub = "edublancas/pkgmt"\n\n[tool.pkgmt.version]\n'
+            'version_file = "/app/_version.py"\npush = true\ntag = false',
+            "Value of 'push' from CLI: False. This will override push=True "
+            "as configured in pyproject.toml",
+        ],
+        [
+            ["version", "--tag"],
+            True,
+            True,
+            '[tool.pkgmt]\ngithub = "edublancas/pkgmt"\n\n[tool.pkgmt.version]\n'
+            'version_file = "/app/_version.py"\npush = true\ntag = false',
+            "Value of 'tag' from CLI: True. This will override tag=False "
+            "as configured in pyproject.toml",
+        ],
+        [
+            ["version", "--no-tag"],
+            True,
+            False,
+            '[tool.pkgmt]\ngithub = "edublancas/pkgmt"\n\n[tool.pkgmt.version]\n'
+            'version_file = "/app/_version.py"\npush = true\ntag = true',
+            "Value of 'tag' from CLI: False. This will override tag=True "
+            "as configured in pyproject.toml",
+        ],
+    ],
+)
+def test_tag_push_config(
+    tmp_another_package, monkeypatch, args, push, tag, pyproject, message
+):
+    Path("pyproject.toml").unlink()
+    Path("pyproject.toml").write_text(pyproject)
+    mock = Mock()
+
+    monkeypatch.setattr(cli.versioneer, "version", mock)
+    runner = CliRunner()
+    result = runner.invoke(cli.cli, args)
+
+    mock.assert_called_once_with(
+        project_root=".", tag=tag, yes=False, push=push, target=None
+    )
+    assert result.exit_code == 0
+    assert message in result.output
+
+
 def test_check_links(tmp_empty):
     Path("pyproject.toml").write_text(
         """
@@ -179,86 +262,3 @@ def test_lint_black_pyproj(pyproject, command, output, tmp_empty):
     result = runner.invoke(cli.cli, command)
 
     assert output in result.output
-
-
-@pytest.mark.parametrize(
-    "args, push, tag, pyproject, message",
-    [
-        [
-            ["version"],
-            True,
-            False,
-            '[tool.pkgmt]\ngithub = "edublancas/pkgmt"\n\n[tool.pkgmt.version]\n'
-            'version_file = "/app/_version.py"\ntag = false',
-            "",
-        ],
-        [
-            ["version"],
-            False,
-            True,
-            '[tool.pkgmt]\ngithub = "edublancas/pkgmt"\n\n[tool.pkgmt.version]\n'
-            'version_file = "/app/_version.py"\npush = false',
-            "",
-        ],
-        [
-            ["version"],
-            False,
-            False,
-            '[tool.pkgmt]\ngithub = "edublancas/pkgmt"\n\n[tool.pkgmt.version]\n'
-            'version_file = "/app/_version.py"\npush = false\ntag = false',
-            "",
-        ],
-        [
-            ["version", "--push"],
-            True,
-            False,
-            '[tool.pkgmt]\ngithub = "edublancas/pkgmt"\n\n[tool.pkgmt.version]\n'
-            'version_file = "/app/_version.py"\npush = false\ntag = false',
-            "Value of 'push' from CLI : True. This will override push=False "
-            "as configured in pyproject.toml",
-        ],
-        [
-            ["version", "--no-push"],
-            False,
-            False,
-            '[tool.pkgmt]\ngithub = "edublancas/pkgmt"\n\n[tool.pkgmt.version]\n'
-            'version_file = "/app/_version.py"\npush = true\ntag = false',
-            "Value of 'push' from CLI : False. This will override push=True "
-            "as configured in pyproject.toml",
-        ],
-        [
-            ["version", "--tag"],
-            True,
-            True,
-            '[tool.pkgmt]\ngithub = "edublancas/pkgmt"\n\n[tool.pkgmt.version]\n'
-            'version_file = "/app/_version.py"\npush = true\ntag = false',
-            "Value of 'tag' from CLI : True. This will override tag=False "
-            "as configured in pyproject.toml",
-        ],
-        [
-            ["version", "--no-tag"],
-            True,
-            False,
-            '[tool.pkgmt]\ngithub = "edublancas/pkgmt"\n\n[tool.pkgmt.version]\n'
-            'version_file = "/app/_version.py"\npush = true\ntag = true',
-            "Value of 'tag' from CLI : False. This will override tag=True "
-            "as configured in pyproject.toml",
-        ],
-    ],
-)
-def test_tag_push_config(
-    tmp_another_package, monkeypatch, args, push, tag, pyproject, message
-):
-    Path("pyproject.toml").unlink()
-    Path("pyproject.toml").write_text(pyproject)
-    mock = Mock()
-
-    monkeypatch.setattr(cli.versioneer, "version", mock)
-    runner = CliRunner()
-    result = runner.invoke(cli.cli, args)
-
-    mock.assert_called_once_with(
-        project_root=".", tag=tag, yes=False, push=push, target=None
-    )
-    assert result.exit_code == 0
-    assert message in result.output

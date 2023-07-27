@@ -3,7 +3,7 @@ import os
 import click
 import warnings
 from pathlib import Path
-from pkgmt.config import PyprojectConfig
+from pkgmt.config import Config
 
 
 def is_pre_release(version):
@@ -138,7 +138,7 @@ def find_package_and_version_file(project_root="."):
     Else version file in __init__.py found in the first package
     inside src directory.
     """
-    cfg = PyprojectConfig().get_config()
+    cfg = Config.from_file("pyproject.toml")
     version_file = cfg.get("version", {}).get("version_file", None)
     validate_version_file(version_file)
     if version_file:

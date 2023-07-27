@@ -68,6 +68,37 @@ def move_to_package_no_src(root):
     os.chdir(old)
 
 
+@pytest.mark.parametrize(
+    "tmp_package, package_name, version_file",
+    [
+        ["tmp_package_name", "package_name", "__init__.py"],
+        ["tmp_another_package", "app", "_version.py"],
+    ],
+)
+def test_commit_version_no_tag_from_config(
+    tmp_package, package_name, version_file, monkeypatch, request
+):
+    tmp_package = request.getfixturevalue(tmp_package)
+    v = Versioner()
+
+    mock = Mock()
+    monkeypatch.setattr(versioneer, "call", mock)
+    monkeypatch.setattr(versioner, "call", mock)
+
+    v.commit_version(
+        "0.2", msg_template="{package_name} release {new_version}", tag=False
+    )
+
+    assert mock.call_args_list == [
+        _call(["git", "add", "--all"]),
+        _call(["git", "status"]),
+        _call(["git", "commit", "-m", f"{package_name} release 0.2"]),
+        _call(["git", "push", "--no-verify"]),
+    ]
+
+    assert '__version__ = "0.2"' in (v.PACKAGE / version_file).read_text()
+
+
 def test_locate_package_and_readme(move_to_package_name):
     v = Versioner()
     assert v.PACKAGE == Path("src", "package_name")
@@ -1215,34 +1246,3 @@ def test_read_version_config_invalid(pyproject, error, tmp_another_package):
     with pytest.raises(InvalidConfiguration) as excinfo:
         config.PyprojectConfig().get_version_configurations()
     assert error in str(excinfo.value)
-
-
-@pytest.mark.parametrize(
-    "tmp_package, package_name, version_file",
-    [
-        ["tmp_package_name", "package_name", "__init__.py"],
-        ["tmp_another_package", "app", "_version.py"],
-    ],
-)
-def test_commit_version_no_tag_from_config(
-    tmp_package, package_name, version_file, monkeypatch, request
-):
-    tmp_package = request.getfixturevalue(tmp_package)
-    v = Versioner()
-
-    mock = Mock()
-    monkeypatch.setattr(versioneer, "call", mock)
-    monkeypatch.setattr(versioner, "call", mock)
-
-    v.commit_version(
-        "0.2", msg_template="{package_name} release {new_version}", tag=False
-    )
-
-    assert mock.call_args_list == [
-        _call(["git", "add", "--all"]),
-        _call(["git", "status"]),
-        _call(["git", "commit", "-m", f"{package_name} release 0.2"]),
-        _call(["git", "push", "--no-verify"]),
-    ]
-
-    assert '__version__ = "0.2"' in (v.PACKAGE / version_file).read_text()
