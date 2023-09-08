@@ -7,7 +7,13 @@ from pathlib import Path
 
 import click
 
-from pkgmt.versioner.util import complete_version_string, find_package_and_version_file
+from pkgmt.versioner.util import (
+    complete_version_string,
+    find_package_and_version_file,
+    find_package_of_version_file,
+    validate_version_file,
+)
+from pkgmt.config import Config
 
 
 def replace_in_file(path_to_file, original, replacement):
@@ -38,30 +44,96 @@ def make_header(content, path, add_date=False):
 
 
 class Versioner:
-    def __init__(self, project_root="."):
-        self.project_root = project_root or "."
-        package_name, PACKAGE, version_file_name = find_package_and_version_file(
-            self.project_root
-        )
+    """Manage package versions
+
+    Attributes
+    ----------
+    package_name : str
+        Package name of the project (e.g., "some_package"). Only used for git commit
+        messages.
+
+    """
+
+    def __init__(
+        self, package_name, path_to_package, version_filename, path_to_changelog
+    ):
         self.package_name = package_name
-        self.PACKAGE = PACKAGE
-        if Path(self.project_root, "CHANGELOG.rst").exists():
-            self.path_to_changelog = Path(self.project_root, "CHANGELOG.rst")
-        elif Path(self.project_root, "CHANGELOG.md").exists():
-            self.path_to_changelog = Path(self.project_root, "CHANGELOG.md")
+        self.path_to_package = path_to_package
+        self.version_file = version_filename
+        self.path_to_changelog = path_to_changelog
+
+    @classmethod
+    def from_project_root(cls, project_root=None):
+        """
+        Parameters
+        ----------
+        project_root : str, default="."
+            Path to project root. If not provided, it assumes current directory. It is
+            assumed that the CHANGELOG file is in the project root.
+        """
+
+        project_root = project_root or "."
+
+        (
+            package_name,
+            path_to_package,
+            version_file_name,
+        ) = find_package_and_version_file(project_root)
+
+        if Path(project_root, "CHANGELOG.rst").exists():
+            path_to_changelog = Path(project_root, "CHANGELOG.rst")
+        elif Path(project_root, "CHANGELOG.md").exists():
+            path_to_changelog = Path(project_root, "CHANGELOG.md")
         else:
-            self.path_to_changelog = None
-        self.version_file = version_file_name
+            path_to_changelog = None
+
+        return cls(package_name, path_to_package, version_file_name, path_to_changelog)
+
+    @classmethod
+    def from_pyproject_toml(cls):
+        cfg = Config.from_file("pyproject.toml")
+        version_file = cfg.get("version", {}).get("version_file", None)
+        validate_version_file(version_file)
+
+        package_name, path_to_package, version_file_name = find_package_of_version_file(
+            version_file
+        )
+
+        project_root = Path()
+
+        # consolidate since this is duplicated
+        if Path(project_root, "CHANGELOG.rst").exists():
+            path_to_changelog = Path(project_root, "CHANGELOG.rst")
+        elif Path(project_root, "CHANGELOG.md").exists():
+            path_to_changelog = Path(project_root, "CHANGELOG.md")
+        else:
+            path_to_changelog = None
+
+        return cls(package_name, path_to_package, version_file_name, path_to_changelog)
+
+    @classmethod
+    def load(cls, project_root=None):
+        use_pyproject = False
+
+        if Path("pyproject.toml").exists():
+            cfg = Config.from_file("pyproject.toml")
+            version_file = cfg.get("version", {}).get("version_file", None)
+            use_pyproject = version_file is not None
+
+        if use_pyproject:
+            return cls.from_pyproject_toml()
+        else:
+            return cls.from_project_root(project_root=project_root)
 
     def get_version_file_path(self):
         """Returns the version file path from project root"""
-        return str(self.PACKAGE / self.version_file)
+        return str(self.path_to_package / self.version_file)
 
     def current_version(self):
         """Returns the current version in version file"""
         _version_re = re.compile(r"__version__\s+=\s+(.*)")
 
-        with open(self.PACKAGE / self.version_file, "rb") as f:
+        with open(self.path_to_package / self.version_file, "rb") as f:
             try:
                 VERSION = str(
                     ast.literal_eval(
@@ -153,7 +225,7 @@ class Versioner:
         current = self.current_version()
 
         # replace new version in version file
-        replace_in_file(self.PACKAGE / self.version_file, current, new_version)
+        replace_in_file(self.path_to_package / self.version_file, current, new_version)
 
         # Run git add and git status
         print("Adding new changes to the repository...")

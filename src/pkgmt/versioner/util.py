@@ -3,7 +3,6 @@ import os
 import click
 import warnings
 from pathlib import Path
-from pkgmt.config import Config
 
 
 def is_pre_release(version):
@@ -41,7 +40,8 @@ def complete_version_string(version):
 
 def find_package_in_src(project_root="."):
     """
-    Function to find the path of the package inside src directory
+    Function to find the path of the package inside src directory. If multiple packages
+    found, first is selected.
 
     Parameters
     ----------
@@ -50,8 +50,11 @@ def find_package_in_src(project_root="."):
 
     Returns
     -------
-    name and path of package inside src. If multiple packages found,
-    first is selected
+    package_name
+        Package name of the project (e.g., "some_package")
+
+    path_to_package
+        Path to the package (e.g., "src/some_package")
     """
 
     path_to_src = Path(project_root, "src")
@@ -75,52 +78,35 @@ def find_package_in_src(project_root="."):
         warnings.warn("Found more than one dir, " f"choosing the first one: {dirs[0]}")
 
     package_name = dirs[0]
-    PACKAGE = path_to_src / package_name
-    return package_name, PACKAGE
+    path_to_package = path_to_src / package_name
+    return package_name, path_to_package
 
 
-def find_package_of_version_file(version_file_path, project_root="."):
+def find_package_of_version_file(version_file_path):
     """
     Function to find the path of the package inside src directory
 
     Parameters
     ----------
 
-    version_file_path: str, path of the file in which
-                       __version__ string is stored
+    version_file_path: str
+        Path of the file in which __version__ string is stored
 
-    project_root: str, root folder of the project.
-                  Default is "."
+    project_root: str
+        Root folder of the project. Default is "."
 
     Returns
     -------
     name and path of package which contains the version file
     """
+    if not Path(version_file_path).exists():
+        raise click.ClickException(f"Version file not found: {version_file_path}")
 
-    PACKAGE = None
-    try:
-        version_file_name = os.path.basename(version_file_path)
-        version_package = os.path.basename(os.path.dirname(version_file_path))
-    except TypeError:
-        raise click.ClickException(
-            f"Invalid path : {version_file_path}. "
-            f"Please provide a valid path for the version file"
-        )
-    for path, dirs, _ in os.walk(project_root):
-        if version_package in dirs:
-            PACKAGE = Path(path, version_package)
-            if not Path(path, version_package, version_file_name).exists():
-                raise click.ClickException(
-                    f"Cannot find version file {version_file_path} "
-                    f"in subdirectory : {version_package}"
-                )
+    path_to_package = Path(version_file_path).parent
+    package_name = path_to_package.name
+    version_file_name = Path(version_file_path).name
 
-    if PACKAGE is None:
-        raise click.ClickException(
-            f"Version file path does not exist : {version_file_path}"
-        )
-    package_name = version_package
-    return package_name, PACKAGE, version_file_name
+    return package_name, path_to_package, version_file_name
 
 
 def validate_version_file(version_file):
@@ -130,22 +116,9 @@ def validate_version_file(version_file):
         )
 
 
+# TODO: we need to remove this function
 def find_package_and_version_file(project_root="."):
-    """
-    Function to find the path of the package containing the
-    version file. If version_file key is found in pyproject.toml
-    file, this path is considered as the path to the version file.
-    Else version file in __init__.py found in the first package
-    inside src directory.
-    """
-    cfg = Config.from_file("pyproject.toml")
-    version_file = cfg.get("version", {}).get("version_file", None)
-    validate_version_file(version_file)
-    if version_file:
-        package_name, PACKAGE, version_file_name = find_package_of_version_file(
-            version_file, project_root
-        )
-    else:
-        version_file_name = "__init__.py"
-        package_name, PACKAGE = find_package_in_src(project_root)
-    return package_name, PACKAGE, version_file_name
+    version_file_name = "__init__.py"
+    package_name, path_to_package = find_package_in_src(project_root)
+
+    return package_name, path_to_package, version_file_name

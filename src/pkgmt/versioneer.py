@@ -113,7 +113,7 @@ def version(
             f"\n{pending.decode()}"
         )
 
-    versioner = Versioner(project_root)
+    versioner = Versioner.load(project_root)
 
     changelog_md_exists = (
         versioner.path_to_changelog and versioner.path_to_changelog.suffix == ".md"
@@ -224,7 +224,7 @@ def upload(tag, production, yes=False):
     print("Checking out tag {}".format(tag))
     call(["git", "checkout", tag])
 
-    versioner = Versioner()
+    versioner = Versioner.load()
     current = versioner.current_version()
 
     if not yes:
@@ -234,7 +234,7 @@ def upload(tag, production, yes=False):
         )
 
     # create distribution
-    delete_dirs("dist", "build", f"{versioner.PACKAGE}.egg-info")
+    delete_dirs("dist", "build", f"{versioner.path_to_package}.egg-info")
     call(["python", "setup.py", "bdist_wheel", "sdist"])
 
     print("Publishing to PyPI...")

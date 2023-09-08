@@ -189,7 +189,7 @@ class CHANGELOG:
         )
         self.tree = markdown(text)
 
-        versioner = Versioner(project_root=project_root)
+        versioner = Versioner.load(project_root=project_root)
         self.version_file = versioner.get_version_file_path()
         self.current = versioner.current_version()
 
