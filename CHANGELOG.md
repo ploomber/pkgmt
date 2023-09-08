@@ -2,6 +2,9 @@
 
 ## 0.7.4dev
 
+* [Fix] Refactors code for versioning to improve clarity
+* [Fix] Fix a bug that caused custom `version_file` in `pyproject.toml` not to work as expected.
+
 ## 0.7.3 (2023-07-27)
 
 * [Fix] Fix bug that caused `pkgmt check` to fail when `pyproject.toml` had an `env_name` key
