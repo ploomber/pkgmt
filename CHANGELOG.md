@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 0.7.4dev
+## 0.7.4 (2023-09-08)
 
 * [Fix] Refactors code for versioning to improve clarity
 * [Fix] Fix a bug that caused custom `version_file` in `pyproject.toml` not to work as expected.
