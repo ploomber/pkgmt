@@ -1,5 +1,7 @@
 # CHANGELOG
 
+## 0.7.5dev
+
 ## 0.7.4 (2023-09-08)
 
 * [Fix] Refactors code for versioning to improve clarity
