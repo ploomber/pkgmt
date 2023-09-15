@@ -5,6 +5,7 @@ from click.testing import CliRunner
 import pytest
 
 from pkgmt import cli
+from invoke import Context
 
 
 @pytest.mark.parametrize(
@@ -262,3 +263,33 @@ def test_lint_black_pyproj(pyproject, command, output, tmp_empty):
     result = runner.invoke(cli.cli, command)
 
     assert output in result.output
+
+
+@pytest.mark.parametrize(
+    "command, version, doc",
+    [
+        [
+            ["setup"],
+            None,
+            False,
+        ],
+        [
+            ["setup", "--version", "3.9"],
+            "3.9",
+            False,
+        ],
+        [
+            ["setup", "--version", "3.9", "--doc"],
+            "3.9",
+            True,
+        ],
+    ],
+)
+def test_setup_with_python_version(monkeypatch, command, version, doc):
+    mock = Mock()
+    monkeypatch.setattr(cli.dev, "setup", mock)
+
+    runner = CliRunner()
+    runner.invoke(cli.cli, command)
+
+    mock.assert_called_once_with(Context(), version=version, doc=doc)
