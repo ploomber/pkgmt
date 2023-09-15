@@ -138,7 +138,13 @@ def release(tag, production, yes):
     default=False,
     help="Install documentation dependencies",
 )
-def setup(doc):
+@click.option(
+    "--version",
+    default=None,
+    type=str,
+    help="Select a Python version, default is 3.10",
+)
+def setup(version, doc):
     """Setup development environment
 
     Create conda environment and install dependencies:
@@ -150,7 +156,7 @@ def setup(doc):
         $ pkgmt setup --doc
     """
     try:
-        dev.setup(Context(), doc=doc)
+        dev.setup(Context(), version=version, doc=doc)
     except UnexpectedExit as e:
         raise SystemExit(f"Error running: {e.result.command}") from e
 
