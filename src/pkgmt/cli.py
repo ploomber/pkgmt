@@ -142,7 +142,7 @@ def release(tag, production, yes):
     "--version",
     default=None,
     type=str,
-    help="Select a Python version, default is 3.10" "Eg: --version 3.9",
+    help="Select a Python version, default is 3.10",
 )
 def setup(version, doc):
     """Setup development environment

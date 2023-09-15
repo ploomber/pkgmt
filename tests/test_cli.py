@@ -268,21 +268,14 @@ def test_lint_black_pyproj(pyproject, command, output, tmp_empty):
 @pytest.mark.parametrize(
     "command, version, doc",
     [
-        [
-            ["setup"],
-            None,
-            False,
-        ],
-        [
-            ["setup", "--version", "3.9"],
-            "3.9",
-            False,
-        ],
-        [
-            ["setup", "--version", "3.9", "--doc"],
-            "3.9",
-            True,
-        ],
+        [["setup"], None, False],
+        [["setup", "--version", "2.7"], "2.7", False],
+        [["setup", "--version", "3.7"], "3.7", False],
+        [["setup", "--version", "3.8"], "3.8", False],
+        [["setup", "--version", "3.9"], "3.9", False],
+        [["setup", "--version", "3.10"], "3.10", False],
+        [["setup", "--version", "3.11"], "3.11", False],
+        [["setup", "--version", "3.9", "--doc"], "3.9", True],
     ],
 )
 def test_setup_with_python_version(monkeypatch, command, version, doc):
