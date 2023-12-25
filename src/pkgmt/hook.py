@@ -44,9 +44,6 @@ class Runner:
         header = "=" * 20
         click.echo(f"{header} Running: {cmd_} {header}")
         res = subprocess.run(cmd, cwd=self._cwd)
-        print("============")
-        print(res.returncode)
-        print("============")
         if res.returncode not in (1,65):
             self._errors.append((cmd_, fix))
 
