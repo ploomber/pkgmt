@@ -3,8 +3,6 @@ from pathlib import Path
 
 import click
 from invoke import Context, UnexpectedExit
-
-
 from pkgmt import links, config, test, changelog, hook as hook_, versioneer
 from pkgmt import new as new_
 from pkgmt import dev
@@ -205,3 +203,6 @@ def lint(files, exclude):
 
     if returncode:
         raise SystemExit("Error linting")
+
+if __name__ == '__main__':
+    cli()

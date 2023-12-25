@@ -44,8 +44,10 @@ class Runner:
         header = "=" * 20
         click.echo(f"{header} Running: {cmd_} {header}")
         res = subprocess.run(cmd, cwd=self._cwd)
-
-        if res.returncode:
+        print("============")
+        print(res.returncode)
+        print("============")
+        if res.returncode not in (1,65):
             self._errors.append((cmd_, fix))
 
     def check(self):
@@ -63,25 +65,28 @@ def _lint(files=None, exclude=None):
     files = files or []
     exclude = exclude or []
 
-    if len(files) == 0:
+    if len(files) == 0 or not files:
         files = ["."]
     else:
         files = list(files)
 
     exclude_str_flake8 = ",".join(exclude)
     exclude_str_black = "|".join(exclude)
-
+    exclude_str_codespell = ','.join(exclude)
     if exclude_str_flake8 and exclude_str_black:
         cmd_black = (
             ["black", "--check"] + files + ["--extend-exclude", exclude_str_black]
         )
         cmd_flake8 = ["flake8"] + files + ["--extend-exclude", exclude_str_flake8]
+        cmd_codespell = ['codespell'] + files + ['--skip', files]
     else:
         cmd_black = ["black", "--check"] + files
         cmd_flake8 = ["flake8"] + files
+        cmd_codespell = ['codespell'] + files
     runner = Runner(find_root())
     runner.run(cmd_flake8, fix="Run: pkgmt format")
     runner.run(cmd_black, fix="Run: pkgmt format")
+    runner.run(cmd_codespell, fix="Run: pkgmt format")
 
     if not nbqa:
         click.echo(
@@ -96,13 +101,19 @@ def _lint(files=None, exclude=None):
         )
 
     if nbqa and jupytext:
-        if exclude_str_flake8 and exclude_str_black:
-            cmd = ["nbqa", "flake8"] + files + ["--extend-exclude", exclude_str_flake8]
+        if exclude_str_flake8 and exclude_str_black and exclude_str_codespell:
+            flake_8_cmd = ["nbqa", "flake8"] + files + ["--extend-exclude", exclude_str_flake8]
+            codespell_cmd = ['codespell'] + files + ['*.ipynb'] + ["--skip", exclude_str_codespell]
         else:
-            cmd = ["nbqa", "flake8"] + files
+            flake_8_cmd = ["nbqa", "flake8"] + files
+            codespell_cmd = ['codespell'] + files
 
         runner.run(
-            cmd,
+            flake_8_cmd,
+            fix="Install nbqa jupytext and run: pkgmt format",
+        )
+        runner.run(
+            codespell_cmd,
             fix="Install nbqa jupytext and run: pkgmt format",
         )
 
