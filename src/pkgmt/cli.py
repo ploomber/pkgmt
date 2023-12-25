@@ -203,6 +203,3 @@ def lint(files, exclude):
 
     if returncode:
         raise SystemExit("Error linting")
-
-if __name__ == '__main__':
-    cli()
