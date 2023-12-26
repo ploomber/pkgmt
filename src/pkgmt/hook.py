@@ -10,7 +10,6 @@ try:
 except ModuleNotFoundError:
     jupytext = None
 
-
 try:
     import nbqa
 except ModuleNotFoundError:
