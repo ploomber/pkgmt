@@ -99,14 +99,12 @@ def _lint(files=None, exclude=None):
 
     if nbqa and jupytext:
         if exclude_str_flake8 and exclude_str_black and exclude_str_codespell:
-            flake_8_cmd = ["nbqa", "flake8"] + files
-            + ["--extend-exclude", exclude_str_flake8]
-            codespell_cmd = ["codespell"] + files
-            +["*.ipynb"] + ["--skip", exclude_str_codespell]
+            exclude_flake8_args = ["--extend-exclude", exclude_str_flake8]
+            flake_8_cmd = ["nbqa", "flake8"] + files + exclude_flake8_args
         else:
             flake_8_cmd = ["nbqa", "flake8"] + files
-            codespell_cmd = ["codespell"] + files
-
+        exclude_codespell_args = ["*.ipynb --skip", exclude_str_codespell]
+        codespell_cmd = ["codespell"] + files + exclude_codespell_args
         runner.run(
             flake_8_cmd,
             fix="Install nbqa jupytext and run: pkgmt format",
