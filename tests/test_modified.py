@@ -107,10 +107,7 @@ def test_check_modified_changelog(tmp_package_changelog):
     )
     subprocess.run(["git", "add", "CHANGELOG.md"])
     subprocess.run(["git", "commit", "-m", "changelog_modified"])
-    assert (
-        fail_if_invalid_changelog.check_modified("main", ["CHANGELOG.md"], debug=True)
-        == 0
-    )
+    assert fail_if_invalid_changelog.check_modified("main", debug=True) == 0
 
 
 @pytest.mark.parametrize(
