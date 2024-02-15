@@ -84,7 +84,8 @@ def check_modified(base_branch, debug=False):
                         print(f"You have added an empty entry: {line}")
                         return 1
 
-    except subprocess.CalledProcessError:
+    except subprocess.CalledProcessError as e:
+        print("Error")
         pass
     return 0
 
