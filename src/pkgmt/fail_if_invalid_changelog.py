@@ -30,7 +30,7 @@ def check_modified(base_branch, debug=False):
         )
         return 1
     cmd = (
-        f"git diff -U0 {base_branch}... CHANGELOG.md "
+        f"git diff {base_branch}... -- CHANGELOG.md "
         f"| grep '^[+-]' | grep -Ev '^(--- a/|\+\+\+ b/)'"  # noqa
     )
     try:
