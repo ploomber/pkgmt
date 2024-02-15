@@ -34,7 +34,7 @@ def check_modified(base_branch, debug=False):
         f"| grep '^[+-]' | grep -Ev '^(--- a/|\+\+\+ b/)'"  # noqa
     )
     try:
-        out = subprocess.check_output(cmd, shell=True).decode("utf-8")
+        out = subprocess.check_output(cmd, shell=True, stderr=subprocess.STDOUT).decode("utf-8")
         all_diff = [line.strip() for line in out.split("\n")]
         git_removals = [
             line[1:].strip()
@@ -85,7 +85,7 @@ def check_modified(base_branch, debug=False):
                         return 1
 
     except subprocess.CalledProcessError as e:
-        print(str(e))
+        raise RuntimeError(f"command '{e.cmd}' return with error (code {e.returncode}): {e.output}")
         pass
     return 0
 
