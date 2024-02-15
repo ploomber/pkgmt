@@ -86,6 +86,8 @@ def check_modified(base_branch, debug=False):
 
     except subprocess.CalledProcessError as e:
         print(e.output)
+        print(e.returncode)
+        print(e.cmd)
         pass
     return 0
 
