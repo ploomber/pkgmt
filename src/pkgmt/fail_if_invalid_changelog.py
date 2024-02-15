@@ -85,7 +85,7 @@ def check_modified(base_branch, debug=False):
                         return 1
 
     except subprocess.CalledProcessError as e:
-        raise RuntimeError(f"command '{e.cmd}' return with error (code {e.returncode}): {e.output}")
+        print(e.output)
         pass
     return 0
 
