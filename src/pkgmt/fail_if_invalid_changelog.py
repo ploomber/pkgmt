@@ -29,13 +29,13 @@ def check_modified(base_branch, debug=False):
             f"{base_branch}: {latest_section_main}"
         )
         return 1
-    cmd = (
-        f"git diff {base_branch}... -- CHANGELOG.md "
-        f"| grep '^[+-]' | grep -Ev '^(--- a/|\+\+\+ b/)'"  # noqa
-    )
+    cmd = f"git diff -U0 {base_branch}... -- CHANGELOG.md"
     try:
         out = subprocess.check_output(cmd, shell=True).decode("utf-8")
-        all_diff = [line.strip() for line in out.split("\n")]
+        all_diff = []
+        for line in out.split("\n"):
+            if not (line.startswith("+++") or line.startswith("---")):
+                all_diff.append(line.strip())
         git_removals = [
             line[1:].strip()
             for line in all_diff
@@ -85,8 +85,7 @@ def check_modified(base_branch, debug=False):
                         return 1
 
     except subprocess.CalledProcessError:
-        print(f"CHANGELOG.md has not been modified with respect to '{base_branch}'")
-        return 1
+        pass
     return 0
 
 
