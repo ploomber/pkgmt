@@ -185,5 +185,13 @@ def test_check_modified_changelog_error(
     subprocess.run(["git", "add", "CHANGELOG.md"])
     subprocess.run(["git", "commit", "-m", "changelog_modified"])
     assert fail_if_invalid_changelog.check_modified("main", debug=True) == 1
+    assert message in capsys.readouterr().out
+
+
+def test_check_modified_changelog_error_file_added(tmp_package_changelog, capsys):
+    Path("some_file.txt").write_text("content")
+    subprocess.run(["git", "add", "some_file.txt"])
+    subprocess.run(["git", "commit", "-m", "added file"])
+    assert fail_if_invalid_changelog.check_modified("main", debug=True) == 1
     out = capsys.readouterr().out
-    assert message in out
+    assert "CHANGELOG.md has not been modified with respect to 'main'" in out
