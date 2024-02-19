@@ -49,9 +49,6 @@ def check_modified(base_branch, debug=False):
             if line[1:].strip() != ""
         ]
 
-        print(f"git_additions: {git_additions}, {len(git_additions)}")
-        print(out)
-
         if len(git_additions) == 0 or out == "" and debug:
             print(f"CHANGELOG.md has not been modified with respect to '{base_branch}'")
             return 1
