@@ -34,7 +34,7 @@ def check_modified(base_branch, debug=False):
         f"| grep '^[+-]' | grep -Ev '^(--- a/|\+\+\+ b/)'"  # noqa
     )
     try:
-        out = subprocess.check_output(cmd, shell=True, stderr=subprocess.STDOUT).decode("utf-8")
+        out = subprocess.check_output(cmd, shell=True).decode("utf-8")
         all_diff = [line.strip() for line in out.split("\n")]
         git_removals = [
             line[1:].strip()
@@ -84,11 +84,9 @@ def check_modified(base_branch, debug=False):
                         print(f"You have added an empty entry: {line}")
                         return 1
 
-    except subprocess.CalledProcessError as e:
-        print(e.output)
-        print(e.returncode)
-        print(e.cmd)
-        pass
+    except subprocess.CalledProcessError:
+        print(f"CHANGELOG.md has not been modified with respect to '{base_branch}'")
+        return 1
     return 0
 
 
