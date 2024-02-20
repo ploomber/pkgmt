@@ -197,6 +197,10 @@ class CHANGELOG:
     def from_path(cls, path, project_root="."):
         return cls(text=Path(path).read_text(), project_root=project_root)
 
+    def extract_text_from_entry(self):
+        """Extract text from a single Changelog entry"""
+        return _extract_text_from_items(self.tree[0])
+
     def sort_last_section(self):
         """Sorts last section depending on the prefix"""
         self.check_latest_changelog_entries()
