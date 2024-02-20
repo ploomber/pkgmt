@@ -1,6 +1,7 @@
 # CHANGELOG
 
-## 0.7.5dev
+## 0.7.5 (2024-02-20)
+
 * [Feature] Added `--version` option to `pkgmt setup` to specify Python version
 * [Feature] Better checks for new entries added to CHANGELOG.md
 
