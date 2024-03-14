@@ -130,8 +130,8 @@ def stuff():
     """
     Notes
     -----
-    .. deprecated:: 0.7
-        Removed in 0.8
+    .. deprecated:: 0.1
+        Removed in 0.2
     """
     pass
 '''
@@ -159,7 +159,7 @@ def stuff():
             "Removed in 0.6.0\n", "0.6.0", "some/nested/dir/functions.py"
         ),
         deprecation.DeprecationItem(
-            "Removed in 0.8\n", "0.8", "some/nested/functions.py"
+            "Removed in 0.2\n", "0.2", "some/nested/functions.py"
         ),
         deprecation.DeprecationItem("Removed in 0.9.0\n", "0.9.0", "functions.py"),
     }
