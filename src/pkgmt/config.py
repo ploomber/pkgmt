@@ -5,7 +5,7 @@ import click
 from pathlib import Path
 from pkgmt.exceptions import InvalidConfiguration
 
-VALID_KEYS = ["github", "version", "package_name", "check_links", "env_name"]
+VALID_KEYS = ["github", "version", "package_name", "check_links", "env_name", "utm"]
 VALID_VERSION_KEYS = ["version_file", "tag", "push"]
 
 
@@ -152,23 +152,35 @@ class Config(Mapping):
         return data
 
     @classmethod
-    def from_file(cls, file, **kwargs):
+    def from_file(cls, filename, directory=None, **kwargs):
         """
         Function to generate Config object from config file.
         Config file should contain key tool.pkgmt
         """
-        config_file_path = Path(file)
-        if not config_file_path.exists():
+        directory = directory or Path.cwd()
+
+        config_file_path = None
+
+        for _ in range(10):  # Limit the search to 10 levels up
+            directory = Path(directory)
+            potential_file_path = directory / filename
+            if potential_file_path.exists():
+                config_file_path = potential_file_path
+                break
+            else:
+                directory = directory.parent  # Go one level up
+
+        if not config_file_path or not config_file_path.exists():
             raise FileNotFoundError(
-                f"Could not load configuration file: expected a {file} file"
+                f"Could not find configuration file: expected a {filename} file"
             )
 
-        with open(file) as f:
+        with open(config_file_path) as f:
             try:
                 data = toml.load(f)
             except toml.decoder.TomlDecodeError as e:
                 raise InvalidConfiguration(
-                    f"Invalid {file} file: {str(e)}."
+                    f"Invalid {filename} file: {str(e)}."
                     "If using a boolean "
                     "value ensure it's in lowercase, e.g., key = true"
                 ) from e
@@ -176,12 +188,12 @@ class Config(Mapping):
                 data = data["tool"]["pkgmt"]
             except KeyError as e:
                 raise InvalidConfiguration(
-                    f"Missing key : {str(e)}.\n{file} "
+                    f"Missing key : {str(e)}.\n{filename} "
                     f"should contain 'tool.pkgmt' key."
                 ) from e
 
-            Config._validate_config(data, file)
+            Config._validate_config(data, filename)
             data = Config._resolve_version_configuration(
-                data, kwargs.get("cli_args"), file
+                data, kwargs.get("cli_args"), filename
             )
-            return cls(data, file)
+            return cls(data, filename)

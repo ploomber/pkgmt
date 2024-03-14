@@ -9,6 +9,7 @@ from pkgmt import links, config, test, changelog, hook as hook_, versioneer
 from pkgmt import new as new_
 from pkgmt import dev
 from pkgmt import formatting
+from pkgmt import utm as utm_
 
 
 @click.group()
@@ -205,3 +206,18 @@ def lint(files, exclude):
 
     if returncode:
         raise SystemExit("Error linting")
+
+
+@cli.command()
+@click.argument("path", type=click.Path(exists=True))
+def utm(path):
+    """Command to process a directory or file"""
+    cfg = config.Config.from_file("pyproject.toml")
+
+    utm_.add_utm_tags(
+        path,
+        utm_source=cfg["utm"].get("source"),
+        utm_medium=cfg["utm"].get("medium"),
+        utm_campaign=cfg["utm"].get("campaign"),
+        base_urls=cfg["utm"].get("base_urls"),
+    )

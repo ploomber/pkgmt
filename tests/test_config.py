@@ -51,7 +51,7 @@ def test_load_toml(data, tmp_empty):
 def test_missing_file(tmp_empty):
     with pytest.raises(FileNotFoundError) as excinfo:
         config.Config.from_file("pyproject.toml")
-    assert "Could not load configuration file: expected a pyproject.toml file" in str(
+    assert "Could not find configuration file: expected a pyproject.toml file" in str(
         excinfo.value
     )
 
