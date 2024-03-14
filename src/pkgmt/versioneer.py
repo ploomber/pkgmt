@@ -1,6 +1,7 @@
 """
 Managing project versions
 """
+
 import sys
 import shutil
 import subprocess

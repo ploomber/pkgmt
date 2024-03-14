@@ -112,7 +112,10 @@ def test_find_markdown_files_nested_directories(tmp_empty):
             "source",
             "medium",
             "campaign",
-            "[link1](http://example.com?utm_source=source&utm_medium=medium&utm_campaign=campaign)",
+            (
+                "[link1](http://example.com?"
+                "utm_source=source&utm_medium=medium&utm_campaign=campaign)"
+            ),
         ),
         (
             "[link2](http://example2.com)",
@@ -152,7 +155,11 @@ def test_add_utm_tags(
             "source",
             "medium",
             "campaign",
-            "[link1](http://example.com?utm_source=source&utm_medium=medium&utm_campaign=campaign) [link2](http://notexample.com)",
+            (
+                "[link1](http://example.com?"
+                "utm_source=source&utm_medium=medium&utm_campaign=campaign)"
+                " [link2](http://notexample.com)"
+            ),
         ),
         (
             "[link1](http://example.com) [link2](http://notexample.com)",
@@ -160,7 +167,12 @@ def test_add_utm_tags(
             "source",
             "medium",
             "campaign",
-            "[link1](http://example.com?utm_source=source&utm_medium=medium&utm_campaign=campaign) [link2](http://notexample.com?utm_source=source&utm_medium=medium&utm_campaign=campaign)",
+            (
+                "[link1](http://example.com"
+                "?utm_source=source&utm_medium=medium&utm_campaign=campaign)"
+                " [link2](http://notexample.com?"
+                "utm_source=source&utm_medium=medium&utm_campaign=campaign)"
+            ),
         ),
         (
             "[link1](http://example.com) [link2](http://notexample.com)",
@@ -168,11 +180,16 @@ def test_add_utm_tags(
             "source",
             "medium",
             "campaign",
-            "[link1](http://example.com?utm_source=source&utm_medium=medium&utm_campaign=campaign) [link2](http://notexample.com?utm_source=source&utm_medium=medium&utm_campaign=campaign)",
+            (
+                "[link1](http://example.com?"
+                "utm_source=source&utm_medium=medium&utm_campaign=campaign)"
+                " [link2](http://notexample.com?"
+                "utm_source=source&utm_medium=medium&utm_campaign=campaign)"
+            ),
         ),
     ],
 )
-def test_add_utm_tags(
+def test_add_utm_tags_with_base_url(
     file_content,
     base_urls,
     utm_source,
@@ -215,9 +232,9 @@ def test_add_utm_tags_utm_source_none(tmp_path):
     # Check that the link in the file has been correctly modified
     with open(p, "r") as file:
         data = file.read()
-    assert (
-        data
-        == "[link](http://example.com?utm_source=test&utm_medium=medium&utm_campaign=campaign)"
+    assert data == (
+        "[link](http://example.com?"
+        "utm_source=test&utm_medium=medium&utm_campaign=campaign)"
     )
 
 
@@ -227,7 +244,10 @@ def test_add_utm_tags_existing_utm_tags(tmp_path):
     d.mkdir()
     p = d / "test.md"
     p.write_text(
-        "[link](http://example.com?utm_source=old_source&utm_medium=old_medium&utm_campaign=old_campaign)"
+        (
+            "[link](http://example.com?"
+            "utm_source=old_source&utm_medium=old_medium&utm_campaign=old_campaign)"
+        )
     )
 
     # Call the function with the temporary file and new UTM tags
@@ -241,9 +261,9 @@ def test_add_utm_tags_existing_utm_tags(tmp_path):
     # Check that the UTM tags in the link have been correctly replaced
     with open(p, "r") as file:
         data = file.read()
-    assert (
-        data
-        == "[link](http://example.com?utm_source=new_source&utm_medium=new_medium&utm_campaign=new_campaign)"
+    assert data == (
+        "[link](http://example.com?"
+        "utm_source=new_source&utm_medium=new_medium&utm_campaign=new_campaign)"
     )
 
 

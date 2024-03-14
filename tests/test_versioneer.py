@@ -12,6 +12,7 @@ we should migrate those projects to
 https://github.com/python-versioneer/python-versioneer
 and get rid of this.
 """
+
 import subprocess
 import os
 from pathlib import Path

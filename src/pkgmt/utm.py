@@ -54,7 +54,8 @@ def add_utm_tags(
         with open(file_path, "r") as file:
             data = file.read()
 
-        # If utm_source is None, use the filename (without extension and directories) as utm_source
+        # If utm_source is None, use the filename (without extension and directories)
+        # as utm_source
         if not utm_source:
             utm_source_ = Path(file_path).stem
         else:
