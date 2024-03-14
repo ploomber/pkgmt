@@ -1,6 +1,9 @@
 # CHANGELOG
 
-## 0.7.6dev
+## 0.8.0dev
+
+* [Feature] Add `pkgmt utm` command to add UTM tags to links in markdown files
+* [API Change] `pyproject.toml` now looked up in current and parent directories
 
 ## 0.7.5 (2024-02-20)
 
