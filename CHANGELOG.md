@@ -1,5 +1,7 @@
 # CHANGELOG
 
+## 0.8.1dev
+
 ## 0.8.0 (2024-03-13)
 
 * [API Change] `pyproject.toml` now looked up in current and parent directories
