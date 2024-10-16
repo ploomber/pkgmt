@@ -1,6 +1,7 @@
 # CHANGELOG
 
-## 0.8.1dev
+## 0.8.1 (2024-10-16)
+
 * [Feature] Updates `ci.yml` template
 
 ## 0.8.0 (2024-03-13)
