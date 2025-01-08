@@ -61,8 +61,9 @@ ALL = [
 
 # to run: pkgmt check
 CHECK = [
-    # for check-project
-    "mistune>=3rc",
+    # for check-project, pinned because mistune 3.1.0 change how it represents
+    # headings, which breaks `get_first_subheading`
+    "mistune>=3.1.0",
 ]
 
 setup(

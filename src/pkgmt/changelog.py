@@ -223,7 +223,7 @@ class CHANGELOG:
         subheading = {
             "type": "heading",
             "attrs": {"level": 2},
-            "style": "axt",
+            "style": "atx",
             "children": [{"type": "text", "raw": ANY}],
         }
 
