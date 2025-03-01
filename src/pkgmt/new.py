@@ -67,9 +67,9 @@ def package(name, use_setup_py=False):
             if line.strip() == "# flake8: noqa":
                 continue
             # Remove the noqa substring from other lines
-            new_line = line.replace("# flake8: noqa", "").rstrip()
-            if new_line:
-                new_lines.append(new_line)
+            if "# flake8: noqa" in line:
+                line = line.replace("# flake8: noqa", "").rstrip()
+            new_lines.append(line)
 
         # Write back the cleaned content
         py_file.write_text("\n".join(new_lines) + "\n")
