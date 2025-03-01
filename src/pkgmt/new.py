@@ -3,7 +3,7 @@ from pathlib import Path
 import shutil
 import importlib.resources
 from string import Template
-
+import re
 from pkgmt import assets
 
 
@@ -36,6 +36,7 @@ def package(name, use_setup_py=False):
         ".github/workflows/ci.yml",
         "src/package_name/cli.py",
         "src/package_name/log.py",
+        "src/package_name/__init__.py",
     ):
         render_inplace(
             root / file,
@@ -52,7 +53,14 @@ def package(name, use_setup_py=False):
         (root / "setup.py").unlink()
         (root / "MANIFEST.in").unlink()
         (root / "pyproject-setup.toml").rename(root / "pyproject.toml")
-        (root / "src" / package_name / "__init__.py").write_text("")
+
+        # Remove __version__ from __init__.py
+        content = (root / "src" / package_name / "__init__.py").read_text()
+        lines = content.splitlines()
+        new_lines = [
+            line for line in lines if not re.match(r"__version__\s+=\s+", line)
+        ]
+        (root / "src" / package_name / "__init__.py").write_text("\n".join(new_lines))
 
     # Remove flake8: noqa comments from Python files, we added them because
     # they contain $TAG, which raises a warning when linting

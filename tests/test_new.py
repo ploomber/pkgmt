@@ -2,6 +2,8 @@ import json
 from unittest.mock import ANY
 from pathlib import Path
 import subprocess
+import os
+
 from pkgmt import new
 
 import pytest
@@ -16,15 +18,17 @@ def uninstall():
 def test_package_setup_py(tmp_empty, uninstall):
     new.package("some-cool_pkg", use_setup_py=True)
 
-    subprocess.check_call(["pip", "install", "some-cool-pkg/"])
+    # move the working directory so the settings.py file is found
+    os.chdir("some-cool-pkg")
+    subprocess.check_call(["pip", "install", "."])
 
-    pyproject = Path("some-cool-pkg", "pyproject.toml").read_text()
-    setup = Path("some-cool-pkg", "setup.py").read_text()
-    ci = Path("some-cool-pkg", ".github", "workflows", "ci.yml").read_text()
-    manifest = Path("some-cool-pkg", "MANIFEST.in").read_text()
-    init = Path("some-cool-pkg", "src", "some_cool_pkg", "__init__.py").read_text()
-    cli = Path("some-cool-pkg", "src", "some_cool_pkg", "cli.py").read_text()
-    assert '__version__ = "0.1dev"\n' == init
+    pyproject = Path("pyproject.toml").read_text()
+    setup = Path("setup.py").read_text()
+    ci = Path(".github", "workflows", "ci.yml").read_text()
+    manifest = Path("MANIFEST.in").read_text()
+    init = Path("src", "some_cool_pkg", "__init__.py").read_text()
+    cli = Path("src", "some_cool_pkg", "cli.py").read_text()
+    assert '__version__ = "0.1dev"\n' in init
     assert 'github = "ploomber/some-cool-pkg"' in pyproject
     assert 'package_name = "some_cool_pkg"' in pyproject
     assert 'env_name = "some-cool-pkg"' in pyproject
@@ -46,17 +50,19 @@ def test_package_setup_py(tmp_empty, uninstall):
 def test_package_pyproject_toml(tmp_empty, uninstall):
     new.package("some-cool_pkg", use_setup_py=False)
 
-    subprocess.check_call(["pip", "install", "some-cool-pkg/"])
+    # move the working directory so the settings.py file is found
+    os.chdir("some-cool-pkg")
+    subprocess.check_call(["pip", "install", "."])
 
-    pyproject = Path("some-cool-pkg", "pyproject.toml").read_text()
-    ci = Path("some-cool-pkg", ".github", "workflows", "ci.yml").read_text()
-    init = Path("some-cool-pkg", "src", "some_cool_pkg", "__init__.py").read_text()
-    cli = Path("some-cool-pkg", "src", "some_cool_pkg", "cli.py").read_text()
-    assert not Path("some-cool-pkg", "setup.py").exists()
-    assert not Path("some-cool-pkg", "MANIFEST.in").exists()
-    assert not Path("some-cool-pkg", "pyproject-setup.toml").exists()
+    pyproject = Path("pyproject.toml").read_text()
+    ci = Path(".github", "workflows", "ci.yml").read_text()
+    init = Path("src", "some_cool_pkg", "__init__.py").read_text()
+    cli = Path("src", "some_cool_pkg", "cli.py").read_text()
+    assert not Path("setup.py").exists()
+    assert not Path("MANIFEST.in").exists()
+    assert not Path("pyproject-setup.toml").exists()
 
-    assert init == "\n"
+    assert "__version__" not in init
 
     assert 'github = "ploomber/some-cool-pkg"' in pyproject
     assert 'package_name = "some_cool_pkg"' in pyproject
