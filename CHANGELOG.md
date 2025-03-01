@@ -2,6 +2,7 @@
 
 ## 0.8.3dev
 
+* [Feature] Add `log.py`, `cli.py`, and `settings.py` modules to template
 * [Feature] Add `pkgmt new NAME --use-pyproject-toml`
 
 ## 0.8.2 (2025-01-08)
