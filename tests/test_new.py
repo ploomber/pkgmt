@@ -1,3 +1,5 @@
+import json
+from unittest.mock import ANY
 from pathlib import Path
 import subprocess
 from pkgmt import new
@@ -8,7 +10,7 @@ import pytest
 @pytest.fixture
 def uninstall():
     yield
-    subprocess.check_call(["pip", "uninstall", "somepkg", "-y"])
+    subprocess.check_call(["pip", "uninstall", "some-cool-pkg", "-y"])
 
 
 def test_package_setup_py(tmp_empty, uninstall):
@@ -30,6 +32,14 @@ def test_package_setup_py(tmp_empty, uninstall):
     assert "src/some_cool_pkg/__init__.py" in setup
     assert 'python -c "import some_cool_pkg"' in ci
     assert "graft src/some_cool_pkg/assets" in manifest
+
+    subprocess.check_call(["some-cool-pkg", "log", "user"])
+    assert json.loads(Path("app.log").read_text()) == {
+        "name": "user",
+        "event": "Hello, user!",
+        "level": "info",
+        "timestamp": ANY,
+    }
 
 
 def test_package_pyproject_toml(tmp_empty, uninstall):
@@ -56,3 +66,11 @@ def test_package_pyproject_toml(tmp_empty, uninstall):
     assert 'package-data = { "some_cool_pkg" = ["assets/*", "*.md"] }' in pyproject
 
     assert 'python -c "import some_cool_pkg"' in ci
+
+    subprocess.check_call(["some-cool-pkg", "log", "user"])
+    assert json.loads(Path("app.log").read_text()) == {
+        "name": "user",
+        "event": "Hello, user!",
+        "level": "info",
+        "timestamp": ANY,
+    }

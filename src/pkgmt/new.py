@@ -34,6 +34,8 @@ def package(name, use_setup_py=False):
         "pyproject.toml",
         "pyproject-setup.toml",
         ".github/workflows/ci.yml",
+        "src/package_name/cli.py",
+        "src/package_name/log.py",
     ):
         render_inplace(
             root / file,

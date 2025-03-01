@@ -41,6 +41,6 @@ setup(
         "dev": DEV,
     },
     entry_points={
-        # 'console_scripts': ['$project_name=$package_name.cli:cli'],
+        "console_scripts": ["$project_name=$package_name.cli:cli"],
     },
 )

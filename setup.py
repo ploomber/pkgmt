@@ -46,6 +46,8 @@ REQUIRES = [
 DEV = [
     "pytest",
     "twine",
+    # to test logging in the template
+    "structlog",
     # optional dependency for test module
     "jupytext",
     "nbclient",
