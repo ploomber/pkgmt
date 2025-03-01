@@ -23,7 +23,7 @@ def test_package_setup_py(tmp_empty, uninstall):
     ci = Path("some-cool-pkg", ".github", "workflows", "ci.yml").read_text()
     manifest = Path("some-cool-pkg", "MANIFEST.in").read_text()
     init = Path("some-cool-pkg", "src", "some_cool_pkg", "__init__.py").read_text()
-
+    cli = Path("some-cool-pkg", "src", "some_cool_pkg", "cli.py").read_text()
     assert '__version__ = "0.1dev"\n' == init
     assert 'github = "ploomber/some-cool-pkg"' in pyproject
     assert 'package_name = "some_cool_pkg"' in pyproject
@@ -32,6 +32,7 @@ def test_package_setup_py(tmp_empty, uninstall):
     assert "src/some_cool_pkg/__init__.py" in setup
     assert 'python -c "import some_cool_pkg"' in ci
     assert "graft src/some_cool_pkg/assets" in manifest
+    assert "# flake8: noqa" not in cli
 
     subprocess.check_call(["some-cool-pkg", "log", "user"])
     assert json.loads(Path("app.log").read_text()) == {
@@ -50,12 +51,12 @@ def test_package_pyproject_toml(tmp_empty, uninstall):
     pyproject = Path("some-cool-pkg", "pyproject.toml").read_text()
     ci = Path("some-cool-pkg", ".github", "workflows", "ci.yml").read_text()
     init = Path("some-cool-pkg", "src", "some_cool_pkg", "__init__.py").read_text()
-
+    cli = Path("some-cool-pkg", "src", "some_cool_pkg", "cli.py").read_text()
     assert not Path("some-cool-pkg", "setup.py").exists()
     assert not Path("some-cool-pkg", "MANIFEST.in").exists()
     assert not Path("some-cool-pkg", "pyproject-setup.toml").exists()
 
-    assert init == ""
+    assert init == "\n"
 
     assert 'github = "ploomber/some-cool-pkg"' in pyproject
     assert 'package_name = "some_cool_pkg"' in pyproject
@@ -66,6 +67,7 @@ def test_package_pyproject_toml(tmp_empty, uninstall):
     assert 'package-data = { "some_cool_pkg" = ["assets/*", "*.md"] }' in pyproject
 
     assert 'python -c "import some_cool_pkg"' in ci
+    assert "# flake8: noqa" not in cli
 
     subprocess.check_call(["some-cool-pkg", "log", "user"])
     assert json.loads(Path("app.log").read_text()) == {

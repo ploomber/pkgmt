@@ -13,7 +13,6 @@ Usage
 """
 
 import logging
-import structlog
 from typing import Any, TextIO
 import os
 
