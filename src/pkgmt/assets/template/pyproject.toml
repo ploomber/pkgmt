@@ -9,7 +9,7 @@ flake8 = [
     # due to the << operator
     # W503, W504 ignore line break after/before
     # binary operator since they are conflicting
-    "--ignore=F821, W503, W504"
+    "--ignore=F821, W503, W504",
 ]
 
 [tool.pkgmt]

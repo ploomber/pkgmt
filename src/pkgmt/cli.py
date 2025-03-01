@@ -42,9 +42,15 @@ def check_links(only_404):
 
 @cli.command()
 @click.argument("name")
-def new(name):
+@click.option(
+    "--use-pyproject-toml",
+    is_flag=True,
+    default=False,
+    help="Use pyproject.toml instead of setup.py",
+)
+def new(name, use_pyproject_toml):
     """Create new package"""
-    new_.package(name)
+    new_.package(name, use_setup_py=not use_pyproject_toml)
 
 
 @cli.command()

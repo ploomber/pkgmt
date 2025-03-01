@@ -2,6 +2,8 @@
 
 ## 0.8.3dev
 
+* [Feature] Add `pkgmt new NAME --use-pyproject-toml`
+
 ## 0.8.2 (2025-01-08)
 
 * [Fix] Compatibility with `mistune>=3.1.0`
