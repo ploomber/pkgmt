@@ -1,5 +1,7 @@
 # CHANGELOG
 
+## 0.8.4dev
+
 ## 0.8.3 (2025-03-01)
 
 * [Feature] Add `log.py`, `cli.py`, and `settings.py` modules to template
