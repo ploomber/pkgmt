@@ -37,6 +37,7 @@ def package(name, use_setup_py=False):
         "src/package_name/cli.py",
         "src/package_name/log.py",
         "src/package_name/__init__.py",
+        "src/package_name/templates/__init__.py",
     ):
         render_inplace(
             root / file,

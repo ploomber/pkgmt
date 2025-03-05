@@ -68,4 +68,4 @@ dev = ["pytest", "flake8", "invoke", "twine"]
 $project_name = "$package_name.cli:cli"
 
 [tool.setuptools]
-package-data = { "$package_name" = ["assets/*", "*.md"] }
+package-data = { "$package_name" = ["assets/*", "*.md", "templates/*"] }

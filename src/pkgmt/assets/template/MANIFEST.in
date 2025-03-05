@@ -3,5 +3,6 @@
 include CHANGELOG.md
 include README.md
 graft src/$package_name/assets
+graft src/$package_name/templates
 global-exclude __pycache__
 global-exclude *.py[co]
