@@ -2,6 +2,12 @@
 
 ## 0.8.4dev
 
+* [Feature] Add aliased group to `cli.py`
+* [Feature] Add markdown utils
+* [Feature] Add sample jinja2 config
+* [Feature] Better structlog defaults
+* [Feature] Add `--pdb` to `cli.py`
+
 ## 0.8.3 (2025-03-01)
 
 * [Feature] Add `log.py`, `cli.py`, and `settings.py` modules to template

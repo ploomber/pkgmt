@@ -2,6 +2,8 @@
 Sample CLI (requires click, tested with click==8.1.3)
 """
 
+import sys
+
 import click
 
 
@@ -30,9 +32,37 @@ class AliasedGroup(click.Group):
         return cmd.name, cmd, args
 
 
+# NOTE: this requires ipdb
+def pdb_option(f):
+    """Decorator to add --pdb option to any command."""
+
+    def callback(ctx, param, value):
+        if value:
+
+            def excepthook(type_, value, traceback):
+                import ipdb
+
+                ipdb.post_mortem(traceback)
+
+            sys.excepthook = excepthook
+
+    return click.option(
+        "--pdb", is_flag=True, help="Drop into pdb on exceptions", callback=callback
+    )(f)
+
+
 @click.group(cls=AliasedGroup)
 def cli():
     pass
+
+
+@cli.command()
+@pdb_option
+def test(pdb: bool):  # NOTE: you must add pdb as an argument
+    """Test command for the pdb option"""
+    x = 1
+    y = 0
+    print(x / y)
 
 
 @cli.command()
