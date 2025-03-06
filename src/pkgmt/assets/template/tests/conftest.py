@@ -52,3 +52,8 @@ def tmp_empty(tmp_path):
     os.chdir(str(tmp_path))
     yield str(Path(tmp_path).resolve())
     os.chdir(old)
+
+
+@pytest.fixture
+def path_to_test_assets():
+    return _path_to_tests() / "assets"
