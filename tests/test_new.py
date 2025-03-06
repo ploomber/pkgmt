@@ -70,7 +70,10 @@ def test_package_pyproject_toml(tmp_empty, uninstall):
 
     # build settings
     assert 'name = "some-cool-pkg"' in pyproject
-    assert 'package-data = { "some_cool_pkg" = ["assets/*", "*.md"] }' in pyproject
+    assert (
+        'package-data = { "some_cool_pkg" = ["assets/*", "templates/*", "*.md"] }'
+        in pyproject
+    )
 
     assert 'python -c "import some_cool_pkg"' in ci
     assert "# flake8: noqa" not in cli
