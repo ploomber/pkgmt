@@ -42,6 +42,9 @@ def test_package_setup_py(tmp_empty, uninstall):
     assert json.loads(Path("app.log").read_text()) == {
         "name": "user",
         "event": "Hello, user!",
+        "filename": "cli.py",
+        "func_name": "log",
+        "lineno": ANY,
         "level": "info",
         "timestamp": ANY,
     }
