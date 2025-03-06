@@ -87,4 +87,7 @@ def test_package_pyproject_toml(tmp_empty, uninstall):
         "event": "Hello, user!",
         "level": "info",
         "timestamp": ANY,
+        "filename": "cli.py",
+        "func_name": "log",
+        "lineno": ANY,
     }
