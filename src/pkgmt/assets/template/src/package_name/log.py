@@ -15,6 +15,8 @@ Usage
 import logging
 from typing import Any, TextIO
 import os
+from pathlib import Path
+
 
 import structlog
 from structlog import WriteLogger, PrintLogger
@@ -67,6 +69,32 @@ def configure_file_and_print_logger(file_path: str = "app.log") -> None:
         wrapper_class=structlog.make_filtering_bound_logger(logging.NOTSET),
         context_class=dict,
         logger_factory=CustomLoggerFactory(open(file_path, "at")),
+        cache_logger_on_first_use=False,
+    )
+
+
+def configure_file_logger(file_path: str = "app.log") -> None:
+    structlog.configure(
+        processors=[
+            structlog.contextvars.merge_contextvars,
+            structlog.processors.add_log_level,
+            structlog.processors.StackInfoRenderer(),
+            structlog.dev.set_exc_info,
+            structlog.processors.CallsiteParameterAdder(
+                [
+                    structlog.processors.CallsiteParameter.FILENAME,
+                    structlog.processors.CallsiteParameter.FUNC_NAME,
+                    structlog.processors.CallsiteParameter.LINENO,
+                ],
+            ),
+            structlog.processors.TimeStamper(fmt="%Y-%m-%d %H:%M:%S", utc=False),
+            structlog.processors.JSONRenderer(),
+        ],
+        wrapper_class=structlog.make_filtering_bound_logger(logging.NOTSET),
+        context_class=dict,
+        logger_factory=structlog.WriteLoggerFactory(
+            file=Path("app").with_suffix(".log").open("wt")
+        ),
         cache_logger_on_first_use=False,
     )
 
