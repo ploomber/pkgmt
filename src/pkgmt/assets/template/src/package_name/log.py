@@ -92,7 +92,7 @@ def configure_file_logger(file_path: str = "app.log") -> None:
         ],
         wrapper_class=structlog.make_filtering_bound_logger(logging.NOTSET),
         context_class=dict,
-        logger_factory=structlog.WriteLoggerFactory(file=Path(file_path).open("wt")),
+        logger_factory=structlog.WriteLoggerFactory(file=Path(file_path).open("at")),
         cache_logger_on_first_use=False,
     )
 
