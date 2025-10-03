@@ -77,9 +77,9 @@ def hello(name):
 def log(name):
     """Log a message"""
     # flake8: noqa
-    from $package_name.log import configure_file_and_print_logger, get_logger
+    from $package_name.log import configure_multi_renderer_logger, get_logger
 
-    configure_file_and_print_logger()
+    configure_multi_renderer_logger()
     logger = get_logger()
     logger.info(f"Hello, {name}!", name=name)
 

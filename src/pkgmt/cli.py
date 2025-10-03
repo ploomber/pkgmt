@@ -43,14 +43,14 @@ def check_links(only_404):
 @cli.command()
 @click.argument("name")
 @click.option(
-    "--use-pyproject-toml",
+    "--use-setup-py",
     is_flag=True,
     default=False,
-    help="Use pyproject.toml instead of setup.py",
+    help="Use setup.py instead of pyproject.toml",
 )
-def new(name, use_pyproject_toml):
+def new(name, use_setup_py):
     """Create new package"""
-    new_.package(name, use_setup_py=not use_pyproject_toml)
+    new_.package(name, use_setup_py=use_setup_py)
 
 
 @cli.command()
@@ -204,7 +204,7 @@ def format(exclude):
     "--exclude",
     multiple=True,
     default=[],
-    help="Exclude multiple files or dir from the build" "Eg: -e tmp -e tmp/a.py",
+    help="Exclude multiple files or dir from the buildEg: -e tmp -e tmp/a.py",
 )
 def lint(files, exclude):
     """Lint .py files and notebooks (.ipynb, .md) with flake8"""

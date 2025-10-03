@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.9.0
+* [Feature] Updated `log.py` module in template
+* [API Change] `pkgmt new` uses `pyproject.toml` by default
+
 ## 0.8.4dev
 
 * [Feature] Add aliased group to `cli.py`
