@@ -1,11 +1,8 @@
 # CHANGELOG
 
-## 0.9.0
-* [Feature] Updated `log.py` module in template
+## 0.9.0dev
 * [API Change] `pkgmt new` uses `pyproject.toml` by default
-
-## 0.8.4dev
-
+* [Feature] Updated `log.py` module in template
 * [Feature] Add aliased group to `cli.py`
 * [Feature] Add markdown utils
 * [Feature] Add sample jinja2 config
